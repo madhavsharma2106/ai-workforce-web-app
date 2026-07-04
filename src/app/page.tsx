@@ -302,20 +302,34 @@ export default function Home() {
                           <p className="font-serif text-lg font-semibold text-slate-900">
                             Emma
                           </p>
-                          <p className="text-sm font-semibold text-orange-700">Lead Sourcer & Outreach Specialist</p>
+                          <p className="text-sm font-semibold text-orange-700">
+                            Lead Sourcer & Outreach Specialist
+                          </p>
                         </div>
                       </div>
-                      
+
                       <p className="text-sm leading-6 text-slate-700">
-                        Researches prospects, identifies fast-fit opportunities, and personalizes outreach emails. Learns from your feedback daily.
+                        Researches prospects, identifies fast-fit opportunities,
+                        and personalizes outreach emails. Learns from your
+                        feedback daily.
                       </p>
 
                       <div className="space-y-3 border-t border-amber-100 pt-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">Key abilities</p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
+                            Key abilities
+                          </p>
                           <div className="mt-2 flex flex-wrap gap-2">
-                            {["Research", "Analysis", "Personalization", "Learning"].map((ability) => (
-                              <span key={ability} className="rounded-full bg-orange-50 px-3 py-1 text-xs font-medium text-orange-700 border border-orange-100">
+                            {[
+                              "Research",
+                              "Analysis",
+                              "Personalization",
+                              "Learning",
+                            ].map((ability) => (
+                              <span
+                                key={ability}
+                                className="rounded-full bg-orange-50 px-3 py-1 text-xs font-medium text-orange-700 border border-orange-100"
+                              >
                                 {ability}
                               </span>
                             ))}
