@@ -17,11 +17,19 @@ Approved email drafts.
 - Ideal customer profile
 - Previous customers
 - Feedback
+- Apollo.io (lead search data source)
 
 ## Outputs
 
 - Qualified leads
 - Personalized emails
+
+## Integrations
+
+- **Apollo.io** — lead search data source (`src/lib/integrations/apollo.ts`)
+  - `searchPeople(criteria)` — finds people matching an ICP via `/mixed_people/search`
+  - `revealEmail(personId)` — unlocks a contact's email via `/people/match`
+  - Requires `APOLLO_API_KEY` in `.env.local`; used by `src/app/api/leads/search` and `src/app/api/leads/reveal-email`
 
 ## Evidence
 

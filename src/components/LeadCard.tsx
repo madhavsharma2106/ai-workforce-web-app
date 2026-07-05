@@ -17,6 +17,8 @@ type Props = {
   onToggleEdit: () => void;
   onDraftChange: (value: string) => void;
   onFeedbackSubmit: (reason: string) => void;
+  onRevealEmail: () => void;
+  isRevealingEmail: boolean;
 };
 
 const statusLabel: Record<ApprovalStatus, { label: string; tone: string }> = {
@@ -45,8 +47,11 @@ const LeadCard: FC<Props> = ({
   onToggleEdit,
   onDraftChange,
   onFeedbackSubmit,
+  onRevealEmail,
+  isRevealingEmail,
 }) => {
   const statusMeta = statusLabel[status];
+  const emailLocked = Boolean(lead.personId) && !lead.emailRevealed;
 
   return (
     <article className="rounded-lg border border-gray-200 bg-white p-5 transition hover:border-gray-300">
@@ -72,7 +77,18 @@ const LeadCard: FC<Props> = ({
             </div>
             <div>
               <span className="text-gray-400">Email </span>
-              <span className="text-gray-700">{lead.email}</span>
+              {emailLocked ? (
+                <button
+                  type="button"
+                  onClick={onRevealEmail}
+                  disabled={isRevealingEmail}
+                  className="text-indigo-600 underline decoration-dotted underline-offset-2 transition hover:text-indigo-700 disabled:opacity-60"
+                >
+                  {isRevealingEmail ? "Revealing…" : "Reveal email"}
+                </button>
+              ) : (
+                <span className="text-gray-700">{lead.email}</span>
+              )}
             </div>
           </div>
           <div className="rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-600">

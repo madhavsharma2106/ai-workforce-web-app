@@ -51,6 +51,13 @@ export default function Home() {
   const [days, setDays] = useState<Day[]>([]);
   const [editingLeadId, setEditingLeadId] = useState<number | null>(null);
   const [feedbackLeadId, setFeedbackLeadId] = useState<number | null>(null);
+  const [searchState, setSearchState] = useState<"idle" | "loading" | "error">(
+    "idle",
+  );
+  const [searchErrorMessage, setSearchErrorMessage] = useState<string | null>(
+    null,
+  );
+  const [revealingLeadId, setRevealingLeadId] = useState<number | null>(null);
 
   const currentDay = days[days.length - 1];
 
@@ -104,23 +111,77 @@ export default function Home() {
     );
   };
 
-  const handleOnboardingComplete = (result: OnboardingResult) => {
+  const handleOnboardingComplete = async (result: OnboardingResult) => {
     setProfile(result);
-    const template = dayTemplates[0];
-    const day1: Day = {
-      id: 1,
-      dateLabel: formatDateLabel(0),
-      leads: template.leads,
-      statuses: initStatuses(template.leads),
-      drafts: initDrafts(template.leads),
-      feedback: {},
-      standup: `Good morning${result.name ? `, ${result.name}` : ""}. I found ${template.leads.length} qualified leads today and prepared personalized emails for review.`,
-      learned:
-        "This is my first day on the job — every approval or rejection you give me will sharpen tomorrow's picks.",
-      researched: template.researched,
-    };
-    setDays([day1]);
-    setScreen("dashboard");
+    setSearchState("loading");
+    setSearchErrorMessage(null);
+    try {
+      const response = await fetch("/api/leads/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientDescription: result.clientDescription,
+          badLeadCriteria: result.badLeadCriteria,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error ?? "Lead search failed.");
+      }
+
+      const leads: Lead[] = data.leads;
+      const day1: Day = {
+        id: 1,
+        dateLabel: formatDateLabel(0),
+        leads,
+        statuses: initStatuses(leads),
+        drafts: initDrafts(leads),
+        feedback: {},
+        standup: `Good morning${result.name ? `, ${result.name}` : ""}. I found ${leads.length} qualified leads today and prepared personalized emails for review.`,
+        learned:
+          "This is my first day on the job — every approval or rejection you give me will sharpen tomorrow's picks.",
+        researched: data.researched ?? leads.length,
+      };
+      setDays([day1]);
+      setSearchState("idle");
+      setScreen("dashboard");
+    } catch (error) {
+      setSearchState("error");
+      setSearchErrorMessage(
+        error instanceof Error ? error.message : "Lead search failed.",
+      );
+    }
+  };
+
+  const handleRevealEmail = async (id: number) => {
+    const lead = currentDay?.leads.find((l) => l.id === id);
+    if (!lead || !lead.personId || lead.emailRevealed) return;
+
+    setRevealingLeadId(id);
+    try {
+      const response = await fetch("/api/leads/reveal-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personId: lead.personId }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error ?? "Failed to reveal email.");
+      }
+      updateCurrentDay((day) => ({
+        ...day,
+        leads: day.leads.map((l) =>
+          l.id === id
+            ? { ...l, email: data.email ?? l.email, emailRevealed: true }
+            : l,
+        ),
+      }));
+    } catch {
+      // Reveal is a secondary action — leave the lead locked and let the
+      // user retry rather than surfacing a blocking error.
+    } finally {
+      setRevealingLeadId(null);
+    }
   };
 
   const handleApprove = (id: number) => {
@@ -129,6 +190,7 @@ export default function Home() {
       statuses: { ...day.statuses, [id]: "approved" },
     }));
     if (feedbackLeadId === id) setFeedbackLeadId(null);
+    void handleRevealEmail(id);
   };
 
   const handleReject = (id: number) => {
@@ -357,6 +419,18 @@ export default function Home() {
               </h2>
             </div>
 
+            {searchState === "loading" && (
+              <div className="rounded-md border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+                Searching Apollo for leads that match your ICP…
+              </div>
+            )}
+
+            {searchState === "error" && (
+              <div className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {searchErrorMessage ?? "Lead search failed."}
+              </div>
+            )}
+
             <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr]">
               <OnboardingChat onComplete={handleOnboardingComplete} />
 
@@ -555,6 +629,8 @@ export default function Home() {
                     feedbackReason={currentDay.feedback[lead.id]}
                     onApprove={() => handleApprove(lead.id)}
                     onReject={() => handleReject(lead.id)}
+                    onRevealEmail={() => handleRevealEmail(lead.id)}
+                    isRevealingEmail={revealingLeadId === lead.id}
                     onToggleEdit={() =>
                       setEditingLeadId((current) =>
                         current === lead.id ? null : lead.id,

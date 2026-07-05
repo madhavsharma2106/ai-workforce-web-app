@@ -7,6 +7,8 @@ export type Lead = {
   email: string;
   draft: string;
   sources: string;
+  personId?: string;
+  emailRevealed?: boolean;
 };
 
 export type DayTemplate = {
