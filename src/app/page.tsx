@@ -139,28 +139,23 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5ede3] text-slate-900">
+    <div className="min-h-screen bg-white text-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-amber-100 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-8 lg:px-10">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-[#ea7317] text-xl font-semibold text-white">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-900 text-sm font-semibold text-white">
               W
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#ea7317]">
-                Workforce
-              </p>
-              <p className="text-sm font-semibold text-slate-900">
-                AI Employees
-              </p>
-            </div>
+            <p className="text-sm font-semibold tracking-tight text-gray-900">
+              Workforce
+            </p>
           </div>
           {screen !== "welcome" && (
             <button
               type="button"
               onClick={() => setScreen("welcome")}
-              className="rounded-full border border-amber-100 bg-white px-5 py-2 text-sm font-semibold text-slate-900 transition hover:border-orange-200 hover:bg-orange-50"
+              className="rounded-md border border-gray-200 px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
               Back to demo
             </button>
@@ -168,29 +163,27 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-6xl px-6 py-10">
         {screen === "welcome" && (
-          <main className="space-y-16">
+          <main className="space-y-20">
             {/* Hero section */}
-            <section className="rounded-[32px] bg-gradient-to-br from-[#d45f0a] via-[#c9a052] to-[#d4a574] px-8 py-16 text-white shadow-sm sm:px-12 sm:py-24">
-              <div className="mx-auto max-w-3xl space-y-8">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-orange-100">
-                    New Era of Work
-                  </p>
-                  <h1 className="font-serif text-5xl font-bold leading-tight tracking-tight sm:text-6xl">
-                    Hire AI employees that work every morning.
-                  </h1>
-                </div>
-                <p className="max-w-2xl text-lg leading-8 text-orange-50">
+            <section className="border-b border-gray-200 pb-16 pt-8">
+              <div className="mx-auto max-w-2xl space-y-6 text-center">
+                <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
+                  New era of work
+                </p>
+                <h1 className="text-5xl font-semibold leading-[1.1] tracking-tight text-gray-900 sm:text-6xl">
+                  Hire AI employees that work every morning.
+                </h1>
+                <p className="mx-auto max-w-lg text-lg leading-7 text-gray-500">
                   Your first employee sources leads, drafts outreach, and waits
                   for your approval.
                 </p>
-                <div className="flex flex-wrap gap-4 pt-4">
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setScreen("hire")}
-                    className="rounded-full bg-[#ea7317] px-7 py-4 text-base font-semibold text-white shadow-lg transition hover:bg-[#d45f0a]"
+                    className="rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700"
                   >
                     Hire your first employee
                   </button>
@@ -199,7 +192,7 @@ export default function Home() {
             </section>
 
             {/* Feature cards */}
-            <section className="grid gap-6 md:grid-cols-3">
+            <section className="grid gap-px overflow-hidden rounded-lg border border-gray-200 bg-gray-200 md:grid-cols-3">
               {[
                 {
                   label: "Meet Emma",
@@ -214,14 +207,11 @@ export default function Home() {
                   desc: "Review leads before Emma sends any outreach.",
                 },
               ].map((feature) => (
-                <article
-                  key={feature.label}
-                  className="rounded-3xl border border-amber-100 bg-white p-8 shadow-sm transition hover:shadow-md"
-                >
-                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#ea7317]">
+                <article key={feature.label} className="bg-white p-8">
+                  <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
                     {feature.label}
                   </p>
-                  <p className="mt-4 font-serif text-lg font-semibold text-slate-900">
+                  <p className="mt-3 text-base font-medium text-gray-900">
                     {feature.desc}
                   </p>
                 </article>
@@ -231,25 +221,22 @@ export default function Home() {
         )}
 
         {screen === "hire" && (
-          <main className="space-y-12">
-            {/* Accent band */}
-            <div className="gradient-warm-band h-1 rounded-full" />
-
-            <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr]">
+          <main className="space-y-10">
+            <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr]">
               <section className="space-y-6">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#ea7317]">
+                  <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
                     Step 1
                   </p>
-                  <h2 className="font-serif text-4xl font-bold text-slate-900">
+                  <h2 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
                     Meet Emma
                   </h2>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
                     <label className="block">
-                      <span className="mb-3 block text-sm font-semibold uppercase tracking-[0.1em] text-slate-700">
+                      <span className="mb-2 block text-sm font-medium text-gray-700">
                         Ideal client description
                       </span>
                       <textarea
@@ -257,14 +244,14 @@ export default function Home() {
                         onChange={(event) =>
                           setClientDescription(event.target.value)
                         }
-                        className="min-h-[140px] w-full rounded-3xl border border-amber-100 bg-[#f9f5ef] p-5 text-sm text-slate-900 outline-none transition focus:border-orange-300 focus:bg-white"
+                        className="min-h-35 w-full rounded-md border border-gray-200 bg-white p-3.5 text-sm text-gray-900 outline-none transition focus:border-gray-400"
                       />
                     </label>
                   </div>
 
                   <div>
                     <label className="block">
-                      <span className="mb-3 block text-sm font-semibold uppercase tracking-[0.1em] text-slate-700">
+                      <span className="mb-2 block text-sm font-medium text-gray-700">
                         Bad lead criteria
                       </span>
                       <textarea
@@ -272,7 +259,7 @@ export default function Home() {
                         onChange={(event) =>
                           setBadLeadCriteria(event.target.value)
                         }
-                        className="min-h-[140px] w-full rounded-3xl border border-amber-100 bg-[#f9f5ef] p-5 text-sm text-slate-900 outline-none transition focus:border-orange-300 focus:bg-white"
+                        className="min-h-35 w-full rounded-md border border-gray-200 bg-white p-3.5 text-sm text-gray-900 outline-none transition focus:border-gray-400"
                       />
                     </label>
                   </div>
@@ -281,76 +268,70 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setScreen("dashboard")}
-                  className="w-full rounded-full bg-[#ea7317] px-8 py-4 text-base font-semibold text-white shadow-lg transition hover:bg-[#d45f0a] sm:w-auto"
+                  className="w-full rounded-md bg-gray-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-gray-700 sm:w-auto"
                 >
                   Hire Emma →
                 </button>
               </section>
 
-              <section className="rounded-3xl border border-amber-100 bg-[#f9f5ef] p-8">
-                <div className="space-y-6">
-                  <div className="rounded-3xl bg-white p-6 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#ea7317]">
-                      Emma's profile
-                    </p>
-                    <div className="mt-4 space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-[#ea7317] to-[#c9a052] text-2xl font-bold text-white">
-                          E
-                        </div>
-                        <div>
-                          <p className="font-serif text-lg font-semibold text-slate-900">
-                            Emma
-                          </p>
-                          <p className="text-sm font-semibold text-orange-700">
-                            Lead Sourcer & Outreach Specialist
-                          </p>
-                        </div>
-                      </div>
-
-                      <p className="text-sm leading-6 text-slate-700">
-                        Researches prospects, identifies fast-fit opportunities,
-                        and personalizes outreach emails. Learns from your
-                        feedback daily.
+              <section className="rounded-lg border border-gray-200 bg-gray-50 p-6">
+                <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
+                  Emma&apos;s profile
+                </p>
+                <div className="mt-4 space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gray-900 text-lg font-medium text-white">
+                      E
+                    </div>
+                    <div>
+                      <p className="text-base font-semibold text-gray-900">
+                        Emma
                       </p>
+                      <p className="text-sm text-gray-500">
+                        Lead Sourcer & Outreach Specialist
+                      </p>
+                    </div>
+                  </div>
 
-                      <div className="space-y-3 border-t border-amber-100 pt-4">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
-                            Key abilities
-                          </p>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {[
-                              "Research",
-                              "Analysis",
-                              "Personalization",
-                              "Learning",
-                            ].map((ability) => (
-                              <span
-                                key={ability}
-                                className="rounded-full bg-orange-50 px-3 py-1 text-xs font-medium text-orange-700 border border-orange-100"
-                              >
-                                {ability}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
+                  <p className="text-sm leading-6 text-gray-600">
+                    Researches prospects, identifies fast-fit opportunities,
+                    and personalizes outreach emails. Learns from your
+                    feedback daily.
+                  </p>
 
-                      <div className="space-y-2 border-t border-amber-100 pt-4 text-sm text-slate-700">
-                        <div className="flex items-start gap-2">
-                          <span className="text-orange-600 font-bold">✓</span>
-                          <span>Works 24/7 on your criteria</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-orange-600 font-bold">✓</span>
-                          <span>Never sends without approval</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-orange-600 font-bold">✓</span>
-                          <span>Improves with every rejection</span>
-                        </div>
-                      </div>
+                  <div className="space-y-2 border-t border-gray-200 pt-4">
+                    <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                      Key abilities
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        "Research",
+                        "Analysis",
+                        "Personalization",
+                        "Learning",
+                      ].map((ability) => (
+                        <span
+                          key={ability}
+                          className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700"
+                        >
+                          {ability}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 border-t border-gray-200 pt-4 text-sm text-gray-600">
+                    <div className="flex items-start gap-2">
+                      <span className="text-indigo-600">✓</span>
+                      <span>Works 24/7 on your criteria</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-indigo-600">✓</span>
+                      <span>Never sends without approval</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-indigo-600">✓</span>
+                      <span>Improves with every rejection</span>
                     </div>
                   </div>
                 </div>
@@ -360,47 +341,41 @@ export default function Home() {
         )}
 
         {screen === "dashboard" && (
-          <main className="space-y-12">
-            {/* Accent band */}
-            <div className="gradient-warm-band h-1 rounded-full" />
-
+          <main className="space-y-10">
             {/* Employee status card */}
-            <section className="rounded-3xl border border-amber-100 bg-white p-8 shadow-sm">
-              <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-5">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-[#ea7317] to-[#c9a052] text-4xl font-bold text-white">
+            <section className="rounded-lg border border-gray-200 p-6">
+              <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gray-900 text-lg font-medium text-white">
                     E
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#ea7317]">
-                      Active Employee
+                    <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
+                      Active employee
                     </p>
-                    <h2 className="mt-2 font-serif text-3xl font-bold text-slate-900">
+                    <h2 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
                       Emma is working
                     </h2>
                   </div>
                 </div>
-                <div className="rounded-full bg-orange-50 px-5 py-3 text-sm font-semibold text-orange-700 shadow-sm">
+                <div className="rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700">
                   Waiting for approval
                 </div>
               </div>
 
               {/* Stats grid */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   { label: "Researched", value: "84 companies" },
                   { label: "Qualified", value: "30 leads" },
                   { label: "Drafted", value: "30 emails" },
                   { label: "In queue", value: "5 for review" },
                 ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="rounded-3xl bg-[#f9f5ef] p-6 shadow-sm"
-                  >
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
+                  <div key={stat.label} className="bg-white p-5">
+                    <p className="text-xs font-medium text-gray-500">
                       {stat.label}
                     </p>
-                    <p className="mt-3 font-serif text-2xl font-bold text-slate-900">
+                    <p className="mt-2 font-mono text-xl font-semibold text-gray-900">
                       {stat.value}
                     </p>
                   </div>
@@ -409,62 +384,62 @@ export default function Home() {
             </section>
 
             {/* Standup section */}
-            <section className="grid gap-8 md:grid-cols-[1.2fr_0.8fr]">
-              <article className="rounded-3xl border border-amber-100 bg-white p-8 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#ea7317]">
-                  Daily Standup
+            <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
+              <article className="rounded-lg border border-gray-200 p-6">
+                <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
+                  Daily standup
                 </p>
-                <blockquote className="mt-6 border-l-4 border-[#ea7317] pl-6">
-                  <p className="text-xl leading-8 text-slate-900">
+                <blockquote className="mt-4 border-l-2 border-gray-900 pl-4">
+                  <p className="text-lg leading-7 text-gray-900">
                     Good morning. I found 30 qualified leads today and prepared
                     personalized emails for review.
                   </p>
                 </blockquote>
               </article>
 
-              <article className="space-y-4 rounded-3xl bg-[#f9f5ef] p-8">
-                <div className="rounded-3xl bg-white p-5 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#ea7317]">
+              <article className="space-y-3">
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
                     What I learned
                   </p>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
                     Companies with weak customer video are most receptive when
                     outreach references case studies.
                   </p>
                 </div>
-                <div className="rounded-3xl bg-white p-5 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#ea7317]">
-                    Tomorrow's plan
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                    Tomorrow&apos;s plan
                   </p>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">
-                    I'll avoid companies like: strong case study libraries,
-                    consumer brands, or agencies.
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                    I&apos;ll avoid companies like: strong case study
+                    libraries, consumer brands, or agencies.
                   </p>
                 </div>
               </article>
             </section>
 
             {/* Approval queue */}
-            <section className="space-y-8 rounded-3xl border border-amber-100 bg-white p-8 shadow-sm">
+            <section className="space-y-6 rounded-lg border border-gray-200 p-6">
               <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#ea7317]">
+                  <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
                     Step 2
                   </p>
-                  <h3 className="mt-2 font-serif text-3xl font-bold text-slate-900">
+                  <h3 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
                     Review & approve leads
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={handleApproveAll}
-                  className="rounded-full bg-[#ea7317] px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#d45f0a]"
+                  className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
                 >
                   Approve all
                 </button>
               </div>
 
-              <div className="grid gap-6">
+              <div className="grid gap-4">
                 {defaultLeads.map((lead) => (
                   <LeadCard
                     key={lead.id}
@@ -488,16 +463,16 @@ export default function Home() {
               </div>
 
               {/* Progress footer */}
-              <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-orange-50 p-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-gray-50 p-5">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-medium text-gray-900">
                     Approval progress
                   </p>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-0.5 text-sm text-gray-500">
                     {approvedCount} approved • {pendingCount} pending
                   </p>
                 </div>
-                <div className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-orange-700 shadow-sm">
+                <div className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm">
                   Emma is learning from your feedback
                 </div>
               </div>
