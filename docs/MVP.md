@@ -16,12 +16,12 @@ Validate that business owners will trust an AI employee to generate outbound pip
 ## Not Included
 
 - Marketplace
-- Multi-agent collaboration
-- Prompt editor
+- Multi-employee collaboration
+- Instructions editor
 - Custom tools
 - Billing
 - CRM integrations
-- Workflow builder
+- Assignment builder
 - Complex permissions
 
 This prevents feature creep.

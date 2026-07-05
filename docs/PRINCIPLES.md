@@ -4,11 +4,11 @@ These are our guardrails.
 
 ## Core Principles
 
-- Users manage employees, not prompts
+- Users manage employees, not instructions
 - Employees own goals, not tasks
 - Every employee has autonomy
 - Humans approve irreversible actions
-- Learning happens through feedback, not prompt editing
+- Learning happens through feedback, not instruction editing
 - Everything should feel like managing people rather than software
 - The UI should reduce cognitive load
 - Shipping beats perfection
