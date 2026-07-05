@@ -1,140 +1,218 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import LeadCard, { Lead } from "@/components/LeadCard";
-
-const defaultLeads: Lead[] = [
-  {
-    id: 1,
-    company: "Waveflow Media",
-    website: "waveflow.media",
-    fit: "Video-first SaaS with weak case study storytelling.",
-    decisionMaker: "Maya Patel, Head of Growth",
-    email: "maya@waveflow.media",
-    draft:
-      "Hi Maya, I noticed Waveflow has strong product video energy but few customer stories. I'd love to share how a fresh case study series could help you win more video-first buyers.",
-    sources: "LinkedIn, company page, product landing page",
-  },
-  {
-    id: 2,
-    company: "BrightCove Labs",
-    website: "brightcovelabs.com",
-    fit: "SaaS team with launch videos but no follow-up campaigns.",
-    decisionMaker: "Jordan Lee, Marketing Director",
-    email: "jordan@brightcovelabs.com",
-    draft:
-      "Hi Jordan, I saw your recent launch content and think a personalized case study series could extend that momentum to enterprise buyers.",
-    sources: "Crunchbase, newsletter, public case studies",
-  },
-  {
-    id: 3,
-    company: "FlowPath AI",
-    website: "flowpath.ai",
-    fit: "AI product with limited customer storytelling online.",
-    decisionMaker: "Avery Chen, Founder",
-    email: "avery@flowpath.ai",
-    draft:
-      "Hi Avery, FlowPath AI has a strong product story. I'd suggest a set of short client videos that highlight real ROI and make outreach feel more human.",
-    sources: "Twitter, product page, investor notes",
-  },
-  {
-    id: 4,
-    company: "PulseCraft",
-    website: "pulsecraft.co",
-    fit: "Growth-stage SaaS without a clear video case study path.",
-    decisionMaker: "Noah Rivera, VP Sales",
-    email: "noah@pulsecraft.co",
-    draft:
-      "Hi Noah, PulseCraft's audience could really benefit from a video-led case study campaign that turns product proof into pipeline warm leads.",
-    sources: "LinkedIn, pricing page, press release",
-  },
-  {
-    id: 5,
-    company: "StudioScale",
-    website: "studioscale.io",
-    fit: "Creative SaaS with product demos but no outreach personalization.",
-    decisionMaker: "Sofia Nguyen, Chief Marketing Officer",
-    email: "sofia@studioscale.io",
-    draft:
-      "Hi Sofia, I noticed StudioScale has a compelling demo library. I can help turn that into outreach that feels personal and high-touch.",
-    sources: "Instagram, demo page, team bios",
-  },
-];
-
-const defaultClientPrompt =
-  "B2B SaaS companies with weak video presence that could benefit from case studies or product videos.";
-const defaultBadLeads =
-  "Companies that already have strong video case studies, agencies, or consumer brands.";
+import LeadCard from "@/components/LeadCard";
+import OnboardingChat, { OnboardingResult } from "@/components/OnboardingChat";
+import HistoryPanel, { DayRecord } from "@/components/HistoryPanel";
+import { dayTemplates, type Lead } from "@/lib/dummyLeads";
 
 type ApprovalStatus = "pending" | "approved" | "rejected";
 
-type LeadDrafts = Record<number, string>;
+type Day = {
+  id: number;
+  dateLabel: string;
+  leads: Lead[];
+  statuses: Record<number, ApprovalStatus>;
+  drafts: Record<number, string>;
+  feedback: Record<number, string>;
+  standup: string;
+  learned: string;
+  researched: number;
+};
+
+const defaultBadLeadCriteria =
+  "companies that already have strong video case studies, agencies, or consumer brands";
+
+function formatDateLabel(offsetDays: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function initStatuses(leads: Lead[]) {
+  return leads.reduce(
+    (acc, lead) => ({ ...acc, [lead.id]: "pending" as ApprovalStatus }),
+    {} as Record<number, ApprovalStatus>,
+  );
+}
+
+function initDrafts(leads: Lead[]) {
+  return leads.reduce(
+    (acc, lead) => ({ ...acc, [lead.id]: lead.draft }),
+    {} as Record<number, string>,
+  );
+}
 
 export default function Home() {
-  const [screen, setScreen] = useState<"welcome" | "hire" | "dashboard">(
-    "welcome",
-  );
-  const [clientDescription, setClientDescription] =
-    useState(defaultClientPrompt);
-  const [badLeadCriteria, setBadLeadCriteria] = useState(defaultBadLeads);
-  const [leadStatuses, setLeadStatuses] = useState<
-    Record<number, ApprovalStatus>
-  >(
-    defaultLeads.reduce(
-      (acc, lead) => ({ ...acc, [lead.id]: "pending" as ApprovalStatus }),
-      {},
-    ),
-  );
-  const [drafts, setDrafts] = useState<LeadDrafts>(
-    defaultLeads.reduce((acc, lead) => ({ ...acc, [lead.id]: lead.draft }), {}),
-  );
+  const [screen, setScreen] = useState<
+    "welcome" | "role" | "onboarding" | "dashboard"
+  >("welcome");
+  const [profile, setProfile] = useState<OnboardingResult | null>(null);
+  const [days, setDays] = useState<Day[]>([]);
   const [editingLeadId, setEditingLeadId] = useState<number | null>(null);
   const [feedbackLeadId, setFeedbackLeadId] = useState<number | null>(null);
-  const [feedbackMemo, setFeedbackMemo] = useState<Record<number, string>>({});
+
+  const currentDay = days[days.length - 1];
 
   const approvedCount = useMemo(
     () =>
-      Object.values(leadStatuses).filter((status) => status === "approved")
-        .length,
-    [leadStatuses],
+      currentDay
+        ? Object.values(currentDay.statuses).filter(
+            (status) => status === "approved",
+          ).length
+        : 0,
+    [currentDay],
   );
 
   const pendingCount = useMemo(
     () =>
-      Object.values(leadStatuses).filter((status) => status === "pending")
-        .length,
-    [leadStatuses],
+      currentDay
+        ? Object.values(currentDay.statuses).filter(
+            (status) => status === "pending",
+          ).length
+        : 0,
+    [currentDay],
   );
 
+  const pastDays: DayRecord[] = useMemo(
+    () =>
+      days.slice(0, -1).map((day) => ({
+        id: day.id,
+        label: `Day ${day.id}`,
+        dateLabel: day.dateLabel,
+        standup: day.standup,
+        leads: day.leads,
+        statuses: day.statuses,
+        feedback: day.feedback,
+      })),
+    [days],
+  );
+
+  const resetDemo = () => {
+    setScreen("welcome");
+    setProfile(null);
+    setDays([]);
+    setEditingLeadId(null);
+    setFeedbackLeadId(null);
+  };
+
+  const updateCurrentDay = (updater: (day: Day) => Day) => {
+    setDays((current) =>
+      current.map((day, index) =>
+        index === current.length - 1 ? updater(day) : day,
+      ),
+    );
+  };
+
+  const handleOnboardingComplete = (result: OnboardingResult) => {
+    setProfile(result);
+    const template = dayTemplates[0];
+    const day1: Day = {
+      id: 1,
+      dateLabel: formatDateLabel(0),
+      leads: template.leads,
+      statuses: initStatuses(template.leads),
+      drafts: initDrafts(template.leads),
+      feedback: {},
+      standup: `Good morning${result.name ? `, ${result.name}` : ""}. I found ${template.leads.length} qualified leads today and prepared personalized emails for review.`,
+      learned:
+        "This is my first day on the job — every approval or rejection you give me will sharpen tomorrow's picks.",
+      researched: template.researched,
+    };
+    setDays([day1]);
+    setScreen("dashboard");
+  };
+
   const handleApprove = (id: number) => {
-    setLeadStatuses((current) => ({ ...current, [id]: "approved" }));
+    updateCurrentDay((day) => ({
+      ...day,
+      statuses: { ...day.statuses, [id]: "approved" },
+    }));
     if (feedbackLeadId === id) setFeedbackLeadId(null);
   };
 
   const handleReject = (id: number) => {
-    setLeadStatuses((current) => ({ ...current, [id]: "rejected" }));
+    updateCurrentDay((day) => ({
+      ...day,
+      statuses: { ...day.statuses, [id]: "rejected" },
+    }));
     setFeedbackLeadId(id);
     setEditingLeadId(null);
   };
 
   const handleApproveAll = () => {
-    setLeadStatuses((current) => {
-      const next = { ...current };
-      defaultLeads.forEach((lead) => {
-        if (next[lead.id] === "pending") next[lead.id] = "approved";
+    updateCurrentDay((day) => {
+      const nextStatuses = { ...day.statuses };
+      day.leads.forEach((lead) => {
+        if (nextStatuses[lead.id] === "pending")
+          nextStatuses[lead.id] = "approved";
       });
-      return next;
+      return { ...day, statuses: nextStatuses };
     });
     setFeedbackLeadId(null);
   };
 
   const handleDraftChange = (id: number, value: string) => {
-    setDrafts((current) => ({ ...current, [id]: value }));
+    updateCurrentDay((day) => ({
+      ...day,
+      drafts: { ...day.drafts, [id]: value },
+    }));
   };
 
   const handleFeedbackSubmit = (reason: string) => {
     if (feedbackLeadId === null) return;
-    setFeedbackMemo((current) => ({ ...current, [feedbackLeadId]: reason }));
+    updateCurrentDay((day) => ({
+      ...day,
+      feedback: { ...day.feedback, [feedbackLeadId]: reason },
+    }));
+    setFeedbackLeadId(null);
+  };
+
+  const handleSimulateNextDay = () => {
+    if (!currentDay) return;
+    const rejectedLeads = currentDay.leads.filter(
+      (lead) => currentDay.statuses[lead.id] === "rejected",
+    );
+    const approvedNow = currentDay.leads.filter(
+      (lead) => currentDay.statuses[lead.id] === "approved",
+    ).length;
+    const reasons = Array.from(
+      new Set(
+        rejectedLeads
+          .map((lead) => currentDay.feedback[lead.id])
+          .filter((reason): reason is string => Boolean(reason)),
+      ),
+    );
+
+    let learned: string;
+    if (rejectedLeads.length > 0) {
+      learned = `Yesterday you rejected ${rejectedLeads.length} lead${
+        rejectedLeads.length === 1 ? "" : "s"
+      }${reasons.length ? ` (${reasons.join(", ")})` : ""}. I've adjusted today's picks to avoid similar profiles.`;
+    } else if (approvedNow > 0) {
+      learned =
+        "Yesterday you approved everything I sent — I'll keep sourcing companies that match that profile.";
+    } else {
+      learned =
+        "Still waiting on your feedback from yesterday's queue — I'll keep today's picks close to the same profile.";
+    }
+
+    const nextDayNumber = days.length + 1;
+    const template = dayTemplates[(nextDayNumber - 1) % dayTemplates.length];
+    const newDay: Day = {
+      id: nextDayNumber,
+      dateLabel: formatDateLabel(days.length),
+      leads: template.leads,
+      statuses: initStatuses(template.leads),
+      drafts: initDrafts(template.leads),
+      feedback: {},
+      standup: `Good morning${profile?.name ? `, ${profile.name}` : ""}. I found ${template.leads.length} new leads today, building on what you taught me.`,
+      learned,
+      researched: template.researched,
+    };
+
+    setDays((current) => [...current, newDay]);
+    setEditingLeadId(null);
     setFeedbackLeadId(null);
   };
 
@@ -154,7 +232,7 @@ export default function Home() {
           {screen !== "welcome" && (
             <button
               type="button"
-              onClick={() => setScreen("welcome")}
+              onClick={resetDemo}
               className="rounded-md border border-gray-200 px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
               Back to demo
@@ -182,7 +260,7 @@ export default function Home() {
                 <div className="flex flex-wrap justify-center gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => setScreen("hire")}
+                    onClick={() => setScreen("role")}
                     className="rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700"
                   >
                     Hire your first employee
@@ -220,59 +298,67 @@ export default function Home() {
           </main>
         )}
 
-        {screen === "hire" && (
-          <main className="space-y-10">
-            <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr]">
-              <section className="space-y-6">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                    Step 1
-                  </p>
-                  <h2 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-                    Meet Emma
-                  </h2>
-                </div>
+        {screen === "role" && (
+          <main className="space-y-8">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
+                Step 1
+              </p>
+              <h2 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                Choose a role to hire
+              </h2>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500">
+                Every employee comes with a clear job description and a
+                dashboard where you review their work.
+              </p>
+            </div>
 
-                <div className="space-y-5">
-                  <div>
-                    <label className="block">
-                      <span className="mb-2 block text-sm font-medium text-gray-700">
-                        Ideal client description
-                      </span>
-                      <textarea
-                        value={clientDescription}
-                        onChange={(event) =>
-                          setClientDescription(event.target.value)
-                        }
-                        className="min-h-35 w-full rounded-md border border-gray-200 bg-white p-3.5 text-sm text-gray-900 outline-none transition focus:border-gray-400"
-                      />
-                    </label>
-                  </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <button
+                type="button"
+                onClick={() => setScreen("onboarding")}
+                className="rounded-lg border border-gray-900 bg-gray-900 p-6 text-left text-white transition hover:bg-gray-700"
+              >
+                <p className="text-xs font-medium uppercase tracking-widest text-indigo-300">
+                  Available now
+                </p>
+                <p className="mt-3 text-lg font-semibold">Lead Sourcer</p>
+                <p className="mt-1.5 text-sm leading-6 text-gray-300">
+                  Researches prospects and drafts personalized outreach
+                  emails for your approval.
+                </p>
+              </button>
 
-                  <div>
-                    <label className="block">
-                      <span className="mb-2 block text-sm font-medium text-gray-700">
-                        Bad lead criteria
-                      </span>
-                      <textarea
-                        value={badLeadCriteria}
-                        onChange={(event) =>
-                          setBadLeadCriteria(event.target.value)
-                        }
-                        className="min-h-35 w-full rounded-md border border-gray-200 bg-white p-3.5 text-sm text-gray-900 outline-none transition focus:border-gray-400"
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setScreen("dashboard")}
-                  className="w-full rounded-md bg-gray-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-gray-700 sm:w-auto"
+              {["Sales Ops Analyst", "Customer Success Rep"].map((role) => (
+                <div
+                  key={role}
+                  className="cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 p-6 text-left opacity-60"
                 >
-                  Hire Emma →
-                </button>
-              </section>
+                  <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                    Coming soon
+                  </p>
+                  <p className="mt-3 text-lg font-semibold text-gray-700">
+                    {role}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </main>
+        )}
+
+        {screen === "onboarding" && (
+          <main className="space-y-8">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
+                Step 2
+              </p>
+              <h2 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                Onboard Emma
+              </h2>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr]">
+              <OnboardingChat onComplete={handleOnboardingComplete} />
 
               <section className="rounded-lg border border-gray-200 bg-gray-50 p-6">
                 <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
@@ -340,7 +426,7 @@ export default function Home() {
           </main>
         )}
 
-        {screen === "dashboard" && (
+        {screen === "dashboard" && currentDay && (
           <main className="space-y-10">
             {/* Employee status card */}
             <section className="rounded-lg border border-gray-200 p-6">
@@ -351,25 +437,46 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                      Active employee
+                      Active employee · Day {currentDay.id} ·{" "}
+                      {currentDay.dateLabel}
                     </p>
                     <h2 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
                       Emma is working
                     </h2>
                   </div>
                 </div>
-                <div className="rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700">
-                  Waiting for approval
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700">
+                    {pendingCount > 0
+                      ? "Waiting for approval"
+                      : "All caught up"}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSimulateNextDay}
+                    className="rounded-md border border-gray-200 px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                  >
+                    Simulate next day →
+                  </button>
                 </div>
               </div>
 
               {/* Stats grid */}
               <div className="grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { label: "Researched", value: "84 companies" },
-                  { label: "Qualified", value: "30 leads" },
-                  { label: "Drafted", value: "30 emails" },
-                  { label: "In queue", value: "5 for review" },
+                  {
+                    label: "Researched",
+                    value: `${currentDay.researched} companies`,
+                  },
+                  {
+                    label: "Qualified",
+                    value: `${currentDay.leads.length} leads`,
+                  },
+                  {
+                    label: "Drafted",
+                    value: `${currentDay.leads.length} emails`,
+                  },
+                  { label: "In queue", value: `${pendingCount} for review` },
                 ].map((stat) => (
                   <div key={stat.label} className="bg-white p-5">
                     <p className="text-xs font-medium text-gray-500">
@@ -391,8 +498,7 @@ export default function Home() {
                 </p>
                 <blockquote className="mt-4 border-l-2 border-gray-900 pl-4">
                   <p className="text-lg leading-7 text-gray-900">
-                    Good morning. I found 30 qualified leads today and prepared
-                    personalized emails for review.
+                    {currentDay.standup}
                   </p>
                 </blockquote>
               </article>
@@ -403,17 +509,15 @@ export default function Home() {
                     What I learned
                   </p>
                   <p className="mt-2 text-sm leading-6 text-gray-600">
-                    Companies with weak customer video are most receptive when
-                    outreach references case studies.
+                    {currentDay.learned}
                   </p>
                 </div>
                 <div className="rounded-lg border border-gray-200 p-4">
                   <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
-                    Tomorrow&apos;s plan
+                    What I&apos;m avoiding
                   </p>
                   <p className="mt-2 text-sm leading-6 text-gray-600">
-                    I&apos;ll avoid companies like: strong case study
-                    libraries, consumer brands, or agencies.
+                    {profile?.badLeadCriteria || defaultBadLeadCriteria}
                   </p>
                 </div>
               </article>
@@ -424,7 +528,7 @@ export default function Home() {
               <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                    Step 2
+                    Step 3
                   </p>
                   <h3 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
                     Review & approve leads
@@ -440,15 +544,15 @@ export default function Home() {
               </div>
 
               <div className="grid gap-4">
-                {defaultLeads.map((lead) => (
+                {currentDay.leads.map((lead) => (
                   <LeadCard
                     key={lead.id}
                     lead={lead}
-                    status={leadStatuses[lead.id]}
-                    draftText={drafts[lead.id]}
+                    status={currentDay.statuses[lead.id]}
+                    draftText={currentDay.drafts[lead.id]}
                     isEditing={editingLeadId === lead.id}
                     feedbackActive={feedbackLeadId === lead.id}
-                    feedbackReason={feedbackMemo[lead.id]}
+                    feedbackReason={currentDay.feedback[lead.id]}
                     onApprove={() => handleApprove(lead.id)}
                     onReject={() => handleReject(lead.id)}
                     onToggleEdit={() =>
@@ -476,6 +580,22 @@ export default function Home() {
                   Emma is learning from your feedback
                 </div>
               </div>
+            </section>
+
+            {/* History & experience */}
+            <section className="space-y-4 rounded-lg border border-gray-200 p-6">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
+                  Experience
+                </p>
+                <h3 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+                  History
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  What Emma has reviewed and learned on previous days.
+                </p>
+              </div>
+              <HistoryPanel days={pastDays} />
             </section>
           </main>
         )}

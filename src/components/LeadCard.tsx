@@ -1,15 +1,7 @@
 import type { FC } from "react";
+import type { Lead } from "@/lib/dummyLeads";
 
-export type Lead = {
-  id: number;
-  company: string;
-  website: string;
-  fit: string;
-  decisionMaker: string;
-  email: string;
-  draft: string;
-  sources: string;
-};
+export type { Lead };
 
 type ApprovalStatus = "pending" | "approved" | "rejected";
 
