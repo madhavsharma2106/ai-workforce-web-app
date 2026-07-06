@@ -2,7 +2,7 @@
 
 A parking lot for ideas. Keep them captured but out of scope for MVP.
 
-## Future Employees
+## Future Roles
 
 - Recruiter
 - Research Analyst
@@ -12,7 +12,7 @@ A parking lot for ideas. Keep them captured but out of scope for MVP.
 ## Future Features
 
 - Marketplace
-- Voice employees
+- Voice roles
 - Slack integration
 - Calendar integration
-- Delegation between employees
+- Delegation between roles

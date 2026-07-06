@@ -6,6 +6,6 @@ Before working on this repo, read:
 2. `/docs/MVP.md`
 3. `/docs/PRINCIPLES.md`
 4. `/docs/INTEGRATIONS.md`
-5. `/employees/lead-sourcer.md`
+5. `/roles/*`
 
 This product is not an agent builder. It is a workforce platform where users hire AI employees that work toward business goals.

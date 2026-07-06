@@ -11,5 +11,3 @@ We are not
 - A developer framework
 - A replacement for CRMs
 - A replacement for email
-
-This is surprisingly powerful. It gives you permission to say "no."

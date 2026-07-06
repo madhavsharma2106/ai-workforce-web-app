@@ -17,7 +17,6 @@ Validate that business owners will trust an AI employee to generate outbound pip
 
 - Marketplace
 - Multi-employee collaboration
-- Instructions editor
 - Custom tools
 - Billing
 - CRM integrations
