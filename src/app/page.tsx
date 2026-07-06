@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import AuthGate from "@/components/AuthGate";
 import LeadCard from "@/components/LeadCard";
 import OnboardingChat, { OnboardingResult } from "@/components/OnboardingChat";
 import HistoryPanel, { DayRecord } from "@/components/HistoryPanel";
+import { createClient } from "@/lib/supabase/client";
 import { dayTemplates, type Lead } from "@/lib/dummyLeads";
 
 type ApprovalStatus = "pending" | "approved" | "rejected";
@@ -44,6 +47,7 @@ function initDrafts(leads: Lead[]) {
 }
 
 export default function Home() {
+  const [user, setUser] = useState<User | null | undefined>(undefined);
   const [screen, setScreen] = useState<
     "welcome" | "role" | "onboarding" | "dashboard"
   >("welcome");
@@ -101,6 +105,26 @@ export default function Home() {
     setDays([]);
     setEditingLeadId(null);
     setFeedbackLeadId(null);
+  };
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    resetDemo();
   };
 
   const updateCurrentDay = (updater: (day: Day) => Day) => {
@@ -278,6 +302,14 @@ export default function Home() {
     setFeedbackLeadId(null);
   };
 
+  if (user === undefined) {
+    return <div className="min-h-screen bg-white" />;
+  }
+
+  if (user === null) {
+    return <AuthGate />;
+  }
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Header */}
@@ -291,15 +323,24 @@ export default function Home() {
               Workforce
             </p>
           </div>
-          {screen !== "welcome" && (
+          <div className="flex items-center gap-3">
+            {screen !== "welcome" && (
+              <button
+                type="button"
+                onClick={resetDemo}
+                className="rounded-md border border-gray-200 px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+              >
+                Back to demo
+              </button>
+            )}
             <button
               type="button"
-              onClick={resetDemo}
+              onClick={handleSignOut}
               className="rounded-md border border-gray-200 px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
-              Back to demo
+              Sign out
             </button>
-          )}
+          </div>
         </div>
       </header>
 
