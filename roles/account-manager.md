@@ -21,12 +21,12 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 ## Outputs
 
-- A living Business Profile / Account Brief (ICP, positioning, tone, priorities, do's & don'ts)
+- A living Business Profile (ICP, positioning, tone, priorities, do's & don'ts)
 - Flags/questions back to the manager (client) when understanding is ambiguous or stale
 
 ## Integrations
 
-- None yet — will eventually consume a persisted client profile. Persistence (a `profiles` table replacing today's in-memory onboarding chat state) is planned as a separate follow-up task, not part of this role's build.
+- None yet — will eventually consume a persisted Business Profile. Persistence (a `business_profiles` table replacing today's in-memory onboarding chat state) is planned as a separate follow-up task, not part of this role's build. Design: the Business Profile is stored as markdown (a `profile_md` column) — the same form other roles' docs take — since it's read whole as LLM prompt context rather than queried field-by-field; a few structured columns (`user_id`, `updated_at`, `business_name`) support the app-level lookups that don't need the full document.
 
 ## Quality Bar
 
