@@ -26,7 +26,7 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 ## Integrations
 
-- None yet — will eventually consume a persisted Business Profile. Persistence (a `business_profiles` table replacing today's in-memory onboarding chat state) is planned as a separate follow-up task, not part of this role's build. Design: the Business Profile is stored as markdown (a `profile_md` column) — the same form other roles' docs take — since it's read whole as LLM prompt context rather than queried field-by-field; a few structured columns (`user_id`, `updated_at`, `business_name`) support the app-level lookups that don't need the full document.
+- The `business_profiles` table (see [docs/DATABASE.md](../docs/DATABASE.md)) now exists in Supabase, but nothing writes to or reads from it yet — onboarding still only holds the profile in in-memory React state. Wiring the onboarding flow and other roles' context-loading to this table is a separate follow-up task, not part of this role's build. Design: the Business Profile is stored as markdown (a `profile_md` column) — the same form other roles' docs take — since it's read whole as LLM prompt context rather than queried field-by-field; a few structured columns (`user_id`, `updated_at`, `business_name`) support the app-level lookups that don't need the full document.
 
 ## Quality Bar
 
