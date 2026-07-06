@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import type { Lead } from "@/lib/dummyLeads";
+import { Badge, Button, Card, Eyebrow, Textarea } from "@/components/atoms";
 
 export type { Lead };
 
@@ -21,10 +22,13 @@ type Props = {
   isRevealingEmail: boolean;
 };
 
-const statusLabel: Record<ApprovalStatus, { label: string; tone: string }> = {
-  pending: { label: "Pending", tone: "bg-gray-100 text-gray-600" },
-  approved: { label: "Approved", tone: "bg-indigo-50 text-indigo-700" },
-  rejected: { label: "Rejected", tone: "bg-red-50 text-red-600" },
+const statusLabel: Record<
+  ApprovalStatus,
+  { label: string; tone: "neutral" | "accent" | "danger" }
+> = {
+  pending: { label: "Pending", tone: "neutral" },
+  approved: { label: "Approved", tone: "accent" },
+  rejected: { label: "Rejected", tone: "danger" },
 };
 
 const feedbackOptions = [
@@ -54,7 +58,11 @@ const LeadCard: FC<Props> = ({
   const emailLocked = Boolean(lead.personId) && !lead.emailRevealed;
 
   return (
-    <article className="rounded-lg border border-gray-200 bg-white p-5 transition hover:border-gray-300">
+    <Card
+      as="article"
+      padding="md"
+      className="bg-white transition hover:border-gray-300"
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -97,21 +105,16 @@ const LeadCard: FC<Props> = ({
           </div>
         </div>
 
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${statusMeta.tone}`}
-        >
-          {statusMeta.label}
-        </span>
+        <Badge tone={statusMeta.tone}>{statusMeta.label}</Badge>
       </div>
 
       <div className="mt-4 space-y-3">
         <div className="space-y-2 rounded-md border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+          <Eyebrow tone="muted" tracking="wide">
             Draft email
-          </p>
+          </Eyebrow>
           {isEditing ? (
-            <textarea
-              className="w-full rounded-md border border-gray-200 bg-white p-2.5 text-sm text-gray-900 outline-none transition focus:border-gray-400"
+            <Textarea
               rows={5}
               value={draftText}
               onChange={(event) => onDraftChange(event.target.value)}
@@ -123,27 +126,13 @@ const LeadCard: FC<Props> = ({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onApprove}
-            className="rounded-md bg-gray-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-          >
-            Approve
-          </button>
-          <button
-            type="button"
-            onClick={onReject}
-            className="rounded-md border border-gray-200 px-3.5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-          >
+          <Button onClick={onApprove}>Approve</Button>
+          <Button variant="danger" onClick={onReject}>
             Reject
-          </button>
-          <button
-            type="button"
-            onClick={onToggleEdit}
-            className="rounded-md border border-gray-200 px-3.5 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-          >
+          </Button>
+          <Button variant="secondary" onClick={onToggleEdit}>
             {isEditing ? "Done" : "Edit"}
-          </button>
+          </Button>
         </div>
 
         {status === "approved" && (
@@ -159,14 +148,15 @@ const LeadCard: FC<Props> = ({
             </p>
             <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
               {feedbackOptions.map((option) => (
-                <button
+                <Button
                   key={option}
-                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="text-left"
                   onClick={() => onFeedbackSubmit(option)}
-                  className="rounded-md border border-gray-200 px-3 py-1.5 text-left text-sm text-gray-700 transition hover:border-gray-400 hover:bg-gray-50"
                 >
                   {option}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -184,7 +174,7 @@ const LeadCard: FC<Props> = ({
           </div>
         )}
       </div>
-    </article>
+    </Card>
   );
 };
 

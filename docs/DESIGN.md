@@ -35,6 +35,6 @@ Deferred. Components should not hardcode assumptions that block adding it later,
 
 ## Applying This
 
-When adding a new screen or component, match existing patterns in [`src/app/page.tsx`](../src/app/page.tsx) and [`src/components/LeadCard.tsx`](../src/components/LeadCard.tsx) rather than introducing new colors, radii, or shadow styles.
+When adding a new screen or component, use the shared primitives in `src/components/atoms/` and `src/components/molecules/` (see [COMPONENTS.md](COMPONENTS.md)) rather than hand-writing new colors, radii, or shadow styles. If a pattern isn't covered by an existing primitive yet, match the conventions in [`src/app/page.tsx`](../src/app/page.tsx) and [`src/components/organisms/LeadCard.tsx`](../src/components/organisms/LeadCard.tsx).
 
 This keeps every future screen looking like it belongs to the same product.

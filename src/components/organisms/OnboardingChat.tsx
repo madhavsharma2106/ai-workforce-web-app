@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Button, Card, Textarea } from "@/components/atoms";
 
 export type OnboardingResult = {
   clientDescription: string;
@@ -157,7 +158,7 @@ const OnboardingChat = ({ onComplete }: Props) => {
   const currentQuestion = questions[questionIndex];
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white">
+    <Card padding="none" className="flex h-full flex-col bg-white">
       <div
         ref={scrollRef}
         className="flex-1 space-y-3 overflow-y-auto p-5"
@@ -222,7 +223,7 @@ const OnboardingChat = ({ onComplete }: Props) => {
                 ))}
               </div>
             )}
-            <textarea
+            <Textarea
               ref={inputRef}
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
@@ -234,50 +235,47 @@ const OnboardingChat = ({ onComplete }: Props) => {
               }}
               placeholder={currentQuestion.placeholder}
               rows={2}
-              className="w-full resize-none rounded-md border border-gray-200 bg-white p-2.5 text-sm text-gray-900 outline-none transition focus:border-gray-400"
+              className="resize-none"
             />
             <div className="flex justify-end gap-2">
               {currentQuestion.optional && (
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
                   onClick={() => submitAnswer("")}
-                  className="rounded-md border border-gray-200 px-3.5 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
                 >
                   Skip
-                </button>
+                </Button>
               )}
-              <button
-                type="submit"
-                className="rounded-md bg-gray-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-              >
-                Send
-              </button>
+              <Button type="submit">Send</Button>
             </div>
           </form>
         )}
 
         {!awaitingQuestion && !isTyping && gmailState !== "connected" && (
-          <button
-            type="button"
+          <Button
+            size="lg"
+            fullWidth
+            className="sm:w-auto"
             onClick={handleConnectGmail}
             disabled={gmailState === "connecting"}
-            className="w-full rounded-md bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:opacity-60 sm:w-auto"
           >
             {gmailState === "connecting" ? "Connecting to Gmail…" : "Connect Gmail"}
-          </button>
+          </Button>
         )}
 
         {!awaitingQuestion && gmailState === "connected" && (
-          <button
-            type="button"
+          <Button
+            variant="accent"
+            size="lg"
+            fullWidth
+            className="sm:w-auto"
             onClick={() => onComplete(answers)}
-            className="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500 sm:w-auto"
           >
             Confirm hire →
-          </button>
+          </Button>
         )}
       </div>
-    </div>
+    </Card>
   );
 };
 

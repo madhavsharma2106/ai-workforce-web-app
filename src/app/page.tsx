@@ -2,12 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import AuthGate from "@/components/AuthGate";
-import LeadCard from "@/components/LeadCard";
-import OnboardingChat, { OnboardingResult } from "@/components/OnboardingChat";
-import HistoryPanel, { DayRecord } from "@/components/HistoryPanel";
+import AuthGate from "@/components/organisms/AuthGate";
+import LeadCard from "@/components/organisms/LeadCard";
+import OnboardingChat, {
+  OnboardingResult,
+} from "@/components/organisms/OnboardingChat";
+import HistoryPanel, { DayRecord } from "@/components/organisms/HistoryPanel";
 import { createClient } from "@/lib/supabase/client";
 import { dayTemplates, type Lead } from "@/lib/dummyLeads";
+import { Badge, Button, Card, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Alert } from "@/components/molecules";
 
 type ApprovalStatus = "pending" | "approved" | "rejected";
 
@@ -319,27 +323,19 @@ export default function Home() {
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-900 text-sm font-semibold text-white">
               W
             </div>
-            <p className="text-sm font-semibold tracking-tight text-gray-900">
+            <Text size="sm" weight="semibold" className="tracking-tight">
               Workforce
-            </p>
+            </Text>
           </div>
           <div className="flex items-center gap-3">
             {screen !== "welcome" && (
-              <button
-                type="button"
-                onClick={resetDemo}
-                className="rounded-md border border-gray-200 px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-              >
+              <Button variant="secondary" size="sm" onClick={resetDemo}>
                 Back to demo
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="rounded-md border border-gray-200 px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-            >
+            <Button variant="secondary" size="sm" onClick={handleSignOut}>
               Sign out
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -350,24 +346,18 @@ export default function Home() {
             {/* Hero section */}
             <section className="border-b border-gray-200 pb-16 pt-8">
               <div className="mx-auto max-w-2xl space-y-6 text-center">
-                <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                  New era of work
-                </p>
-                <h1 className="text-5xl font-semibold leading-[1.1] tracking-tight text-gray-900 sm:text-6xl">
+                <Eyebrow>New era of work</Eyebrow>
+                <Heading as="h1" size="xl">
                   Hire AI employees that work every morning.
-                </h1>
-                <p className="mx-auto max-w-lg text-lg leading-7 text-gray-500">
+                </Heading>
+                <Text size="lg" tone="muted" className="mx-auto max-w-lg">
                   Your first employee sources leads, drafts outreach, and waits
                   for your approval.
-                </p>
+                </Text>
                 <div className="flex flex-wrap justify-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setScreen("role")}
-                    className="rounded-md bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700"
-                  >
+                  <Button size="lg" onClick={() => setScreen("role")}>
                     Hire your first employee
-                  </button>
+                  </Button>
                 </div>
               </div>
             </section>
@@ -389,12 +379,10 @@ export default function Home() {
                 },
               ].map((feature) => (
                 <article key={feature.label} className="bg-white p-8">
-                  <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                    {feature.label}
-                  </p>
-                  <p className="mt-3 text-base font-medium text-gray-900">
+                  <Eyebrow>{feature.label}</Eyebrow>
+                  <Text size="md" weight="medium" className="mt-3">
                     {feature.desc}
-                  </p>
+                  </Text>
                 </article>
               ))}
             </section>
@@ -404,16 +392,14 @@ export default function Home() {
         {screen === "role" && (
           <main className="space-y-8">
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                Step 1
-              </p>
-              <h2 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+              <Eyebrow>Step 1</Eyebrow>
+              <Heading as="h2" size="lg" className="mt-1">
                 Choose a role to hire
-              </h2>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500">
+              </Heading>
+              <Text size="sm" tone="muted" className="mt-2 max-w-xl">
                 Every employee comes with a clear job description and a
                 dashboard where you review their work.
-              </p>
+              </Text>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
@@ -422,28 +408,31 @@ export default function Home() {
                 onClick={() => setScreen("onboarding")}
                 className="rounded-lg border border-gray-900 bg-gray-900 p-6 text-left text-white transition hover:bg-gray-700"
               >
-                <p className="text-xs font-medium uppercase tracking-widest text-indigo-300">
-                  Available now
-                </p>
-                <p className="mt-3 text-lg font-semibold">Lead Sourcer</p>
-                <p className="mt-1.5 text-sm leading-6 text-gray-300">
+                <Eyebrow tone="accent-faint">Available now</Eyebrow>
+                <Text size="lg" weight="semibold" className="mt-3 text-white!">
+                  Lead Sourcer
+                </Text>
+                <Text size="sm" tone="inverted" className="mt-1.5">
                   Researches prospects and drafts personalized outreach
                   emails for your approval.
-                </p>
+                </Text>
               </button>
 
               {["Sales Ops Analyst", "Customer Success Rep"].map((role) => (
-                <div
+                <Card
                   key={role}
-                  className="cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 p-6 text-left opacity-60"
+                  padding="lg"
+                  className="cursor-not-allowed bg-gray-50 text-left opacity-60"
                 >
-                  <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
-                    Coming soon
-                  </p>
-                  <p className="mt-3 text-lg font-semibold text-gray-700">
+                  <Eyebrow tone="muted">Coming soon</Eyebrow>
+                  <Text
+                    size="lg"
+                    weight="semibold"
+                    className="mt-3 text-gray-700!"
+                  >
                     {role}
-                  </p>
-                </div>
+                  </Text>
+                </Card>
               ))}
             </div>
           </main>
@@ -452,58 +441,52 @@ export default function Home() {
         {screen === "onboarding" && (
           <main className="space-y-8">
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                Step 2
-              </p>
-              <h2 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+              <Eyebrow>Step 2</Eyebrow>
+              <Heading as="h2" size="lg" className="mt-1">
                 Onboard Emma
-              </h2>
+              </Heading>
             </div>
 
             {searchState === "loading" && (
-              <div className="rounded-md border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+              <Alert variant="info">
                 Searching Apollo for leads that match your ICP…
-              </div>
+              </Alert>
             )}
 
             {searchState === "error" && (
-              <div className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <Alert variant="error">
                 {searchErrorMessage ?? "Lead search failed."}
-              </div>
+              </Alert>
             )}
 
             <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr]">
               <OnboardingChat onComplete={handleOnboardingComplete} />
 
-              <section className="rounded-lg border border-gray-200 bg-gray-50 p-6">
-                <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                  Emma&apos;s profile
-                </p>
+              <Card as="section" padding="lg" className="bg-gray-50">
+                <Eyebrow>Emma&apos;s profile</Eyebrow>
                 <div className="mt-4 space-y-5">
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gray-900 text-lg font-medium text-white">
                       E
                     </div>
                     <div>
-                      <p className="text-base font-semibold text-gray-900">
+                      <Text size="md" weight="semibold">
                         Emma
-                      </p>
-                      <p className="text-sm text-gray-500">
+                      </Text>
+                      <Text size="sm" tone="muted">
                         Lead Sourcer & Outreach Specialist
-                      </p>
+                      </Text>
                     </div>
                   </div>
 
-                  <p className="text-sm leading-6 text-gray-600">
+                  <Text size="sm" tone="subtle">
                     Researches prospects, identifies fast-fit opportunities,
                     and personalizes outreach emails. Learns from your
                     feedback daily.
-                  </p>
+                  </Text>
 
                   <div className="space-y-2 border-t border-gray-200 pt-4">
-                    <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
-                      Key abilities
-                    </p>
+                    <Eyebrow tone="muted">Key abilities</Eyebrow>
                     <div className="flex flex-wrap gap-1.5">
                       {[
                         "Research",
@@ -511,12 +494,9 @@ export default function Home() {
                         "Personalization",
                         "Learning",
                       ].map((ability) => (
-                        <span
-                          key={ability}
-                          className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700"
-                        >
+                        <Badge key={ability} tone="accent">
                           {ability}
-                        </span>
+                        </Badge>
                       ))}
                     </div>
                   </div>
@@ -536,7 +516,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              </section>
+              </Card>
             </div>
           </main>
         )}
@@ -544,35 +524,35 @@ export default function Home() {
         {screen === "dashboard" && currentDay && (
           <main className="space-y-10">
             {/* Employee status card */}
-            <section className="rounded-lg border border-gray-200 p-6">
+            <Card as="section" padding="lg">
               <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gray-900 text-lg font-medium text-white">
                     E
                   </div>
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
+                    <Eyebrow>
                       Active employee · Day {currentDay.id} ·{" "}
                       {currentDay.dateLabel}
-                    </p>
-                    <h2 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+                    </Eyebrow>
+                    <Heading as="h2" size="md" className="mt-1">
                       Emma is working
-                    </h2>
+                    </Heading>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700">
+                  <Badge tone="accent" size="md">
                     {pendingCount > 0
                       ? "Waiting for approval"
                       : "All caught up"}
-                  </div>
-                  <button
-                    type="button"
+                  </Badge>
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={handleSimulateNextDay}
-                    className="rounded-md border border-gray-200 px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
                   >
                     Simulate next day →
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -594,68 +574,58 @@ export default function Home() {
                   { label: "In queue", value: `${pendingCount} for review` },
                 ].map((stat) => (
                   <div key={stat.label} className="bg-white p-5">
-                    <p className="text-xs font-medium text-gray-500">
+                    <Text size="xs" tone="muted" weight="medium">
                       {stat.label}
-                    </p>
-                    <p className="mt-2 font-mono text-xl font-semibold text-gray-900">
+                    </Text>
+                    <Text
+                      size="xl"
+                      weight="semibold"
+                      className="mt-2 font-mono"
+                    >
                       {stat.value}
-                    </p>
+                    </Text>
                   </div>
                 ))}
               </div>
-            </section>
+            </Card>
 
             {/* Standup section */}
             <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
-              <article className="rounded-lg border border-gray-200 p-6">
-                <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                  Daily standup
-                </p>
+              <Card as="article" padding="lg">
+                <Eyebrow>Daily standup</Eyebrow>
                 <blockquote className="mt-4 border-l-2 border-gray-900 pl-4">
-                  <p className="text-lg leading-7 text-gray-900">
-                    {currentDay.standup}
-                  </p>
+                  <Text size="lg">{currentDay.standup}</Text>
                 </blockquote>
-              </article>
+              </Card>
 
               <article className="space-y-3">
-                <div className="rounded-lg border border-gray-200 p-4">
-                  <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
-                    What I learned
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                <Card padding="sm">
+                  <Eyebrow tone="muted">What I learned</Eyebrow>
+                  <Text size="sm" tone="subtle" className="mt-2">
                     {currentDay.learned}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-gray-200 p-4">
-                  <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
-                    What I&apos;m avoiding
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                  </Text>
+                </Card>
+                <Card padding="sm">
+                  <Eyebrow tone="muted">What I&apos;m avoiding</Eyebrow>
+                  <Text size="sm" tone="subtle" className="mt-2">
                     {profile?.badLeadCriteria || defaultBadLeadCriteria}
-                  </p>
-                </div>
+                  </Text>
+                </Card>
               </article>
             </section>
 
             {/* Approval queue */}
-            <section className="space-y-6 rounded-lg border border-gray-200 p-6">
+            <Card as="section" padding="lg" className="space-y-6">
               <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                    Step 3
-                  </p>
-                  <h3 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+                  <Eyebrow>Step 3</Eyebrow>
+                  <Heading as="h3" size="md" className="mt-1">
                     Review & approve leads
-                  </h3>
+                  </Heading>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleApproveAll}
-                  className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-                >
+                <Button className="px-4!" onClick={handleApproveAll}>
                   Approve all
-                </button>
+                </Button>
               </div>
 
               <div className="grid gap-4">
@@ -686,34 +656,32 @@ export default function Home() {
               {/* Progress footer */}
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-gray-50 p-5">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">
+                  <Text size="sm" weight="medium">
                     Approval progress
-                  </p>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  </Text>
+                  <Text size="sm" tone="muted" className="mt-0.5">
                     {approvedCount} approved • {pendingCount} pending
-                  </p>
+                  </Text>
                 </div>
-                <div className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm">
+                <Badge tone="accent" size="sm" className="bg-white! shadow-sm">
                   Emma is learning from your feedback
-                </div>
+                </Badge>
               </div>
-            </section>
+            </Card>
 
             {/* History & experience */}
-            <section className="space-y-4 rounded-lg border border-gray-200 p-6">
+            <Card as="section" padding="lg" className="space-y-4">
               <div>
-                <p className="text-xs font-medium uppercase tracking-widest text-indigo-600">
-                  Experience
-                </p>
-                <h3 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+                <Eyebrow>Experience</Eyebrow>
+                <Heading as="h3" size="md" className="mt-1">
                   History
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
+                </Heading>
+                <Text size="sm" tone="muted" className="mt-1">
                   What Emma has reviewed and learned on previous days.
-                </p>
+                </Text>
               </div>
               <HistoryPanel days={pastDays} />
-            </section>
+            </Card>
           </main>
         )}
       </div>

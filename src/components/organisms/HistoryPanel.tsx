@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import type { Lead } from "@/lib/dummyLeads";
+import { Badge } from "@/components/atoms";
 
 type ApprovalStatus = "pending" | "approved" | "rejected";
 
@@ -17,10 +18,10 @@ type Props = {
   days: DayRecord[];
 };
 
-const statusTone: Record<ApprovalStatus, string> = {
-  approved: "bg-indigo-50 text-indigo-700",
-  rejected: "bg-red-50 text-red-600",
-  pending: "bg-gray-100 text-gray-500",
+const statusTone: Record<ApprovalStatus, "neutral" | "accent" | "danger"> = {
+  approved: "accent",
+  rejected: "danger",
+  pending: "neutral",
 };
 
 const HistoryPanel: FC<Props> = ({ days }) => {
@@ -46,7 +47,7 @@ const HistoryPanel: FC<Props> = ({ days }) => {
         return (
           <details
             key={day.id}
-            className="group rounded-lg border border-gray-200 p-4"
+            className="group rounded-lg border border-(--border) p-4"
           >
             <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3">
               <div>
@@ -89,11 +90,7 @@ const HistoryPanel: FC<Props> = ({ days }) => {
                           </span>
                         )}
                       </div>
-                      <span
-                        className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${statusTone[status]}`}
-                      >
-                        {status}
-                      </span>
+                      <Badge tone={statusTone[status]}>{status}</Badge>
                     </div>
                   );
                 })}
