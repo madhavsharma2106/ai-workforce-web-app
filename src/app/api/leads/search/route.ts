@@ -4,7 +4,7 @@ import {
   ApolloRequestError,
   searchPeople,
 } from "@/lib/integrations/apollo";
-import type { Lead } from "@/lib/dummyLeads";
+import type { Lead } from "@/lib/types";
 
 export async function POST(request: Request) {
   const body = await request.json();

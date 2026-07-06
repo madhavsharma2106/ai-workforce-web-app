@@ -6,8 +6,9 @@ Validate that business owners will trust an AI employee to generate outbound pip
 
 ## Included
 
+- Account Manager Employee
 - Lead Sourcer employee
-- Daily execution
+- Daily execution of of some employees
 - Lead research
 - Email drafting
 - Approval queue

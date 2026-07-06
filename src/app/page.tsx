@@ -7,9 +7,8 @@ import LeadCard from "@/components/organisms/LeadCard";
 import OnboardingChat, {
   OnboardingResult,
 } from "@/components/organisms/OnboardingChat";
-import HistoryPanel, { DayRecord } from "@/components/organisms/HistoryPanel";
 import { createClient } from "@/lib/supabase/client";
-import { dayTemplates, type Lead } from "@/lib/dummyLeads";
+import type { Lead } from "@/lib/types";
 import { Badge, Button, Card, Eyebrow, Heading, Text } from "@/components/atoms";
 import { Alert } from "@/components/molecules";
 
@@ -89,21 +88,7 @@ export default function Home() {
     [currentDay],
   );
 
-  const pastDays: DayRecord[] = useMemo(
-    () =>
-      days.slice(0, -1).map((day) => ({
-        id: day.id,
-        label: `Day ${day.id}`,
-        dateLabel: day.dateLabel,
-        standup: day.standup,
-        leads: day.leads,
-        statuses: day.statuses,
-        feedback: day.feedback,
-      })),
-    [days],
-  );
-
-  const resetDemo = () => {
+  const clearLocalState = () => {
     setScreen("welcome");
     setProfile(null);
     setDays([]);
@@ -128,7 +113,7 @@ export default function Home() {
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    resetDemo();
+    clearLocalState();
   };
 
   const updateCurrentDay = (updater: (day: Day) => Day) => {
@@ -258,54 +243,6 @@ export default function Home() {
     setFeedbackLeadId(null);
   };
 
-  const handleSimulateNextDay = () => {
-    if (!currentDay) return;
-    const rejectedLeads = currentDay.leads.filter(
-      (lead) => currentDay.statuses[lead.id] === "rejected",
-    );
-    const approvedNow = currentDay.leads.filter(
-      (lead) => currentDay.statuses[lead.id] === "approved",
-    ).length;
-    const reasons = Array.from(
-      new Set(
-        rejectedLeads
-          .map((lead) => currentDay.feedback[lead.id])
-          .filter((reason): reason is string => Boolean(reason)),
-      ),
-    );
-
-    let learned: string;
-    if (rejectedLeads.length > 0) {
-      learned = `Yesterday you rejected ${rejectedLeads.length} lead${
-        rejectedLeads.length === 1 ? "" : "s"
-      }${reasons.length ? ` (${reasons.join(", ")})` : ""}. I've adjusted today's picks to avoid similar profiles.`;
-    } else if (approvedNow > 0) {
-      learned =
-        "Yesterday you approved everything I sent — I'll keep sourcing companies that match that profile.";
-    } else {
-      learned =
-        "Still waiting on your feedback from yesterday's queue — I'll keep today's picks close to the same profile.";
-    }
-
-    const nextDayNumber = days.length + 1;
-    const template = dayTemplates[(nextDayNumber - 1) % dayTemplates.length];
-    const newDay: Day = {
-      id: nextDayNumber,
-      dateLabel: formatDateLabel(days.length),
-      leads: template.leads,
-      statuses: initStatuses(template.leads),
-      drafts: initDrafts(template.leads),
-      feedback: {},
-      standup: `Good morning${profile?.name ? `, ${profile.name}` : ""}. I found ${template.leads.length} new leads today, building on what you taught me.`,
-      learned,
-      researched: template.researched,
-    };
-
-    setDays((current) => [...current, newDay]);
-    setEditingLeadId(null);
-    setFeedbackLeadId(null);
-  };
-
   if (user === undefined) {
     return <div className="min-h-screen bg-white" />;
   }
@@ -328,11 +265,6 @@ export default function Home() {
             </Text>
           </div>
           <div className="flex items-center gap-3">
-            {screen !== "welcome" && (
-              <Button variant="secondary" size="sm" onClick={resetDemo}>
-                Back to demo
-              </Button>
-            )}
             <Button variant="secondary" size="sm" onClick={handleSignOut}>
               Sign out
             </Button>
@@ -546,13 +478,6 @@ export default function Home() {
                       ? "Waiting for approval"
                       : "All caught up"}
                   </Badge>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleSimulateNextDay}
-                  >
-                    Simulate next day →
-                  </Button>
                 </div>
               </div>
 
@@ -667,20 +592,6 @@ export default function Home() {
                   Emma is learning from your feedback
                 </Badge>
               </div>
-            </Card>
-
-            {/* History & experience */}
-            <Card as="section" padding="lg" className="space-y-4">
-              <div>
-                <Eyebrow>Experience</Eyebrow>
-                <Heading as="h3" size="md" className="mt-1">
-                  History
-                </Heading>
-                <Text size="sm" tone="muted" className="mt-1">
-                  What Emma has reviewed and learned on previous days.
-                </Text>
-              </div>
-              <HistoryPanel days={pastDays} />
             </Card>
           </main>
         )}

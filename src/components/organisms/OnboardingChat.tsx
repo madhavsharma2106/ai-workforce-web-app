@@ -54,16 +54,11 @@ const questions: Question[] = [
   },
   {
     key: "name",
-    prompt: "Last thing before Gmail — what should I call you?",
+    prompt: "Last thing — what should I call you?",
     placeholder: "Your name (optional)",
     optional: true,
   },
 ];
-
-type GmailState = "idle" | "connecting" | "connected";
-
-const GMAIL_PROMPT =
-  "One last thing — I need access to your Gmail to send approved emails on your behalf.";
 
 const OnboardingChat = ({ onComplete }: Props) => {
   const [messages, setMessages] = useState<Message[]>([
@@ -72,7 +67,6 @@ const OnboardingChat = ({ onComplete }: Props) => {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [gmailState, setGmailState] = useState<GmailState>("idle");
   const [answers, setAnswers] = useState<OnboardingResult>({
     clientDescription: "",
     badLeadCriteria: "",
@@ -83,13 +77,13 @@ const OnboardingChat = ({ onComplete }: Props) => {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [messages, isTyping, gmailState]);
+  }, [messages, isTyping]);
 
   useEffect(() => {
     if (!isTyping) inputRef.current?.focus();
   }, [isTyping, questionIndex]);
 
-  const askNext = (nextIndex: number, updatedAnswers: OnboardingResult) => {
+  const askNext = (nextIndex: number) => {
     setIsTyping(true);
     window.setTimeout(() => {
       setIsTyping(false);
@@ -102,20 +96,8 @@ const OnboardingChat = ({ onComplete }: Props) => {
             text: questions[nextIndex].prompt,
           },
         ]);
-        setQuestionIndex(nextIndex);
-      } else {
-        setMessages((current) => [
-          ...current,
-          {
-            id: "gmail-ask",
-            from: "emma",
-            text: updatedAnswers.name
-              ? `Great, ${updatedAnswers.name}! ${GMAIL_PROMPT}`
-              : `Great! ${GMAIL_PROMPT}`,
-          },
-        ]);
-        setQuestionIndex(questions.length);
       }
+      setQuestionIndex(nextIndex);
     }, 550);
   };
 
@@ -136,22 +118,7 @@ const OnboardingChat = ({ onComplete }: Props) => {
       },
     ]);
     setInputValue("");
-    askNext(questionIndex + 1, updatedAnswers);
-  };
-
-  const handleConnectGmail = () => {
-    setGmailState("connecting");
-    window.setTimeout(() => {
-      setGmailState("connected");
-      setMessages((current) => [
-        ...current,
-        {
-          id: "gmail-connected",
-          from: "emma",
-          text: "Gmail connected. I'm ready to get to work.",
-        },
-      ]);
-    }, 1200);
+    askNext(questionIndex + 1);
   };
 
   const awaitingQuestion = questionIndex < questions.length;
@@ -251,19 +218,7 @@ const OnboardingChat = ({ onComplete }: Props) => {
           </form>
         )}
 
-        {!awaitingQuestion && !isTyping && gmailState !== "connected" && (
-          <Button
-            size="lg"
-            fullWidth
-            className="sm:w-auto"
-            onClick={handleConnectGmail}
-            disabled={gmailState === "connecting"}
-          >
-            {gmailState === "connecting" ? "Connecting to Gmail…" : "Connect Gmail"}
-          </Button>
-        )}
-
-        {!awaitingQuestion && gmailState === "connected" && (
+        {!awaitingQuestion && !isTyping && (
           <Button
             variant="accent"
             size="lg"

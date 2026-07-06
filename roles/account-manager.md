@@ -26,7 +26,7 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 ## Integrations
 
-- None yet — will eventually consume a persisted client profile (doesn't exist today) rather than the current in-memory onboarding chat state.
+- None yet — will eventually consume a persisted client profile. Persistence (a `profiles` table replacing today's in-memory onboarding chat state) is planned as a separate follow-up task, not part of this role's build.
 
 ## Evidence
 

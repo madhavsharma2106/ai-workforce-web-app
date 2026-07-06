@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { Lead } from "@/lib/dummyLeads";
+import type { Lead } from "@/lib/types";
 import { Badge, Button, Card, Eyebrow, Textarea } from "@/components/atoms";
 
 export type { Lead };

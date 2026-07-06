@@ -3,7 +3,7 @@
 ## Week One
 
 - ✓ User hires employee
-- ✓ Connects Gmail
+- ✓ Reviews first batch of leads
 - ✓ Returns the next morning
 - ✓ Approves emails
 
