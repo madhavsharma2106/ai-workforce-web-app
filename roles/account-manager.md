@@ -28,6 +28,10 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 - None yet — will eventually consume a persisted client profile. Persistence (a `profiles` table replacing today's in-memory onboarding chat state) is planned as a separate follow-up task, not part of this role's build.
 
+## Quality Bar
+
+MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). The Business Profile must be precise enough that another employee could act on it without re-asking the client basic questions — vague ICP descriptions or generic positioning statements don't clear the bar.
+
 ## Evidence
 
 (To be tracked and measured)
@@ -36,7 +40,7 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 - Conduct/refresh onboarding conversation with the client
 - Periodically check in about changes in the business
-- Review other roles' approved/rejected work for context gaps
+- Review other roles' approved/rejected work for context gaps and quality-bar misses (see [docs/QUALITY.md](../docs/QUALITY.md))
 - Update the Business Profile
 - Surface open questions to the client
 
@@ -48,7 +52,8 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 ## Do Not
 
+(See [docs/ROLES.md](../docs/ROLES.md) for baseline rules every role follows.)
+
 - Edit other employees' outputs directly
 - Make hiring/firing decisions
-- Spend money
 - Contact the client's customers directly
