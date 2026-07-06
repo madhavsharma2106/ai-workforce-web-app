@@ -3,75 +3,40 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Card, Textarea } from "@/components/atoms";
 
-export type OnboardingResult = {
-  clientDescription: string;
-  badLeadCriteria: string;
-  name: string;
-};
-
-type Props = {
-  onComplete: (result: OnboardingResult) => void;
-};
-
-type Message = {
-  id: string;
-  from: "emma" | "user";
-  text: string;
-};
-
-type QuestionKey = "clientDescription" | "badLeadCriteria" | "name";
-
-type Question = {
-  key: QuestionKey;
+export type ConversationalFormQuestion = {
+  key: string;
   prompt: string;
   placeholder: string;
   optional?: boolean;
   chips?: string[];
 };
 
-const questions: Question[] = [
-  {
-    key: "clientDescription",
-    prompt:
-      "Hi, I'm Emma — I'll be sourcing leads and drafting outreach for you. First: what does your ideal client look like?",
-    placeholder: "e.g. B2B SaaS companies with weak video presence...",
-    chips: [
-      "B2B SaaS companies with weak online presence",
-      "Local service businesses ready to grow",
-      "E-commerce brands scaling past $1M",
-    ],
-  },
-  {
-    key: "badLeadCriteria",
-    prompt:
-      "Good to know. And what should I steer clear of — what does a bad-fit lead look like?",
-    placeholder: "e.g. Agencies, consumer brands, companies too small...",
-    chips: [
-      "Agencies and consultants",
-      "Companies too small to afford us",
-      "Already working with a competitor",
-    ],
-  },
-  {
-    key: "name",
-    prompt: "Last thing — what should I call you?",
-    placeholder: "Your name (optional)",
-    optional: true,
-  },
-];
+type Props = {
+  agentName: string;
+  questions: ConversationalFormQuestion[];
+  confirmLabel: string;
+  onComplete: (answers: Record<string, string>) => void;
+};
 
-const OnboardingChat = ({ onComplete }: Props) => {
+type Message = {
+  id: string;
+  from: "agent" | "user";
+  text: string;
+};
+
+const ConversationalForm = ({
+  agentName,
+  questions,
+  confirmLabel,
+  onComplete,
+}: Props) => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: "q0", from: "emma", text: questions[0].prompt },
+    { id: "q0", from: "agent", text: questions[0].prompt },
   ]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [answers, setAnswers] = useState<OnboardingResult>({
-    clientDescription: "",
-    badLeadCriteria: "",
-    name: "",
-  });
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -92,7 +57,7 @@ const OnboardingChat = ({ onComplete }: Props) => {
           ...current,
           {
             id: `q${nextIndex}`,
-            from: "emma",
+            from: "agent",
             text: questions[nextIndex].prompt,
           },
         ]);
@@ -143,9 +108,9 @@ const OnboardingChat = ({ onComplete }: Props) => {
                   : "bg-gray-100 text-gray-800"
               }`}
             >
-              {message.from === "emma" && (
+              {message.from === "agent" && (
                 <p className="mb-1 text-xs font-medium uppercase tracking-wide text-indigo-500">
-                  Emma
+                  {agentName}
                 </p>
               )}
               {message.text}
@@ -206,10 +171,7 @@ const OnboardingChat = ({ onComplete }: Props) => {
             />
             <div className="flex justify-end gap-2">
               {currentQuestion.optional && (
-                <Button
-                  variant="secondary"
-                  onClick={() => submitAnswer("")}
-                >
+                <Button variant="secondary" onClick={() => submitAnswer("")}>
                   Skip
                 </Button>
               )}
@@ -226,7 +188,7 @@ const OnboardingChat = ({ onComplete }: Props) => {
             className="sm:w-auto"
             onClick={() => onComplete(answers)}
           >
-            Confirm hire →
+            {confirmLabel}
           </Button>
         )}
       </div>
@@ -234,4 +196,4 @@ const OnboardingChat = ({ onComplete }: Props) => {
   );
 };
 
-export default OnboardingChat;
+export default ConversationalForm;

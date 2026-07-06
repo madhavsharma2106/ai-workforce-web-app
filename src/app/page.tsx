@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import AuthGate from "@/components/organisms/AuthGate";
 import LeadCard from "@/components/organisms/LeadCard";
-import OnboardingChat, {
-  OnboardingResult,
-} from "@/components/organisms/OnboardingChat";
+import ConversationalForm, {
+  ConversationalFormQuestion,
+} from "@/components/organisms/ConversationalForm";
 import { createClient } from "@/lib/supabase/client";
 import type { Lead } from "@/lib/types";
 import { Badge, Button, Card, Eyebrow, Heading, Text } from "@/components/atoms";
@@ -28,6 +28,43 @@ type Day = {
 
 const defaultBadLeadCriteria =
   "companies that already have strong video case studies, agencies, or consumer brands";
+
+type OnboardingResult = {
+  clientDescription: string;
+  badLeadCriteria: string;
+  name: string;
+};
+
+const emmaOnboardingQuestions: ConversationalFormQuestion[] = [
+  {
+    key: "clientDescription",
+    prompt:
+      "Hi, I'm Emma — I'll be sourcing leads and drafting outreach for you. First: what does your ideal client look like?",
+    placeholder: "e.g. B2B SaaS companies with weak video presence...",
+    chips: [
+      "B2B SaaS companies with weak online presence",
+      "Local service businesses ready to grow",
+      "E-commerce brands scaling past $1M",
+    ],
+  },
+  {
+    key: "badLeadCriteria",
+    prompt:
+      "Good to know. And what should I steer clear of — what does a bad-fit lead look like?",
+    placeholder: "e.g. Agencies, consumer brands, companies too small...",
+    chips: [
+      "Agencies and consultants",
+      "Companies too small to afford us",
+      "Already working with a competitor",
+    ],
+  },
+  {
+    key: "name",
+    prompt: "Last thing — what should I call you?",
+    placeholder: "Your name (optional)",
+    optional: true,
+  },
+];
 
 function formatDateLabel(offsetDays: number) {
   const date = new Date();
@@ -392,7 +429,18 @@ export default function Home() {
             )}
 
             <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr]">
-              <OnboardingChat onComplete={handleOnboardingComplete} />
+              <ConversationalForm
+                agentName="Emma"
+                questions={emmaOnboardingQuestions}
+                confirmLabel="Confirm hire →"
+                onComplete={(answers) =>
+                  handleOnboardingComplete({
+                    clientDescription: answers.clientDescription ?? "",
+                    badLeadCriteria: answers.badLeadCriteria ?? "",
+                    name: answers.name ?? "",
+                  })
+                }
+              />
 
               <Card as="section" padding="lg" className="bg-gray-50">
                 <Eyebrow>Emma&apos;s profile</Eyebrow>

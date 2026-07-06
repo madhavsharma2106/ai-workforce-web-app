@@ -8,7 +8,7 @@ How `src/components/` is organized, and how to extend it without drifting back i
 src/components/
   atoms/        pure, single-purpose UI primitives — no business logic, no data fetching
   molecules/    small compositions of 2+ atoms — only exist where a pattern genuinely repeats
-  organisms/    feature components (AuthGate, LeadCard, HistoryPanel, OnboardingChat) — own domain logic, compose atoms/molecules
+  organisms/    feature components (AuthGate, LeadCard, HistoryPanel, ConversationalForm) — own domain logic, compose atoms/molecules
 ```
 
 `src/app/page.tsx` composes organisms; organisms compose atoms/molecules. Import via the barrels: `@/components/atoms`, `@/components/molecules`, `@/components/organisms/<Name>` (organisms aren't barrel-exported from a single index — import each by name).
@@ -48,4 +48,13 @@ Tailwind's generated CSS order isn't guaranteed to follow JSX `className` order,
 - **New variant on an existing atom**: only add one backed by a real call site in the app — don't pre-populate options nobody uses yet.
 - **New atom**: only when a class-string pattern is duplicated 2+ times across files (grep before assuming).
 - **New molecule**: only when 2+ real call sites compose the *same* atoms in the *same* shape.
-- **Storybook**: deliberately out of scope for now — see [DECISIONS.md](DECISIONS.md). Revisit once the atom/molecule count grows enough that browsing them in isolation would save more time than the setup costs.
+## Storybook
+
+Set up to view components in isolation, starting with `ConversationalForm` (the generic chat shell behind Emma's hire flow and, soon, Account Manager onboarding).
+
+- Run with `npm run storybook` (serves on `http://localhost:6006`); `npm run build-storybook` produces a static build.
+- Requires Node 22.14+ (this repo's `engines` requirement) — the `oxc-parser` native binding Storybook depends on fails to load under older Node (e.g. 20.x) with a misleading "Cannot find native binding" error. If your shell defaults to an older Node via `nvm`, run `nvm use 22.14.0` first.
+- Config lives in `.storybook/` (`main.ts`, `preview.ts`). Uses `@storybook/react-vite`, not `@storybook/nextjs` — nothing under `src/components` depends on Next-specific APIs (`next/image`, `next/link`, routing, server components), so the lighter Vite builder avoids depending on this repo's modified Next.js internals (see root `AGENTS.md`). Revisit if a component that genuinely needs Next's runtime gets a story.
+- Tailwind v4 is wired in via `@tailwindcss/vite`, importing the same `src/app/globals.css` the app uses, so stories share the real design tokens. Path aliases (`@/*`) are resolved via `vite-tsconfig-paths`.
+- Story files live next to their component (`Component.stories.tsx`), matching the `stories` glob in `.storybook/main.ts`.
+- **Extending this**: only write a story for a component once there's a real reason to view it in isolation (a second consumer, a design review, a hard-to-reach state) — don't backfill stories for every atom/molecule just because Storybook now exists.
