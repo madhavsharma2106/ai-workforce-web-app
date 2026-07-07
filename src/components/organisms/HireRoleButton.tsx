@@ -1,0 +1,53 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Eyebrow, Text } from "@/components/atoms";
+import type { EmployeeRole } from "@/lib/employees";
+
+type Props = {
+  role: EmployeeRole;
+  title: string;
+  description: string;
+};
+
+const HireRoleButton = ({ role, title, description }: Props) => {
+  const router = useRouter();
+  const [isHiring, setIsHiring] = useState(false);
+
+  const handleHire = async () => {
+    setIsHiring(true);
+    const response = await fetch("/api/employees", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      router.push(`/employee/${data.id}/onboarding`);
+    } else {
+      setIsHiring(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleHire}
+      disabled={isHiring}
+      className="rounded-lg border border-gray-900 bg-gray-900 p-6 text-left text-white transition hover:bg-gray-700 disabled:opacity-60"
+    >
+      <Eyebrow tone="accent-faint">
+        {isHiring ? "Hiring…" : "Available now"}
+      </Eyebrow>
+      <Text size="lg" weight="semibold" className="mt-3 text-white!">
+        {title}
+      </Text>
+      <Text size="sm" tone="inverted" className="mt-1.5">
+        {description}
+      </Text>
+    </button>
+  );
+};
+
+export default HireRoleButton;

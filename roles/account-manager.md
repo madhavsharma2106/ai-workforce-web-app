@@ -26,7 +26,7 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 ## Integrations
 
-- The `business_profiles` table (see [docs/DATABASE.md](../docs/DATABASE.md)) now exists in Supabase, but nothing writes to or reads from it yet — onboarding still only holds the profile in in-memory React state. Wiring the onboarding flow and other roles' context-loading to this table is a separate follow-up task, not part of this role's build. Design: the Business Profile is stored as markdown (a `profile_md` column) — the same form other roles' docs take — since it's read whole as LLM prompt context rather than queried field-by-field; a few structured columns (`user_id`, `updated_at`, `business_name`) support the app-level lookups that don't need the full document.
+- The `business_profiles` table (see [docs/DATABASE.md](../docs/DATABASE.md)) is wired: the onboarding conversation at `/employee/:id/onboarding` (for the auto-hired `account_manager` employee) writes it via `POST /api/employees/[id]/complete-onboarding`, and the Lead Sourcer's first run reads `profile_md` directly as its search input — see [src/lib/employees.ts](../src/lib/employees.ts) and [src/lib/leadSearch.ts](../src/lib/leadSearch.ts). Design: the Business Profile is stored as markdown (a `profile_md` column) — the same form other roles' docs take — since it's read whole as LLM prompt context rather than queried field-by-field; a few structured columns (`user_id`, `updated_at`, `business_name`, `contact_name`) support the app-level lookups that don't need the full document. The onboarding question set today (ideal client, bad-fit criteria) is an initial pass — more questions will be added as the Business Profile deepens.
 
 ## Quality Bar
 

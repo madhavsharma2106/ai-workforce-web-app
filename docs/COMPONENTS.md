@@ -8,10 +8,10 @@ How `src/components/` is organized, and how to extend it without drifting back i
 src/components/
   atoms/        pure, single-purpose UI primitives — no business logic, no data fetching
   molecules/    small compositions of 2+ atoms — only exist where a pattern genuinely repeats
-  organisms/    feature components (AuthGate, LeadCard, HistoryPanel, ConversationalForm) — own domain logic, compose atoms/molecules
+  organisms/    feature components (AuthGate, LeadCard, ConversationalForm, LeadSourcerHome) — own domain logic, compose atoms/molecules
 ```
 
-`src/app/page.tsx` composes organisms; organisms compose atoms/molecules. Import via the barrels: `@/components/atoms`, `@/components/molecules`, `@/components/organisms/<Name>` (organisms aren't barrel-exported from a single index — import each by name).
+Pages under `src/app/` (the landing page, `/dashboard`, `/employee/[id]`, `/employee/[id]/onboarding`) compose organisms; organisms compose atoms/molecules. Import via the barrels: `@/components/atoms`, `@/components/molecules`, `@/components/organisms/<Name>` (organisms aren't barrel-exported from a single index — import each by name).
 
 ## Atoms (`src/components/atoms/`)
 

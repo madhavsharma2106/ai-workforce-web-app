@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  ApolloConfigError,
-  ApolloRequestError,
-  searchPeople,
-} from "@/lib/integrations/apollo";
-import type { Lead } from "@/lib/types";
+import { ApolloConfigError, ApolloRequestError } from "@/lib/integrations/apollo";
+import { searchLeadsForClient } from "@/lib/leadSearch";
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -19,34 +15,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    const people = await searchPeople({
-      icp: clientDescription,
-      excludeCriteria: badLeadCriteria,
-    });
-
-    const leads: Lead[] = people
-      .filter((person) => person.organization)
-      .map((person, index) => ({
-        id: index + 1,
-        company: person.organization!.name,
-        website:
-          person.organization!.primary_domain ??
-          person.organization!.website_url ??
-          "",
-        fit: `Matches ICP: ${clientDescription}`,
-        decisionMaker: person.title
-          ? `${person.name}, ${person.title}`
-          : person.name,
-        email: "",
-        draft: `Hi ${person.name.split(" ")[0]}, I came across ${person.organization!.name} and thought there could be a good fit here. Would love to share more.`,
-        sources: "Apollo.io",
-        personId: person.id,
-        emailRevealed: false,
-      }));
+    const { leads, researched } = await searchLeadsForClient(
+      clientDescription,
+      badLeadCriteria,
+    );
 
     return NextResponse.json({
       leads,
-      researched: people.length,
+      researched,
       focus: clientDescription,
     });
   } catch (error) {

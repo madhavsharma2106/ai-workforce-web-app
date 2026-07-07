@@ -10,8 +10,8 @@ Get a steady stream of qualified, personalized outbound leads without doing the 
 
 **Preconditions**
 
-- User can articulate, in plain language, what their business does, their ideal client, and what a bad lead looks like — conversationally, in response to the Account Manager's questions.
-- No prior employees, assignments, or account state exist (first-run experience). A user with no Business Profile yet is treated as first-run regardless of login history.
+- User can articulate, in plain language, what their business does, their ideal client, and what a bad lead looks like — conversationally, in response to Alex's (the Account Manager's) questions.
+- Every hire — Alex or Emma — is a row in the `employees` table (see [DATABASE.md](DATABASE.md)) with its own onboarding page and home page at `/employee/:id` and `/employee/:id/onboarding`. Alex is auto-hired the first time a user reaches `/` authenticated with no `account_manager` employee row yet — that row's presence/absence is the first-run signal, not `business_profiles`.
 
 ---
 
@@ -19,29 +19,31 @@ Get a steady stream of qualified, personalized outbound leads without doing the 
 
 ```mermaid
 flowchart TD
-    A[Public landing page: pitch + Login/Sign up CTA] --> B[Login]
-    B --> C{Business Profile exists?}
-    C -->|No| D[Account Manager onboarding conversation:<br/>asks about the business, ideal client,<br/>good/bad client criteria]
-    D --> E[Business Profile created]
-    E --> F[Hire: choose a role<br/>Lead Sourcer]
-    C -->|Yes| F
-    F --> G[Hire confirmed —<br/>kicks off one real lead search]
-    G --> H[Dashboard — one place for everything:<br/>status, stats, Daily Report,<br/>Approval Queue]
-    H --> I{Review a draft}
-    I -->|Approve / Edit then Approve| J[Lead's verified email revealed<br/>draft still sent manually — no send integration yet]
-    I -->|Reject| H
-    J --> H
+    A["/ — public landing page:<br/>pitch + Login/Sign up CTA"] --> B["/login"]
+    B --> C{Account Manager<br/>employee row exists?}
+    C -->|No| D["Auto-hire Alex, redirect to<br/>/employee/:id/onboarding"]
+    D --> E["Alex's onboarding conversation:<br/>business, ideal client, bad-fit criteria"]
+    E --> F["Business Profile written;<br/>redirect to /dashboard"]
+    C -->|Yes| F2["/dashboard"]
+    F --> F2
+    F2 --> G["Hire: choose a role<br/>(Lead Sourcer)"]
+    G --> H["/employee/:id/onboarding —<br/>Emma's onboarding, kicks off<br/>one real lead search"]
+    H --> I["/employee/:id — Emma's home:<br/>status, stats, Daily Report,<br/>Approval Queue"]
+    I --> J{Review a draft}
+    J -->|Approve / Edit then Approve| K[Lead's verified email revealed<br/>draft still sent manually — no send integration yet]
+    J -->|Reject| I
+    K --> I
 ```
 
 ## 3. Journey Details Table
 
 | Stage                          | User Goal                                                | User Action                                     | System Behavior                                                                                                                                                                                                                                                            | Pain Points                                                                                        | Success Metric                                                                                    |
 | ------------------------------ | -------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Landing page                   | Understand what the product does                         | Views pitch                                     | Shows single CTA to log in / sign up                                                                                                                                                                                                                                       | Unclear value prop if pitch is too abstract                                                        | % of visitors who click the CTA                                                                   |
-| Login                          | Get into the product                                     | Logs in / signs up                              | Authenticates via Supabase, then checks whether a `business_profiles` row exists for this user                                                                                                                                                                            | Friction from auth itself (password, email verification)                                           | Login completion rate                                                                             |
-| Account Manager onboarding     | Get the product set up to understand the business        | Answers Account Manager's questions (business, ideal client, good/bad lead criteria) | Only shown when no Business Profile exists yet; Account Manager asks questions conversationally and writes the Business Profile so every role can reuse it without re-asking                                                                                              | Conversational format may feel slower than a form for some users                                   | % of first-run users who complete onboarding and reach role selection                             |
-| Choose a role                  | Decide who to hire                                       | Selects "Lead Sourcer" (only option)             | Displays role even with one choice, to set the hiring mental model; skipped straight to for returning users who already have a Business Profile                                                                                                                          | May feel like an unnecessary extra click                                                           | % who proceed past role selection                                                                 |
-| Confirm                        | Finish hiring                                            | Reviews and confirms                            | Marks employee as hired and kicks off the first real lead search                                                                                                                                                                                                           | Waiting on live search results                                                                     | Hire completion rate                                                                              |
-| Dashboard (single view)        | Review Emma's work and see what she's found for this run | Approves, rejects, or edits draft leads/emails  | Dashboard renders status, stats, today's report, and Approval Queue together; approving a lead reveals its verified email address, but the drafted email is still sent manually — no send integration yet; feedback will shape future runs once recurring automation ships | Reviewing every item may feel like a chore; no history view yet since only one run exists per hire | Approved email drafts (core success metric per [roles/lead-sourcer.md](../roles/lead-sourcer.md)) |
+| Landing page (`/`)             | Understand what the product does                         | Views pitch                                     | Shows single CTA to log in / sign up; if already authenticated, `/` never renders the pitch — it redirects onward instead                                                                                                                                                 | Unclear value prop if pitch is too abstract                                                        | % of visitors who click the CTA                                                                   |
+| Login (`/login`)               | Get into the product                                     | Logs in / signs up                              | Authenticates via Supabase, then `/` decides where to send the user based on whether an `account_manager` employee row exists                                                                                                                                             | Friction from auth itself (magic-link email round trip)                                            | Login completion rate                                                                              |
+| Alex's onboarding (`/employee/:id/onboarding`) | Get the product set up to understand the business | Answers Alex's questions (business, ideal client, bad-fit criteria, name) | Only reached when no Account Manager employee exists yet (auto-hired); Alex asks questions conversationally and writes the Business Profile so every future role can reuse it without re-asking                                                                          | Conversational format may feel slower than a form for some users                                   | % of first-run users who complete onboarding and reach `/dashboard`                                |
+| Choose a role (`/dashboard`)   | Decide who to hire                                       | Selects "Lead Sourcer" (only option)             | Roster of hired employees plus a hire catalog; Lead Sourcer shows as hireable until the user has one, then links to her page instead                                                                                                                                      | May feel like an unnecessary extra click                                                           | % who proceed past role selection                                                                 |
+| Emma's onboarding (`/employee/:id/onboarding`) | Finish hiring                             | Confirms hire                                   | Marks the employee active and kicks off the first real lead search, seeded from Alex's Business Profile                                                                                                                                                                   | Waiting on live search results                                                                     | Hire completion rate                                                                               |
+| Emma's home (`/employee/:id`)  | Review Emma's work and see what she's found for this run | Approves, rejects, or edits draft leads/emails  | Renders status, stats, today's report, and Approval Queue together; approving a lead reveals its verified email address, but the drafted email is still sent manually — no send integration yet; feedback will shape future runs once recurring automation ships          | Reviewing every item may feel like a chore; no history view yet, and this run isn't persisted — a reload loses it | Approved email drafts (core success metric per [roles/lead-sourcer.md](../roles/lead-sourcer.md)) |
 
-**Note:** Emma's hire flow no longer asks for ideal client / good-bad lead criteria — that's now covered once by the Account Manager's Business Profile. A lighter, role-specific onboarding pass for Emma (e.g. tone, signature name) may be added later; not part of this change.
+**Note:** Emma's hire flow no longer asks for ideal client / good-fit criteria — that's now covered once by Alex's Business Profile, which her first search reads directly. Her onboarding today is a single placeholder question; her real question set (lead-type preferences, etc.) is designed later.
