@@ -1,10 +1,25 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BarChart3, Headset, Target } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { listEmployees, ROLE_LABELS } from "@/lib/employees";
 import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
 import AppHeader from "@/components/organisms/AppHeader";
 import HireRoleButton from "@/components/organisms/HireRoleButton";
+
+const COMING_SOON_ROLES: { title: string; description: string; icon: LucideIcon }[] = [
+  {
+    title: "Sales Ops Analyst",
+    description: "Keeps your pipeline data clean and flags deals that need attention.",
+    icon: BarChart3,
+  },
+  {
+    title: "Customer Success Rep",
+    description: "Checks in with customers and drafts renewal and upsell outreach.",
+    icon: Headset,
+  },
+];
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -92,7 +107,10 @@ export default async function DashboardPage() {
                 }
               >
                 <Card padding="lg" className="h-full transition hover:border-gray-400">
-                  <Eyebrow>Hired</Eyebrow>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--accent-soft)">
+                    <Target size={20} className="text-(--accent)" />
+                  </div>
+                  <Eyebrow className="mt-4">Hired</Eyebrow>
                   <Text size="lg" weight="semibold" className="mt-3">
                     Lead Sourcer
                   </Text>
@@ -106,18 +124,27 @@ export default async function DashboardPage() {
                 role="lead_sourcer"
                 title="Lead Sourcer"
                 description="Researches prospects and drafts personalized outreach emails for your approval."
+                icon={Target}
               />
             )}
 
-            {["Sales Ops Analyst", "Customer Success Rep"].map((role) => (
+            {COMING_SOON_ROLES.map(({ title, description, icon: Icon }) => (
               <Card
-                key={role}
+                key={title}
                 padding="lg"
                 className="cursor-not-allowed bg-gray-50 text-left opacity-60"
               >
-                <Eyebrow tone="muted">Coming soon</Eyebrow>
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gray-200">
+                  <Icon size={20} className="text-gray-500" />
+                </div>
+                <Eyebrow tone="muted" className="mt-4">
+                  Coming soon
+                </Eyebrow>
                 <Text size="lg" weight="semibold" className="mt-3 text-gray-700!">
-                  {role}
+                  {title}
+                </Text>
+                <Text size="sm" tone="muted" className="mt-1.5">
+                  {description}
                 </Text>
               </Card>
             ))}
