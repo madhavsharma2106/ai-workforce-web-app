@@ -26,7 +26,7 @@ export const LeadSourcer: Story = {
     title: "Lead Sourcer",
     description:
       "Researches prospects and drafts personalized outreach emails for your approval.",
-    icon: Target,
+    icon: <Target size={20} className="text-white" />,
   },
 };
 
@@ -36,6 +36,16 @@ export const AccountManager: Story = {
     title: "Account Manager",
     description:
       "Keeps your Business Profile current so every employee you hire understands your business.",
-    icon: Users,
+    icon: <Users size={20} className="text-white" />,
+  },
+};
+
+export const SalesRepresentative: Story = {
+  args: {
+    role: "sales_representative",
+    title: "Sales Representative",
+    description:
+      "Sends approved outreach and drafts follow-ups — once Emma hands off qualified leads.",
+    icon: <Users size={20} className="text-white" />,
   },
 };

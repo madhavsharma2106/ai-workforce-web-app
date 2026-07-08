@@ -9,7 +9,7 @@ import { createAgentRun, updateAgentRun, insertAgentRunStep, insertDelegation } 
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 import type { DelegationRequest } from "./tools/delegationTool";
 
-const ROLES: EmployeeRole[] = ["account_manager", "lead_sourcer"];
+const ROLES: EmployeeRole[] = ["account_manager", "lead_sourcer", "sales_representative"];
 
 const GraphState = Annotation.Root({
   messages: Annotation<ModelMessage[]>({

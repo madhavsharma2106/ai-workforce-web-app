@@ -44,32 +44,40 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json({ redirectTo: "/dashboard" });
   }
 
-  // lead_sourcer
-  const { data: profile } = await supabase
-    .from("business_profiles")
-    .select("profile_md, contact_name")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const clientDescription =
-    profile?.profile_md ||
-    "Small businesses that need outbound sales pipeline.";
-
-  try {
-    const { leads, researched } = await searchLeadsForClient(
-      clientDescription,
-    );
-    const day = buildFirstDay(leads, researched, profile?.contact_name ?? "");
-
+  if (employee.role === "sales_representative") {
     await markEmployeeActive(supabase, id);
-    return NextResponse.json({ redirectTo: `/employee/${id}`, day });
-  } catch (error) {
-    if (error instanceof ApolloConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    if (error instanceof ApolloRequestError) {
-      return NextResponse.json({ error: error.message }, { status: 502 });
-    }
-    throw error;
+    return NextResponse.json({ redirectTo: `/employee/${id}` });
   }
+
+  if (employee.role === "lead_sourcer") {
+    const { data: profile } = await supabase
+      .from("business_profiles")
+      .select("profile_md, contact_name")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const clientDescription =
+      profile?.profile_md ||
+      "Small businesses that need outbound sales pipeline.";
+
+    try {
+      const { leads, researched } = await searchLeadsForClient(
+        clientDescription,
+      );
+      const day = buildFirstDay(leads, researched, profile?.contact_name ?? "");
+
+      await markEmployeeActive(supabase, id);
+      return NextResponse.json({ redirectTo: `/employee/${id}`, day });
+    } catch (error) {
+      if (error instanceof ApolloConfigError) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      if (error instanceof ApolloRequestError) {
+        return NextResponse.json({ error: error.message }, { status: 502 });
+      }
+      throw error;
+    }
+  }
+
+  return NextResponse.json({ error: "Unsupported role" }, { status: 400 });
 }

@@ -4,6 +4,7 @@ import { getEmployeeById, listEmployees, ROLE_LABELS } from "@/lib/employees";
 import { Breadcrumb } from "@/components/atoms";
 import LeadSourcerHome from "@/components/organisms/LeadSourcerHome";
 import AccountManagerHome from "@/components/organisms/AccountManagerHome";
+import SalesRepresentativeHome from "@/components/organisms/SalesRepresentativeHome";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -60,6 +61,8 @@ export default async function EmployeeHomePage({ params }: Params) {
       />
       {employee.role === "lead_sourcer" ? (
         <LeadSourcerHome employeeId={employee.id} />
+      ) : employee.role === "sales_representative" ? (
+        <SalesRepresentativeHome employeeId={employee.id} />
       ) : (
         accountManagerContent
       )}

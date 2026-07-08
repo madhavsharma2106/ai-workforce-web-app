@@ -5,6 +5,7 @@ import type { EmployeeRole } from "@/lib/employees";
 const ROLE_FILES: Record<EmployeeRole, string> = {
   account_manager: "account-manager.md",
   lead_sourcer: "lead-sourcer.md",
+  sales_representative: "sales-representative.md",
 };
 
 const cache = new Map<EmployeeRole, string>();

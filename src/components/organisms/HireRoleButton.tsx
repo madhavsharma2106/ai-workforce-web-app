@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
 import { Eyebrow, Text } from "@/components/atoms";
 import type { EmployeeRole } from "@/lib/employees";
 
@@ -10,10 +10,10 @@ type Props = {
   role: EmployeeRole;
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: ReactNode;
 };
 
-const HireRoleButton = ({ role, title, description, icon: Icon }: Props) => {
+const HireRoleButton = ({ role, title, description, icon }: Props) => {
   const router = useRouter();
   const [isHiring, setIsHiring] = useState(false);
 
@@ -40,7 +40,7 @@ const HireRoleButton = ({ role, title, description, icon: Icon }: Props) => {
       className="rounded-lg border border-gray-900 bg-gray-900 p-6 text-left text-white transition hover:bg-gray-700 disabled:opacity-60"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white/10">
-        <Icon size={20} className="text-white" />
+        {icon}
       </div>
       <Eyebrow tone="accent-faint" className="mt-4">
         {isHiring ? "Hiring…" : "Available now"}

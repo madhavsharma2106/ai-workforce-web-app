@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 export type DelegationRequest = {
-  to_role: "account_manager" | "lead_sourcer";
+  to_role: "account_manager" | "lead_sourcer" | "sales_representative";
   reason: string;
   context?: string;
 };
@@ -21,7 +21,7 @@ export function createDelegateToEmployeeTool(
       "Hand this off to another employee role when they are genuinely better positioned to continue it. Not for routine work you can do yourself.",
     inputSchema: z.object({
       to_role: z
-        .enum(["account_manager", "lead_sourcer"])
+        .enum(["account_manager", "lead_sourcer", "sales_representative"])
         .describe("The role to hand this off to."),
       reason: z
         .string()

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Input, Text, Textarea } from "@/components/atoms";
 import { BUSINESS_PROFILE_SECTIONS, parseProfileMarkdown } from "@/lib/businessProfile";
-import { ROLE_LABELS, type Employee } from "@/lib/employees";
+import { ROLE_LABELS, ROLE_TITLES, type Employee } from "@/lib/employees";
 
 type Field = {
   key: string;
@@ -69,13 +69,9 @@ const FIELDS: Field[] = [
   },
 ];
 
-const ROLE_TITLES: Record<Employee["role"], string> = {
-  account_manager: "Account Manager",
-  lead_sourcer: "Lead Sourcer",
-};
-
 const ROLE_BLURBS: Partial<Record<Employee["role"], string>> = {
   lead_sourcer: "every search and email draft",
+  sales_representative: "outreach context and case studies",
 };
 
 type Props = {

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import ConversationalForm, {
   ConversationalFormQuestion,
 } from "@/components/organisms/ConversationalForm";
-import type { EmployeeRole } from "@/lib/employees";
+import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 
 type Props = {
   employeeId: string;
@@ -76,16 +76,47 @@ const leadSourcerQuestions: ConversationalFormQuestion[] = [
   },
 ];
 
+// Placeholder only — Oliver will ask his own questions once his real
+// onboarding content is designed.
+const salesRepresentativeQuestions: ConversationalFormQuestion[] = [
+  {
+    key: "notes",
+    prompt:
+      "Hi, I'm Oliver — I'll turn Emma's approved outreach into real conversations once that part of the product is built. Anything I should know before I start?",
+    placeholder: "Optional — anything you'd like me to know",
+    optional: true,
+  },
+];
+
+const ROLE_ONBOARDING: Record<
+  EmployeeRole,
+  {
+    questions: ConversationalFormQuestion[];
+    agentName: string;
+    confirmLabel: string;
+  }
+> = {
+  account_manager: {
+    questions: accountManagerQuestions,
+    agentName: ROLE_LABELS.account_manager,
+    confirmLabel: "Continue →",
+  },
+  lead_sourcer: {
+    questions: leadSourcerQuestions,
+    agentName: ROLE_LABELS.lead_sourcer,
+    confirmLabel: "Confirm hire →",
+  },
+  sales_representative: {
+    questions: salesRepresentativeQuestions,
+    agentName: ROLE_LABELS.sales_representative,
+    confirmLabel: "Confirm hire →",
+  },
+};
+
 const EmployeeOnboarding = ({ employeeId, role }: Props) => {
   const router = useRouter();
 
-  const questions =
-    role === "account_manager"
-      ? accountManagerQuestions
-      : leadSourcerQuestions;
-  const agentName = role === "account_manager" ? "Alex" : "Emma";
-  const confirmLabel =
-    role === "account_manager" ? "Continue →" : "Confirm hire →";
+  const { questions, agentName, confirmLabel } = ROLE_ONBOARDING[role];
 
   const handleComplete = async (answers: Record<string, string>) => {
     const response = await fetch(

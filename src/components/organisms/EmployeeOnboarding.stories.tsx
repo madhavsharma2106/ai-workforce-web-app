@@ -29,3 +29,7 @@ export const LeadSourcer: Story = {
 export const AccountManager: Story = {
   args: { role: "account_manager" },
 };
+
+export const SalesRepresentative: Story = {
+  args: { role: "sales_representative" },
+};

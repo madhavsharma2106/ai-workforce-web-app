@@ -1,6 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export type EmployeeRole = "account_manager" | "lead_sourcer";
+export type EmployeeRole =
+  | "account_manager"
+  | "lead_sourcer"
+  | "sales_representative";
 export type EmployeeStatus = "onboarding" | "active";
 
 export type Employee = {
@@ -14,6 +17,13 @@ export type Employee = {
 export const ROLE_LABELS: Record<EmployeeRole, string> = {
   account_manager: "Alex",
   lead_sourcer: "Emma",
+  sales_representative: "Oliver",
+};
+
+export const ROLE_TITLES: Record<EmployeeRole, string> = {
+  account_manager: "Account Manager",
+  lead_sourcer: "Lead Sourcer",
+  sales_representative: "Sales Representative",
 };
 
 export async function getAccountManager(

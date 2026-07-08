@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { FileSearch, Target, UserPlus } from "lucide-react";
+import { FileSearch, Target, UserPlus, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { listEmployees, ROLE_LABELS } from "@/lib/employees";
+import { listEmployees, ROLE_LABELS, ROLE_TITLES } from "@/lib/employees";
 import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
 import HireRoleButton from "@/components/organisms/HireRoleButton";
 
@@ -32,6 +32,9 @@ export default async function DashboardPage() {
 
   const employees = await listEmployees(supabase, user.id);
   const leadSourcer = employees.find((e) => e.role === "lead_sourcer");
+  const salesRepresentative = employees.find(
+    (e) => e.role === "sales_representative",
+  );
 
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-6 py-10">
@@ -55,9 +58,7 @@ export default async function DashboardPage() {
                         {ROLE_LABELS[employee.role]}
                       </Text>
                       <Text size="sm" tone="muted">
-                        {employee.role === "account_manager"
-                          ? "Account Manager"
-                          : "Lead Sourcer"}
+                        {ROLE_TITLES[employee.role]}
                       </Text>
                     </div>
                     <Badge
@@ -114,7 +115,37 @@ export default async function DashboardPage() {
               role="lead_sourcer"
               title="Lead Sourcer"
               description="Researches prospects and drafts personalized outreach emails for your approval."
-              icon={Target}
+              icon={<Target size={20} className="text-white" />}
+            />
+          )}
+
+          {salesRepresentative ? (
+            <Link
+              href={
+                salesRepresentative.status === "onboarding"
+                  ? `/employee/${salesRepresentative.id}/onboarding`
+                  : `/employee/${salesRepresentative.id}`
+              }
+            >
+              <Card padding="lg" className="h-full transition hover:border-gray-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--accent-soft)">
+                  <Users size={20} className="text-(--accent)" />
+                </div>
+                <Eyebrow className="mt-4">Hired</Eyebrow>
+                <Text size="lg" weight="semibold" className="mt-3">
+                  Sales Representative
+                </Text>
+                <Text size="sm" tone="muted" className="mt-1.5">
+                  Oliver is turning Emma&apos;s outreach into real conversations.
+                </Text>
+              </Card>
+            </Link>
+          ) : (
+            <HireRoleButton
+              role="sales_representative"
+              title="Sales Representative"
+              description="Sends approved outreach and drafts follow-ups — once Emma hands off qualified leads."
+              icon={<Users size={20} className="text-white" />}
             />
           )}
 
