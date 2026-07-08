@@ -1,24 +1,17 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { FileSearch, Target, UserPlus, Users } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Target, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { listEmployees, ROLE_LABELS, ROLE_TITLES } from "@/lib/employees";
-import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import {
+  Badge,
+  Card,
+  EmployeeAvatar,
+  Eyebrow,
+  Heading,
+  Text,
+} from "@/components/atoms";
 import HireRoleButton from "@/components/organisms/HireRoleButton";
-
-const COMING_SOON_ROLES: { title: string; description: string; icon: LucideIcon }[] = [
-  {
-    title: "Recruiter",
-    description: "Sources and screens candidates for roles you're hiring.",
-    icon: UserPlus,
-  },
-  {
-    title: "Research Analyst",
-    description: "Digs into markets, competitors, and companies you need briefed on.",
-    icon: FileSearch,
-  },
-];
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -40,7 +33,7 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-6xl space-y-12 px-6 py-10">
       <section className="space-y-4">
         <Heading as="h1" size="lg">
-          Your team
+          Welcome to your office.
         </Heading>
         <div className="grid gap-4 sm:grid-cols-2">
           {employees.map((employee) => {
@@ -97,7 +90,10 @@ export default async function DashboardPage() {
                   : `/employee/${leadSourcer.id}`
               }
             >
-              <Card padding="lg" className="h-full transition hover:border-gray-400">
+              <Card
+                padding="lg"
+                className="h-full transition hover:border-gray-400"
+              >
                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--accent-soft)">
                   <Target size={20} className="text-(--accent)" />
                 </div>
@@ -127,7 +123,10 @@ export default async function DashboardPage() {
                   : `/employee/${salesRepresentative.id}`
               }
             >
-              <Card padding="lg" className="h-full transition hover:border-gray-400">
+              <Card
+                padding="lg"
+                className="h-full transition hover:border-gray-400"
+              >
                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--accent-soft)">
                   <Users size={20} className="text-(--accent)" />
                 </div>
@@ -136,7 +135,8 @@ export default async function DashboardPage() {
                   Sales Representative
                 </Text>
                 <Text size="sm" tone="muted" className="mt-1.5">
-                  Oliver is turning Emma&apos;s outreach into real conversations.
+                  Oliver is turning Emma&apos;s outreach into real
+                  conversations.
                 </Text>
               </Card>
             </Link>
@@ -148,27 +148,6 @@ export default async function DashboardPage() {
               icon={<Users size={20} className="text-white" />}
             />
           )}
-
-          {COMING_SOON_ROLES.map(({ title, description, icon: Icon }) => (
-            <Card
-              key={title}
-              padding="lg"
-              className="cursor-not-allowed bg-gray-50 text-left opacity-60"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gray-200">
-                <Icon size={20} className="text-gray-500" />
-              </div>
-              <Eyebrow tone="muted" className="mt-4">
-                Coming soon
-              </Eyebrow>
-              <Text size="lg" weight="semibold" className="mt-3 text-gray-700!">
-                {title}
-              </Text>
-              <Text size="sm" tone="muted" className="mt-1.5">
-                {description}
-              </Text>
-            </Card>
-          ))}
         </div>
       </section>
     </div>
