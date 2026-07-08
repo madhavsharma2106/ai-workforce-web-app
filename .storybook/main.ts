@@ -12,6 +12,12 @@ const config: StorybookConfig = {
     const { mergeConfig } = await import("vite");
     return mergeConfig(viteConfig, {
       plugins: [tsconfigPaths(), tailwindcss()],
+      // next/link and next/navigation read `process.env.*` at module load
+      // time; Vite doesn't polyfill `process` in the browser like webpack
+      // does, so without this every story importing them throws.
+      define: {
+        "process.env": {},
+      },
     });
   },
 };
