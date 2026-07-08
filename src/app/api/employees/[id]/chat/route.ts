@@ -69,7 +69,21 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   const systemPrompt = await buildSystemPrompt({ supabase, userId: user.id, role: employee.role });
-  const agent = createEmployeeAgent({ systemPrompt, tools: {} });
+  const agent = createEmployeeAgent({
+    systemPrompt,
+    tools: {},
+    metadata: {
+      // thread_id (and session_id, alongside it) is LangSmith's convention for
+      // grouping a multi-turn conversation into one thread in its UI — without
+      // it, every turn's ToolLoopAgent call is its own unrelated root trace.
+      thread_id: conversation.id,
+      session_id: conversation.id,
+      conversationId: conversation.id,
+      employeeId: id,
+      role: employee.role,
+      userId: user.id,
+    },
+  });
 
   return createAgentUIStreamResponse({
     agent,

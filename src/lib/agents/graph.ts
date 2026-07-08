@@ -80,6 +80,7 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
     const agent = createEmployeeAgent({
       systemPrompt,
       tools,
+      metadata: { conversationKind: "delegation", role, runId, employeeId, userId: ctx.userId },
       onStepFinish: async (step) => {
         for (const call of step.toolCalls) {
           const input = (call as { input?: unknown }).input;
