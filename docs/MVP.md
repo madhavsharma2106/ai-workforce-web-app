@@ -8,9 +8,12 @@ Validate that business owners will trust an AI employee to generate outbound pip
 
 - Account Manager Employee
 - Lead Sourcer employee
+- Sales Representative employee
 - Daily execution of some employees
 - Lead research
 - Email drafting
+- Sending approved emails from the founder's Outlook account
+- Reply monitoring
 - Approval queue
 - Feedback learning
 

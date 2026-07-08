@@ -36,4 +36,4 @@ Inngest jobs run with no user session, so they use a service-role Supabase clien
 
 ## Current status
 
-This is platform infrastructure, not finished role behavior. The Account Manager has a real graph node; the Lead Sourcer node is a stub that proves handoff routing with no Apollo/lead logic behind it yet. Each role's actual tools, persistence, and UI land in that role's own follow-up pass — check `roles/<role>.md` for what a given role can actually do today versus what's planned.
+This is platform infrastructure, not finished role behavior. The Account Manager has a real graph node; the Lead Sourcer node is a stub that proves handoff routing with no Apollo/lead logic behind it yet. The Sales Representative (see [roles/sales-representative.md](../roles/sales-representative.md)) has no graph node, tools, or `EmployeeRole` entry yet — it's documented as the target MVP shape for Emma's handoff, not built. Each role's actual tools, persistence, and UI land in that role's own follow-up pass — check `roles/<role>.md` for what a given role can actually do today versus what's planned.

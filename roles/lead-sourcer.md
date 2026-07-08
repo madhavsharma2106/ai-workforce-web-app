@@ -45,7 +45,7 @@ MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). In practice: qualification
 - Research
 - Qualify
 - Draft
-- Wait for approval
+- Hand off qualified outreach to the Sales Representative (see [roles/sales-representative.md](../roles/sales-representative.md)), who prepares it for founder approval and sending
 
 ## Experience
 
@@ -58,4 +58,6 @@ MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). In practice: qualification
 (See [docs/ROLES.md](../docs/ROLES.md) for baseline rules every role follows.)
 
 - Send emails
+- Reply to prospects
+- Book meetings
 - Delete data

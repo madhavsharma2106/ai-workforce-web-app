@@ -23,6 +23,7 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 - A living Business Profile (ICP, positioning, tone, priorities, do's & don'ts)
 - Flags/questions back to the manager (client) when understanding is ambiguous or stale
+- Answers to ad hoc questions from Emma and Oliver (e.g. "is this company a good fit?", "which case study fits this email?") — future integration, not built yet; today only the Lead Sourcer's first run reads `profile_md` directly, there's no interactive Q&A path
 
 ## Integrations
 

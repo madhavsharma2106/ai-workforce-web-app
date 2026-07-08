@@ -36,7 +36,7 @@ Never say: **Agent, Prompt, Execution, Workflow, LLM, Reasoning, Trace.** These 
 
 ### Roles vs. Employees
 
-A **Role** defines the job (e.g. Lead Sourcer, Account Manager). An **Employee** is a specific instance of a role (e.g. Emma). You hire for a role, then a person fills it — mirroring real hiring.
+A **Role** defines the job (e.g. Lead Sourcer, Account Manager, Sales Representative). An **Employee** is a specific instance of a role (e.g. Emma, Oliver). You hire for a role, then a person fills it — mirroring real hiring.
 
 ## Voice — point of view
 
