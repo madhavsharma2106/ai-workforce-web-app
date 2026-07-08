@@ -1,6 +1,6 @@
 # Creating a Role
 
-A Role is a job definition (see [TERMINOLOGY.md](TERMINOLOGY.md): Role vs. Employee). Every Role lives at `roles/<role-name>.md` and follows the same template, so any employee's job is legible at a glance and the product can eventually treat hiring/routines generically instead of one-off per role.
+A Role is a job definition (see [UX.md](UX.md): Role vs. Employee). Every Role lives at `roles/<role-name>.md` and follows the same template, so any employee's job is legible at a glance and the product can eventually treat hiring/routines generically instead of one-off per role.
 
 ## Template
 
@@ -24,7 +24,7 @@ Use this exact section order — see [roles/lead-sourcer.md](../roles/lead-sourc
 
 ## What goes in each section
 
-- **Role** — the job title as it appears in the hiring flow. Plain, real-world job language (see [TERMINOLOGY.md](TERMINOLOGY.md)) — not "Agent" or "Bot."
+- **Role** — the job title as it appears in the hiring flow. Plain, real-world job language (see [UX.md](UX.md)) — not "Agent" or "Bot."
 - **Mission** — one sentence: what the role exists to accomplish, not what it does day to day.
 - **Success Metric** — one metric, ideally instrumentable. If you can't name a single number that tells you this role is working, it isn't scoped yet.
 - **Inputs** — what the role consumes: client-provided info, feedback, other roles' output, integrations. Mark anything not built yet as "future integration, not built yet" rather than omitting it.
@@ -51,7 +51,7 @@ A role's Do Not section should list only what's specific to it, on top of this b
 - [MVP.md](MVP.md) — is the role actually in scope, or does it belong in [IDEAS.md](IDEAS.md) under "Future Roles" for now?
 - [PRINCIPLES.md](PRINCIPLES.md) — does it own a goal (not a task list), with genuine autonomy and approval gated only on irreversible actions?
 - [QUALITY.md](QUALITY.md) — can you write a real, specific Quality Bar section? If you can't say what "good" looks like yet, the role isn't ready to build.
-- [TERMINOLOGY.md](TERMINOLOGY.md) — does the role's name and language fit "hiring a person," not "configuring an agent"?
+- [UX.md](UX.md) — does the role's name and language fit "hiring a person," not "configuring an agent"?
 
 ## Adding the role
 
