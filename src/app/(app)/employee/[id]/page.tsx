@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getEmployeeById, listEmployees, ROLE_LABELS } from "@/lib/employees";
+import { requireOwnedEmployee, listEmployees, ROLE_LABELS } from "@/lib/employees";
 import { Breadcrumb } from "@/components/atoms";
 import LeadSourcerHome from "@/components/organisms/LeadSourcerHome";
 import AccountManagerHome from "@/components/organisms/AccountManagerHome";
@@ -11,18 +11,7 @@ type Params = { params: Promise<{ id: string }> };
 export default async function EmployeeHomePage({ params }: Params) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/");
-  }
-
-  const employee = await getEmployeeById(supabase, id);
-  if (!employee || employee.user_id !== user.id) {
-    notFound();
-  }
+  const { user, employee } = await requireOwnedEmployee(supabase, id);
 
   if (employee.status === "onboarding") {
     redirect(`/employee/${id}/onboarding`);

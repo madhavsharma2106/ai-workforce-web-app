@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Target, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/auth";
 import { listEmployees, ROLE_LABELS, ROLE_TITLES } from "@/lib/employees";
 import {
   Badge,
@@ -15,13 +15,7 @@ import HireRoleButton from "@/components/organisms/HireRoleButton";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/");
-  }
+  const user = await requireUser(supabase);
 
   const employees = await listEmployees(supabase, user.id);
   const leadSourcer = employees.find((e) => e.role === "lead_sourcer");

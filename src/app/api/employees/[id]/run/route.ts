@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getEmployeeById } from "@/lib/employees";
+import { requireOwnedEmployeeForApi } from "@/lib/employees";
 import { inngest } from "@/lib/inngest/client";
 
 type Params = { params: Promise<{ id: string }> };
@@ -13,18 +13,9 @@ type Params = { params: Promise<{ id: string }> };
 export async function POST(request: Request, { params }: Params) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  const employee = await getEmployeeById(supabase, id);
-  if (!employee || employee.user_id !== user.id) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const result = await requireOwnedEmployeeForApi(supabase, id);
+  if (result instanceof NextResponse) return result;
+  const { user, employee } = result;
 
   const body = await request.json().catch(() => ({}));
   const message: string = body.message || "Give me a status update.";

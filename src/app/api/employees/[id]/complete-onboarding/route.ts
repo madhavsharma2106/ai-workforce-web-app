@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getEmployeeById, markEmployeeActive } from "@/lib/employees";
+import { markEmployeeActive, requireOwnedEmployeeForApi } from "@/lib/employees";
 import { buildFirstDay, searchLeadsForClient } from "@/lib/leadSearch";
 import { buildProfileMarkdown } from "@/lib/businessProfile";
 import {
@@ -13,18 +13,9 @@ type Params = { params: Promise<{ id: string }> };
 export async function POST(request: Request, { params }: Params) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  const employee = await getEmployeeById(supabase, id);
-  if (!employee || employee.user_id !== user.id) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const result = await requireOwnedEmployeeForApi(supabase, id);
+  if (result instanceof NextResponse) return result;
+  const { user, employee } = result;
 
   const body = await request.json();
   const answers: Record<string, string> = body.answers ?? {};

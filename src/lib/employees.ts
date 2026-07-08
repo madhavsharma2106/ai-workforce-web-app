@@ -1,4 +1,7 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { notFound } from "next/navigation";
+import { NextResponse } from "next/server";
+import { requireUser, requireUserForApi } from "@/lib/supabase/auth";
 
 export type EmployeeRole =
   | "account_manager"
@@ -51,6 +54,35 @@ export async function getEmployeeById(
     .maybeSingle();
 
   return data as Employee | null;
+}
+
+export async function requireOwnedEmployee(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<{ user: User; employee: Employee }> {
+  const user = await requireUser(supabase);
+
+  const employee = await getEmployeeById(supabase, id);
+  if (!employee || employee.user_id !== user.id) {
+    notFound();
+  }
+
+  return { user, employee };
+}
+
+export async function requireOwnedEmployeeForApi(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<{ user: User; employee: Employee } | NextResponse> {
+  const user = await requireUserForApi(supabase);
+  if (user instanceof NextResponse) return user;
+
+  const employee = await getEmployeeById(supabase, id);
+  if (!employee || employee.user_id !== user.id) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return { user, employee };
 }
 
 export async function listEmployees(
