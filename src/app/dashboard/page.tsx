@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BarChart3, Headset, Target } from "lucide-react";
+import { FileSearch, Target, UserPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { listEmployees, ROLE_LABELS } from "@/lib/employees";
@@ -10,14 +10,14 @@ import HireRoleButton from "@/components/organisms/HireRoleButton";
 
 const COMING_SOON_ROLES: { title: string; description: string; icon: LucideIcon }[] = [
   {
-    title: "Sales Ops Analyst",
-    description: "Keeps your pipeline data clean and flags deals that need attention.",
-    icon: BarChart3,
+    title: "Recruiter",
+    description: "Sources and screens candidates for roles you're hiring.",
+    icon: UserPlus,
   },
   {
-    title: "Customer Success Rep",
-    description: "Checks in with customers and drafts renewal and upsell outreach.",
-    icon: Headset,
+    title: "Research Analyst",
+    description: "Digs into markets, competitors, and companies you need briefed on.",
+    icon: FileSearch,
   },
 ];
 
