@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getEmployeeById } from "@/lib/employees";
-import { Card, Eyebrow, Heading, Text } from "@/components/atoms";
+import { getEmployeeById, listEmployees } from "@/lib/employees";
 import AppHeader from "@/components/organisms/AppHeader";
 import LeadSourcerHome from "@/components/organisms/LeadSourcerHome";
+import AccountManagerHome from "@/components/organisms/AccountManagerHome";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -27,6 +27,29 @@ export default async function EmployeeHomePage({ params }: Params) {
     redirect(`/employee/${id}/onboarding`);
   }
 
+  let accountManagerContent = null;
+  if (employee.role === "account_manager") {
+    const [{ data: profile }, otherEmployees] = await Promise.all([
+      supabase
+        .from("business_profiles")
+        .select("business_name, contact_name, profile_md, updated_at")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      listEmployees(supabase, user.id),
+    ]);
+
+    accountManagerContent = (
+      <AccountManagerHome
+        employeeId={employee.id}
+        businessName={profile?.business_name ?? null}
+        contactName={profile?.contact_name ?? null}
+        profileMd={profile?.profile_md ?? ""}
+        updatedAt={profile?.updated_at ?? null}
+        otherEmployees={otherEmployees.filter((e) => e.id !== employee.id)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <AppHeader />
@@ -34,16 +57,7 @@ export default async function EmployeeHomePage({ params }: Params) {
         {employee.role === "lead_sourcer" ? (
           <LeadSourcerHome employeeId={employee.id} />
         ) : (
-          <Card as="section" padding="lg">
-            <Eyebrow>Alex</Eyebrow>
-            <Heading as="h2" size="md" className="mt-1">
-              Maintaining your Business Profile
-            </Heading>
-            <Text size="sm" tone="muted" className="mt-2">
-              Nothing to review yet — Alex checks in as your business
-              changes.
-            </Text>
-          </Card>
+          accountManagerContent
         )}
       </div>
     </div>

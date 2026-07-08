@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getEmployeeById, markEmployeeActive } from "@/lib/employees";
 import { buildFirstDay, searchLeadsForClient } from "@/lib/leadSearch";
+import { buildProfileMarkdown } from "@/lib/businessProfile";
 import {
   ApolloConfigError,
   ApolloRequestError,
@@ -29,31 +30,7 @@ export async function POST(request: Request, { params }: Params) {
   const answers: Record<string, string> = body.answers ?? {};
 
   if (employee.role === "account_manager") {
-    const sections = [
-      "## Business",
-      answers.businessDescription || "(not provided)",
-      "",
-      "## Ideal client",
-      answers.idealClient || "(not provided)",
-      "",
-      "## Bad-fit criteria",
-      answers.badLeadCriteria || "(not provided)",
-      "",
-      "## Value proposition",
-      answers.valueProp || "(not provided)",
-      "",
-      "## Tone",
-      answers.tone || "(not provided)",
-    ];
-
-    if (answers.priorities) {
-      sections.push("", "## Current priorities", answers.priorities);
-    }
-    if (answers.dosDonts) {
-      sections.push("", "## Do's and don'ts", answers.dosDonts);
-    }
-
-    const profileMd = sections.join("\n");
+    const profileMd = buildProfileMarkdown(answers);
 
     await supabase.from("business_profiles").upsert({
       user_id: user.id,
