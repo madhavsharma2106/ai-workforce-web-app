@@ -3,8 +3,7 @@ import type { UIMessage } from "ai";
 import { createClient } from "@/lib/supabase/server";
 import { getEmployeeById, ROLE_LABELS } from "@/lib/employees";
 import { getOrCreateConversation, listMessages } from "@/lib/conversations";
-import { Eyebrow, Heading } from "@/components/atoms";
-import AppHeader from "@/components/organisms/AppHeader";
+import { Breadcrumb, Eyebrow, Heading } from "@/components/atoms";
 import TestChat from "@/components/organisms/TestChat";
 
 type Params = { params: Promise<{ id: string }> };
@@ -39,21 +38,25 @@ export default async function EmployeeChatPage({ params }: Params) {
   }));
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <AppHeader />
-      <div className="mx-auto max-w-2xl space-y-8 px-6 py-10">
-        <div>
-          <Eyebrow>Test chat</Eyebrow>
-          <Heading as="h1" size="lg" className="mt-1">
-            Chat with {ROLE_LABELS[employee.role]}
-          </Heading>
-        </div>
-        <TestChat
-          employeeId={employee.id}
-          employeeName={ROLE_LABELS[employee.role]}
-          initialMessages={initialMessages}
-        />
+    <div className="mx-auto max-w-2xl space-y-8 px-6 py-10">
+      <Breadcrumb
+        items={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: ROLE_LABELS[employee.role], href: `/employee/${employee.id}` },
+          { label: "Chat" },
+        ]}
+      />
+      <div>
+        <Eyebrow>Test chat</Eyebrow>
+        <Heading as="h1" size="lg" className="mt-1">
+          Chat with {ROLE_LABELS[employee.role]}
+        </Heading>
       </div>
+      <TestChat
+        employeeId={employee.id}
+        employeeName={ROLE_LABELS[employee.role]}
+        initialMessages={initialMessages}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ export { Button } from "./Button";
 export { Input, Textarea } from "./Input";
 export { Card } from "./Card";
 export { Badge } from "./Badge";
+export { Breadcrumb } from "./Breadcrumb";
 export { EmployeeAvatar } from "./EmployeeAvatar";
 export { Eyebrow } from "./Eyebrow";
 export { Heading } from "./Heading";

@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getEmployeeById, listEmployees } from "@/lib/employees";
-import AppHeader from "@/components/organisms/AppHeader";
+import { getEmployeeById, listEmployees, ROLE_LABELS } from "@/lib/employees";
+import { Breadcrumb } from "@/components/atoms";
 import LeadSourcerHome from "@/components/organisms/LeadSourcerHome";
 import AccountManagerHome from "@/components/organisms/AccountManagerHome";
 
@@ -51,15 +51,18 @@ export default async function EmployeeHomePage({ params }: Params) {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <AppHeader />
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        {employee.role === "lead_sourcer" ? (
-          <LeadSourcerHome employeeId={employee.id} />
-        ) : (
-          accountManagerContent
-        )}
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6 px-6 py-10">
+      <Breadcrumb
+        items={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: ROLE_LABELS[employee.role] },
+        ]}
+      />
+      {employee.role === "lead_sourcer" ? (
+        <LeadSourcerHome employeeId={employee.id} />
+      ) : (
+        accountManagerContent
+      )}
     </div>
   );
 }
