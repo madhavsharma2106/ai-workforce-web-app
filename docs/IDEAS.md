@@ -9,7 +9,7 @@ A parking lot for ideas. Keep them captured but out of scope for MVP.
 - Finance Assistant
 - Content Writer
 
-Recruiter and Research Analyst are already teased as "coming soon" cards in the dashboard's hire catalog (`src/app/dashboard/page.tsx`) — keep this list and that UI in sync if either changes.
+Recruiter and Research Analyst are already teased as "coming soon" cards in the dashboard's hire catalog (`src/app/(app)/dashboard/page.tsx`) — keep this list and that UI in sync if either changes.
 
 ## Future Features
 
