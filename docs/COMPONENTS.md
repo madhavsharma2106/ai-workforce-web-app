@@ -13,6 +13,8 @@ src/components/
 
 Pages under `src/app/` (the landing page, `/dashboard`, `/employee/[id]`, `/employee/[id]/onboarding`) compose organisms; organisms compose atoms/molecules. Import via the barrels: `@/components/atoms`, `@/components/molecules`, `@/components/organisms/<Name>` (organisms aren't barrel-exported from a single index — import each by name).
 
+Authenticated routes (`/dashboard`, `/employee/[id]` and its subroutes) live under the `src/app/(app)/` route group, which shares one `layout.tsx` — it does the signed-in check and renders `AppHeader` once, instead of every page importing it. The landing page and `/login` sit outside this group and render their own chrome (or none).
+
 ## Atoms (`src/components/atoms/`)
 
 | Component | Props | Notes |
@@ -25,6 +27,7 @@ Pages under `src/app/` (the landing page, `/dashboard`, `/employee/[id]`, `/empl
 | `Heading` | `as?: ElementType` (default `h2`), `size?: "xl" \| "lg" \| "md" \| "sm"` | `font-semibold tracking-tight text-gray-900` headings; pair `as="h1"` with `size="xl"` for page titles. |
 | `Text` | `as?: ElementType` (default `p`), `size?: "xs" \| "sm" \| "md" \| "lg" \| "xl"`, `tone?: "default" \| "muted" \| "subtle" \| "inverted"`, `weight?: "normal" \| "medium" \| "semibold"` | General body/paragraph text. |
 | `EmployeeAvatar` | `seed: string`, `size?: "sm" \| "md" \| "lg"` (32/40/48px) | Wraps `boring-avatars` (`variant="beam"`, `square`), seeded on `employee.id` for a deterministic, unique-per-employee avatar. Colors constrained to this app's grays + accent instead of the library's default palette — see `EmployeeAvatar.tsx`. |
+| `Breadcrumb` | `items: { label: string; href?: string }[]` | Crumbs without `href` render as the current (non-linked) page. Used on `/employee/[id]` and its `onboarding`/`chat` subroutes to orient the user back to `/dashboard`. |
 
 `cn(...)` (in `atoms/cn.ts`) is a tiny classname-joiner (`filter(Boolean).join(" ")`) — no `clsx`/`tailwind-merge` dependency.
 
@@ -51,11 +54,13 @@ Tailwind's generated CSS order isn't guaranteed to follow JSX `className` order,
 - **New molecule**: only when 2+ real call sites compose the *same* atoms in the *same* shape.
 ## Storybook
 
-Set up to view components in isolation, starting with `ConversationalForm` (the generic chat shell behind Emma's hire flow and, soon, Account Manager onboarding).
+Every component in `atoms/` and `organisms/` has a story (a deliberate one-time full backfill — the general rule below still governs new components going forward).
 
 - Run with `npm run storybook` (serves on `http://localhost:6006`); `npm run build-storybook` produces a static build.
 - Requires Node 22.14+ (this repo's `engines` requirement) — the `oxc-parser` native binding Storybook depends on fails to load under older Node (e.g. 20.x) with a misleading "Cannot find native binding" error. If your shell defaults to an older Node via `nvm`, run `nvm use 22.14.0` first.
-- Config lives in `.storybook/` (`main.ts`, `preview.ts`). Uses `@storybook/react-vite`, not `@storybook/nextjs` — nothing under `src/components` depends on Next-specific APIs (`next/image`, `next/link`, routing, server components), so the lighter Vite builder avoids depending on this repo's modified Next.js internals (see root `AGENTS.md`). Revisit if a component that genuinely needs Next's runtime gets a story.
+- Config lives in `.storybook/` (`main.ts`, `preview.ts`). Uses `@storybook/react-vite`, not `@storybook/nextjs`, to avoid depending on this repo's modified Next.js internals (see root `AGENTS.md`) — but several organisms (`AppHeader`, `HireRoleButton`, `EmployeeOnboarding`) do call `useRouter()` from `next/navigation`, and others (`AccountManagerHome`, `Breadcrumb`) use `next/link`. Two workarounds in `main.ts` make that work under Vite:
+  - `next/link` and `next/navigation` read `process.env.*` at module load; Vite doesn't polyfill a `process` global like webpack does, so `viteFinal` sets `define: { "process.env": {} }`.
+  - `useRouter()` throws if no `AppRouterContext` is mounted. `.storybook/decorators.tsx` exports `withAppRouterMock`, a decorator that provides a stub router (`push`/`replace`/`refresh`/`back`/`forward`/`prefetch` as no-ops) — apply it to any story whose component calls `useRouter()`.
 - Tailwind v4 is wired in via `@tailwindcss/vite`, importing the same `src/app/globals.css` the app uses, so stories share the real design tokens. Path aliases (`@/*`) are resolved via `vite-tsconfig-paths`.
 - Story files live next to their component (`Component.stories.tsx`), matching the `stories` glob in `.storybook/main.ts`.
-- **Extending this**: only write a story for a component once there's a real reason to view it in isolation (a second consumer, a design review, a hard-to-reach state) — don't backfill stories for every atom/molecule just because Storybook now exists.
+- **Extending this**: for a genuinely new component, only write a story once there's a real reason to view it in isolation (a second consumer, a design review, a hard-to-reach state) — don't reflexively add one just because Storybook exists. The full backfill above was a one-time exception, not a standing requirement to keep 100% coverage.
