@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Badge, Button, Card, Eyebrow, Heading, Input, Text, Textarea } from "@/components/atoms";
+import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Input, Text, Textarea } from "@/components/atoms";
 import { BUSINESS_PROFILE_SECTIONS, parseProfileMarkdown } from "@/lib/businessProfile";
 import { ROLE_LABELS, type Employee } from "@/lib/employees";
 
@@ -168,9 +168,7 @@ const AccountManagerHome = ({
       <Card as="section" padding="lg">
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gray-900 text-lg font-medium text-white">
-              A
-            </div>
+            <EmployeeAvatar seed={employeeId} size="lg" />
             <div>
               <Eyebrow>Active employee</Eyebrow>
               <Heading as="h2" size="md" className="mt-1">
@@ -318,9 +316,7 @@ const AccountManagerHome = ({
           <div className="space-y-3">
             {otherEmployees.map((employee) => (
               <div key={employee.id} className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gray-900 text-xs font-medium text-white">
-                  {ROLE_LABELS[employee.role][0]}
-                </div>
+                <EmployeeAvatar seed={employee.id} size="sm" className="shrink-0" />
                 <Text size="sm">
                   I make sure{" "}
                   <span className="font-medium">

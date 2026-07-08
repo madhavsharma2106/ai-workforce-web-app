@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { listEmployees, ROLE_LABELS } from "@/lib/employees";
-import { Badge, Card, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
 import AppHeader from "@/components/organisms/AppHeader";
 import HireRoleButton from "@/components/organisms/HireRoleButton";
 
@@ -40,9 +40,7 @@ export default async function DashboardPage() {
                     className="transition hover:border-gray-400"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gray-900 text-sm font-medium text-white">
-                        {ROLE_LABELS[employee.role][0]}
-                      </div>
+                      <EmployeeAvatar seed={employee.id} size="md" />
                       <div>
                         <Text size="md" weight="semibold">
                           {ROLE_LABELS[employee.role]}

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import LeadCard from "@/components/organisms/LeadCard";
 import type { Day } from "@/lib/types";
-import { Badge, Button, Card, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
 
 const defaultBadLeadCriteria =
   "companies that already have strong video case studies, agencies, or consumer brands";
@@ -139,9 +139,7 @@ const LeadSourcerHome = ({ employeeId }: Props) => {
       <Card as="section" padding="lg">
         <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gray-900 text-lg font-medium text-white">
-              E
-            </div>
+            <EmployeeAvatar seed={employeeId} size="lg" />
             <div>
               <Eyebrow>
                 Active employee · Day {day.id} · {day.dateLabel}
