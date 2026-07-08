@@ -24,6 +24,7 @@ Pages under `src/app/` (the landing page, `/dashboard`, `/employee/[id]`, `/empl
 | `Eyebrow` | `tone?: "accent" \| "accent-faint" \| "muted"`, `tracking?: "wide" \| "widest"` | The small-caps kicker/label pattern from [DESIGN.md](DESIGN.md). |
 | `Heading` | `as?: ElementType` (default `h2`), `size?: "xl" \| "lg" \| "md" \| "sm"` | `font-semibold tracking-tight text-gray-900` headings; pair `as="h1"` with `size="xl"` for page titles. |
 | `Text` | `as?: ElementType` (default `p`), `size?: "xs" \| "sm" \| "md" \| "lg" \| "xl"`, `tone?: "default" \| "muted" \| "subtle" \| "inverted"`, `weight?: "normal" \| "medium" \| "semibold"` | General body/paragraph text. |
+| `EmployeeAvatar` | `seed: string`, `size?: "sm" \| "md" \| "lg"` (32/40/48px) | Wraps `boring-avatars` (`variant="beam"`, `square`), seeded on `employee.id` for a deterministic, unique-per-employee avatar. Colors constrained to this app's grays + accent instead of the library's default palette — see `EmployeeAvatar.tsx`. |
 
 `cn(...)` (in `atoms/cn.ts`) is a tiny classname-joiner (`filter(Boolean).join(" ")`) — no `clsx`/`tailwind-merge` dependency.
 
