@@ -29,16 +29,35 @@ export async function POST(request: Request, { params }: Params) {
   const answers: Record<string, string> = body.answers ?? {};
 
   if (employee.role === "account_manager") {
-    const profileMd = [
+    const sections = [
+      "## Business",
+      answers.businessDescription || "(not provided)",
+      "",
       "## Ideal client",
       answers.idealClient || "(not provided)",
       "",
       "## Bad-fit criteria",
       answers.badLeadCriteria || "(not provided)",
-    ].join("\n");
+      "",
+      "## Value proposition",
+      answers.valueProp || "(not provided)",
+      "",
+      "## Tone",
+      answers.tone || "(not provided)",
+    ];
+
+    if (answers.priorities) {
+      sections.push("", "## Current priorities", answers.priorities);
+    }
+    if (answers.dosDonts) {
+      sections.push("", "## Do's and don'ts", answers.dosDonts);
+    }
+
+    const profileMd = sections.join("\n");
 
     await supabase.from("business_profiles").upsert({
       user_id: user.id,
+      business_name: answers.businessName || null,
       profile_md: profileMd,
       contact_name: answers.name || null,
       updated_at: new Date().toISOString(),

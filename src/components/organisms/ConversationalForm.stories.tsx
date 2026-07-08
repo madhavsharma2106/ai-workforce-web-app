@@ -59,19 +59,58 @@ export const EmmaOnboarding: Story = {
 
 export const AccountManagerOnboarding: Story = {
   args: {
-    agentName: "Account Manager",
+    agentName: "Alex",
     confirmLabel: "Continue →",
     questions: [
       {
-        key: "businessDescription",
+        key: "businessName",
         prompt:
-          "Hi, I'm your Account Manager — I'll make sure everyone you hire understands your business. What does your business do?",
+          "Hi, I'm Alex — I'll make sure everyone you hire understands your business. First: what's your business called?",
+        placeholder: "Your business name",
+      },
+      {
+        key: "businessDescription",
+        prompt: "And what does your business do?",
         placeholder: "e.g. We build custom video ads for B2B SaaS companies...",
       },
       {
         key: "idealClient",
-        prompt: "Who's your ideal client?",
+        prompt: "What does your ideal client look like?",
         placeholder: "e.g. Series A-C SaaS companies with a sales team...",
+      },
+      {
+        key: "badLeadCriteria",
+        prompt: "And what should we steer clear of — what's a bad-fit lead?",
+        placeholder: "e.g. Agencies, consumer brands, companies too small...",
+      },
+      {
+        key: "valueProp",
+        prompt: "Why do clients pick you over the alternative?",
+        placeholder: "e.g. Faster turnaround, better creative, lower cost...",
+      },
+      {
+        key: "tone",
+        prompt: "What tone should we use when reaching out on your behalf?",
+        placeholder: "Formal, casual, direct...",
+        chips: ["Formal", "Casual & friendly", "Direct, no-fluff"],
+      },
+      {
+        key: "priorities",
+        prompt: "Anything specific you're focused on right now?",
+        placeholder: "Optional — a segment, campaign, or push this quarter",
+        optional: true,
+      },
+      {
+        key: "dosDonts",
+        prompt: "Anything we should never say or do in outreach?",
+        placeholder: "Optional — e.g. never mention pricing, avoid competitor X",
+        optional: true,
+      },
+      {
+        key: "name",
+        prompt: "Last thing — what should I call you?",
+        placeholder: "Your name (optional)",
+        optional: true,
       },
     ],
   },
