@@ -1,8 +1,14 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Target, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/supabase/auth";
-import { listEmployees, ROLE_LABELS, ROLE_TITLES } from "@/lib/employees";
+import {
+  createEmployee,
+  listEmployees,
+  ROLE_LABELS,
+  ROLE_TITLES,
+} from "@/lib/employees";
 import {
   Badge,
   Card,
@@ -18,6 +24,12 @@ export default async function DashboardPage() {
   const user = await requireUser(supabase);
 
   const employees = await listEmployees(supabase, user.id);
+  const accountManager = employees.find((e) => e.role === "account_manager");
+  if (!accountManager) {
+    const employee = await createEmployee(supabase, user.id, "account_manager");
+    redirect(`/employee/${employee.id}/onboarding`);
+  }
+
   const leadSourcer = employees.find((e) => e.role === "lead_sourcer");
   const salesRepresentative = employees.find(
     (e) => e.role === "sales_representative",

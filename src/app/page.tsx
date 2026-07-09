@@ -1,28 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { createEmployee, getAccountManager } from "@/lib/employees";
 import { Eyebrow, Heading, Text } from "@/components/atoms";
 
-export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    const accountManager = await getAccountManager(supabase, user.id);
-    if (!accountManager) {
-      const employee = await createEmployee(
-        supabase,
-        user.id,
-        "account_manager",
-      );
-      redirect(`/employee/${employee.id}/onboarding`);
-    }
-    redirect("/dashboard");
-  }
-
+export default function Home() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <div className="mx-auto max-w-6xl px-6 py-10">
