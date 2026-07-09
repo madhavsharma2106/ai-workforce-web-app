@@ -1,16 +1,24 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { buildProfileMarkdown } from "@/lib/businessProfile";
 import type { Employee } from "@/lib/employees";
 import AccountManagerHome from "./AccountManagerHome";
 
-const filledProfileMd = buildProfileMarkdown({
-  businessDescription: "We build custom video ads for B2B SaaS companies.",
-  idealClient: "Series A-C SaaS companies with a sales team of 5+.",
-  badLeadCriteria: "Agencies, consumer brands, companies too small to afford us.",
-  valueProp: "Faster turnaround and better creative than in-house teams.",
-  tone: "Direct, no-fluff",
-  priorities: "Push for Q3 renewals before the pricing change.",
-});
+const filledProfileMd = `## Business
+We build custom video ads for B2B SaaS companies.
+
+## Ideal client
+Series A-C SaaS companies with a sales team of 5+.
+
+## Bad-fit criteria
+Agencies, consumer brands, companies too small to afford us.
+
+## Value proposition
+Faster turnaround and better creative than in-house teams.
+
+## Tone
+Direct, no-fluff.
+
+## Current priorities
+Push for Q3 renewals before the pricing change.`;
 
 const otherEmployees: Employee[] = [
   {

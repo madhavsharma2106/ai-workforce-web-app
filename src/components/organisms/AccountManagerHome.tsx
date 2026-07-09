@@ -3,71 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Input, Text, Textarea } from "@/components/atoms";
-import { BUSINESS_PROFILE_SECTIONS, parseProfileMarkdown } from "@/lib/businessProfile";
 import { ROLE_LABELS, ROLE_TITLES, type Employee } from "@/lib/employees";
 
-type Field = {
-  key: string;
-  label: string;
-  placeholder: string;
-  optional?: boolean;
-  chips?: string[];
-  multiline?: boolean;
+type Profile = {
+  businessName: string;
+  contactName: string;
+  profileMd: string;
 };
-
-const FIELDS: Field[] = [
-  { key: "businessName", label: "Business name", placeholder: "Your business name" },
-  {
-    key: "businessDescription",
-    label: "What your business does",
-    placeholder: "e.g. We build custom video ads for B2B SaaS companies...",
-    multiline: true,
-  },
-  {
-    key: "idealClient",
-    label: "Ideal client",
-    placeholder: "e.g. Series A-C SaaS companies with a sales team...",
-    multiline: true,
-  },
-  {
-    key: "badLeadCriteria",
-    label: "Bad-fit criteria",
-    placeholder: "e.g. Agencies, consumer brands, companies too small...",
-    multiline: true,
-  },
-  {
-    key: "valueProp",
-    label: "Value proposition",
-    placeholder: "e.g. Faster turnaround, better creative, lower cost...",
-    multiline: true,
-  },
-  {
-    key: "tone",
-    label: "Tone",
-    placeholder: "Formal, casual, direct...",
-    chips: ["Formal", "Casual & friendly", "Direct, no-fluff"],
-  },
-  {
-    key: "priorities",
-    label: "Current priorities",
-    placeholder: "Optional — a segment, campaign, or push this quarter",
-    optional: true,
-    multiline: true,
-  },
-  {
-    key: "dosDonts",
-    label: "Do's and don'ts",
-    placeholder: "Optional — e.g. never mention pricing, avoid competitor X",
-    optional: true,
-    multiline: true,
-  },
-  {
-    key: "name",
-    label: "Your name",
-    placeholder: "Optional",
-    optional: true,
-  },
-];
 
 const ROLE_BLURBS: Partial<Record<Employee["role"], string>> = {
   lead_sourcer: "every search and email draft",
@@ -83,16 +25,6 @@ type Props = {
   otherEmployees: Employee[];
 };
 
-const buildAnswers = (
-  businessName: string | null,
-  contactName: string | null,
-  profileMd: string,
-): Record<string, string> => ({
-  businessName: businessName ?? "",
-  name: contactName ?? "",
-  ...parseProfileMarkdown(profileMd),
-});
-
 const AccountManagerHome = ({
   employeeId,
   businessName,
@@ -101,17 +33,19 @@ const AccountManagerHome = ({
   updatedAt,
   otherEmployees,
 }: Props) => {
-  const [answers, setAnswers] = useState(() =>
-    buildAnswers(businessName, contactName, profileMd),
-  );
+  const [profile, setProfile] = useState<Profile>({
+    businessName: businessName ?? "",
+    contactName: contactName ?? "",
+    profileMd,
+  });
   const [savedAt, setSavedAt] = useState(updatedAt);
   const [mode, setMode] = useState<"view" | "edit">("view");
-  const [draft, setDraft] = useState(answers);
+  const [draft, setDraft] = useState(profile);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const startEdit = () => {
-    setDraft(answers);
+    setDraft(profile);
     setError(null);
     setMode("edit");
   };
@@ -125,19 +59,17 @@ const AccountManagerHome = ({
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers: draft }),
+          body: JSON.stringify(draft),
         },
       );
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Failed to save.");
 
-      setAnswers(
-        buildAnswers(
-          data.profile.business_name,
-          data.profile.contact_name,
-          data.profile.profile_md,
-        ),
-      );
+      setProfile({
+        businessName: data.profile.business_name ?? "",
+        contactName: data.profile.contact_name ?? "",
+        profileMd: data.profile.profile_md ?? "",
+      });
       setSavedAt(data.profile.updated_at);
       setMode("view");
     } catch (err) {
@@ -155,10 +87,6 @@ const AccountManagerHome = ({
       })
     : null;
 
-  const filledSections = BUSINESS_PROFILE_SECTIONS.filter(
-    (section) => answers[section.key],
-  ).length;
-
   return (
     <main className="space-y-10">
       <Card as="section" padding="lg">
@@ -171,7 +99,7 @@ const AccountManagerHome = ({
                 Hi, I&apos;m Alex
               </Heading>
               <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-                I keep {answers.businessName ? `${answers.businessName}'s` : "your"}{" "}
+                I keep {profile.businessName ? `${profile.businessName}'s` : "your"}{" "}
                 Business Profile current so everyone you hire understands your
                 business without asking you the basics twice.
               </Text>
@@ -182,13 +110,9 @@ const AccountManagerHome = ({
           </Badge>
         </div>
 
-        <div className="mt-8 grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-3">
+        <div className="mt-8 grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-2">
           {[
             { label: "Supporting", value: `${otherEmployees.length} employee${otherEmployees.length === 1 ? "" : "s"}` },
-            {
-              label: "Profile completeness",
-              value: `${filledSections}/${BUSINESS_PROFILE_SECTIONS.length} sections`,
-            },
             { label: "Updated", value: updatedLabel ?? "Never" },
           ].map((stat) => (
             <div key={stat.label} className="bg-white p-5">
@@ -219,70 +143,85 @@ const AccountManagerHome = ({
         </div>
 
         {mode === "view" ? (
-          <div className="grid gap-5 sm:grid-cols-2">
-            {FIELDS.filter((field) => !field.optional || answers[field.key]).map(
-              (field) => (
-                <div key={field.key}>
-                  <Text size="xs" tone="muted" weight="medium">
-                    {field.label}
-                  </Text>
-                  <Text size="sm" className="mt-1 whitespace-pre-wrap">
-                    {answers[field.key] || "(not provided)"}
-                  </Text>
-                </div>
-              ),
-            )}
+          <div className="space-y-5">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <Text size="xs" tone="muted" weight="medium">
+                  Business name
+                </Text>
+                <Text size="sm" className="mt-1">
+                  {profile.businessName || "(not provided)"}
+                </Text>
+              </div>
+              <div>
+                <Text size="xs" tone="muted" weight="medium">
+                  Your name
+                </Text>
+                <Text size="sm" className="mt-1">
+                  {profile.contactName || "(not provided)"}
+                </Text>
+              </div>
+            </div>
+            <div>
+              <Text size="xs" tone="muted" weight="medium">
+                Profile
+              </Text>
+              <Text size="sm" className="mt-1 whitespace-pre-wrap">
+                {profile.profileMd || "(not provided)"}
+              </Text>
+            </div>
           </div>
         ) : (
           <div className="space-y-5">
-            {FIELDS.map((field) => (
-              <div key={field.key}>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
                 <Text size="xs" tone="muted" weight="medium" className="mb-1.5">
-                  {field.label}
+                  Business name
                 </Text>
-                {field.chips && (
-                  <div className="mb-1.5 flex flex-wrap gap-1.5">
-                    {field.chips.map((chip) => (
-                      <button
-                        key={chip}
-                        type="button"
-                        onClick={() =>
-                          setDraft((current) => ({ ...current, [field.key]: chip }))
-                        }
-                        className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-gray-600 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
-                      >
-                        {chip}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {field.multiline ? (
-                  <Textarea
-                    value={draft[field.key] || ""}
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        [field.key]: event.target.value,
-                      }))
-                    }
-                    placeholder={field.placeholder}
-                    rows={2}
-                    className="resize-none"
-                  />
-                ) : (
-                  <Input
-                    value={draft[field.key] || ""}
-                    onChange={(event) =>
-                      setDraft((current) => ({
-                        ...current,
-                        [field.key]: event.target.value,
-                      }))
-                    }
-                    placeholder={field.placeholder}
-                  />
-                )}
+                <Input
+                  value={draft.businessName}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      businessName: event.target.value,
+                    }))
+                  }
+                  placeholder="Your business name"
+                />
               </div>
-            ))}
+              <div>
+                <Text size="xs" tone="muted" weight="medium" className="mb-1.5">
+                  Your name
+                </Text>
+                <Input
+                  value={draft.contactName}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      contactName: event.target.value,
+                    }))
+                  }
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+            <div>
+              <Text size="xs" tone="muted" weight="medium" className="mb-1.5">
+                Profile
+              </Text>
+              <Textarea
+                value={draft.profileMd}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    profileMd: event.target.value,
+                  }))
+                }
+                placeholder="What your business does, who your ideal client is, what a bad-fit lead looks like, your value prop, tone..."
+                rows={14}
+                className="resize-none"
+              />
+            </div>
 
             {error && (
               <Text size="sm" className="text-red-600">

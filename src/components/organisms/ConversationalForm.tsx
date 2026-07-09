@@ -2,20 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button, Card, Textarea } from "@/components/atoms";
+import type {
+  OnboardingQuestion,
+  OnboardingTranscriptEntry,
+  NextQuestionResult,
+} from "@/lib/onboardingQuestions";
 
-export type ConversationalFormQuestion = {
-  key: string;
-  prompt: string;
-  placeholder: string;
-  optional?: boolean;
-  chips?: string[];
-};
+export type {
+  OnboardingQuestion as ConversationalFormQuestion,
+  OnboardingTranscriptEntry as TranscriptEntry,
+  NextQuestionResult,
+} from "@/lib/onboardingQuestions";
 
 type Props = {
   agentName: string;
-  questions: ConversationalFormQuestion[];
   confirmLabel: string;
-  onComplete: (answers: Record<string, string>) => void;
+  fetchNextQuestion: (transcript: OnboardingTranscriptEntry[]) => Promise<NextQuestionResult>;
+  onComplete: (transcript: OnboardingTranscriptEntry[]) => void;
 };
 
 type Message = {
@@ -26,19 +29,56 @@ type Message = {
 
 const ConversationalForm = ({
   agentName,
-  questions,
   confirmLabel,
+  fetchNextQuestion,
   onComplete,
 }: Props) => {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: "q0", from: "agent", text: questions[0].prompt },
-  ]);
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [transcript, setTranscript] = useState<OnboardingTranscriptEntry[]>([]);
+  const [currentQuestion, setCurrentQuestion] =
+    useState<OnboardingQuestion | null>(null);
+  const [isComplete, setIsComplete] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isTyping, setIsTyping] = useState(true);
+  const [error, setError] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const messageIdRef = useRef(0);
+
+  const loadNext = async (nextTranscript: OnboardingTranscriptEntry[]) => {
+    setIsTyping(true);
+    setError(false);
+    try {
+      const result = await fetchNextQuestion(nextTranscript);
+      if (result.done) {
+        setCurrentQuestion(null);
+        setIsComplete(true);
+      } else {
+        setCurrentQuestion(result.question);
+        setMessages((current) => [
+          ...current,
+          {
+            id: `q${messageIdRef.current++}`,
+            from: "agent",
+            text: result.question.prompt,
+          },
+        ]);
+      }
+    } catch {
+      setError(true);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch the opening question once on mount — the resulting setState
+    // happens asynchronously after the LLM call resolves, not synchronously
+    // within the effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadNext([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -46,48 +86,32 @@ const ConversationalForm = ({
 
   useEffect(() => {
     if (!isTyping) inputRef.current?.focus();
-  }, [isTyping, questionIndex]);
-
-  const askNext = (nextIndex: number) => {
-    setIsTyping(true);
-    window.setTimeout(() => {
-      setIsTyping(false);
-      if (nextIndex < questions.length) {
-        setMessages((current) => [
-          ...current,
-          {
-            id: `q${nextIndex}`,
-            from: "agent",
-            text: questions[nextIndex].prompt,
-          },
-        ]);
-      }
-      setQuestionIndex(nextIndex);
-    }, 550);
-  };
+  }, [isTyping, currentQuestion]);
 
   const submitAnswer = (rawValue: string) => {
-    const question = questions[questionIndex];
-    if (!question) return;
+    if (!currentQuestion) return;
     const value = rawValue.trim();
-    if (!value && !question.optional) return;
+    if (!value && !currentQuestion.optional) return;
 
-    const updatedAnswers = { ...answers, [question.key]: value };
-    setAnswers(updatedAnswers);
+    const updatedTranscript = [
+      ...transcript,
+      { prompt: currentQuestion.prompt, answer: value },
+    ];
+    setTranscript(updatedTranscript);
     setMessages((current) => [
       ...current,
       {
-        id: `a${questionIndex}`,
+        id: `a${messageIdRef.current++}`,
         from: "user",
         text: value || "(skipped)",
       },
     ]);
     setInputValue("");
-    askNext(questionIndex + 1);
+    setCurrentQuestion(null);
+    void loadNext(updatedTranscript);
   };
 
-  const awaitingQuestion = questionIndex < questions.length;
-  const currentQuestion = questions[questionIndex];
+  const retry = () => void loadNext(transcript);
 
   return (
     <Card padding="none" className="flex h-full flex-col bg-white">
@@ -133,7 +157,18 @@ const ConversationalForm = ({
       </div>
 
       <div className="border-t border-gray-200 p-4">
-        {awaitingQuestion && !isTyping && (
+        {error && !isTyping && (
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-red-600">
+              Something went wrong on our end.
+            </p>
+            <Button variant="secondary" onClick={retry}>
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {!error && currentQuestion && !isTyping && (
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -180,13 +215,13 @@ const ConversationalForm = ({
           </form>
         )}
 
-        {!awaitingQuestion && !isTyping && (
+        {!error && isComplete && !isTyping && (
           <Button
             variant="accent"
             size="lg"
             fullWidth
             className="sm:w-auto"
-            onClick={() => onComplete(answers)}
+            onClick={() => onComplete(transcript)}
           >
             {confirmLabel}
           </Button>

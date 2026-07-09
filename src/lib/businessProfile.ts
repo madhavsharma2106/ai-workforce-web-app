@@ -1,50 +1,47 @@
-export type BusinessProfileSection = {
-  key: string;
-  header: string;
-  optional?: boolean;
-};
+import { z } from "zod";
+import { getModel } from "@/lib/agents/model";
+import { generateObject } from "@/lib/agents/tracing";
+import type { OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
 
-export const BUSINESS_PROFILE_SECTIONS: BusinessProfileSection[] = [
-  { key: "businessDescription", header: "Business" },
-  { key: "idealClient", header: "Ideal client" },
-  { key: "badLeadCriteria", header: "Bad-fit criteria" },
-  { key: "valueProp", header: "Value proposition" },
-  { key: "tone", header: "Tone" },
-  { key: "priorities", header: "Current priorities", optional: true },
-  { key: "dosDonts", header: "Do's and don'ts", optional: true },
-];
+const profileSchema = z.object({
+  businessName: z.string(),
+  contactName: z.string(),
+  profileMd: z.string(),
+});
 
-/** Builds the `business_profiles.profile_md` markdown from onboarding/edit answers. */
-export function buildProfileMarkdown(answers: Record<string, string>): string {
-  const blocks: string[] = [];
+const formatTranscript = (transcript: OnboardingTranscriptEntry[]): string =>
+  transcript
+    .map(
+      (entry, index) =>
+        `${index + 1}. Q: ${entry.prompt}\n   A: ${entry.answer || "(skipped)"}`,
+    )
+    .join("\n");
 
-  for (const section of BUSINESS_PROFILE_SECTIONS) {
-    const value = (answers[section.key] || "").trim();
-    if (section.optional && !value) continue;
-    blocks.push(`## ${section.header}\n${value || "(not provided)"}`);
-  }
+/**
+ * Synthesizes an onboarding conversation into a Business Profile other
+ * employees read as context. The write-up is organized however best fits
+ * what the client actually said — not a fixed template.
+ */
+export async function synthesizeBusinessProfile(input: {
+  transcript: OnboardingTranscriptEntry[];
+}): Promise<{ businessName: string; contactName: string; profileMd: string }> {
+  const { transcript } = input;
 
-  return blocks.join("\n\n");
-}
+  const prompt = `You just finished an onboarding conversation with a new client as Alex, their Account Manager. Turn it into a Business Profile other AI employees (a lead sourcer, a sales rep) will read as context before doing their jobs — it needs to be precise enough that they don't have to re-ask the client anything basic.
 
-/** Reverses `buildProfileMarkdown` — used to prefill the edit form and render the read view. */
-export function parseProfileMarkdown(profileMd: string): Record<string, string> {
-  const headerToKey = new Map(
-    BUSINESS_PROFILE_SECTIONS.map((section) => [section.header, section.key]),
-  );
-  const answers: Record<string, string> = {};
+Conversation:
+${formatTranscript(transcript)}
 
-  const parts = `\n${profileMd}`.split("\n## ").filter(Boolean);
-  for (const part of parts) {
-    const newlineIndex = part.indexOf("\n");
-    const header = (newlineIndex === -1 ? part : part.slice(0, newlineIndex)).trim();
-    const body = newlineIndex === -1 ? "" : part.slice(newlineIndex + 1).trim();
+Write:
+- "businessName": the business's name, or "" if it wasn't mentioned.
+- "contactName": the client's own name, or "" if it wasn't mentioned.
+- "profileMd": a well-organized markdown document covering everything relevant from the conversation (e.g. business description, ideal client, bad-fit criteria, value proposition, tone, priorities, do's/don'ts — plus anything else that came up), organized with "## Heading" sections however best fits what was actually said. Be concrete and specific, not generic.`;
 
-    const key = headerToKey.get(header);
-    if (!key) continue;
+  const { object } = await generateObject({
+    model: getModel(),
+    schema: profileSchema,
+    prompt,
+  });
 
-    answers[key] = body === "(not provided)" ? "" : body;
-  }
-
-  return answers;
+  return object;
 }

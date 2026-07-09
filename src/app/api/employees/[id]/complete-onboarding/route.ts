@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { markEmployeeActive, requireOwnedEmployeeForApi } from "@/lib/employees";
 import { buildFirstDay, searchLeadsForClient } from "@/lib/leadSearch";
-import { buildProfileMarkdown } from "@/lib/businessProfile";
+import { synthesizeBusinessProfile } from "@/lib/businessProfile";
+import type { OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
 import {
   ApolloConfigError,
   ApolloRequestError,
@@ -18,16 +19,24 @@ export async function POST(request: Request, { params }: Params) {
   const { user, employee } = result;
 
   const body = await request.json();
-  const answers: Record<string, string> = body.answers ?? {};
+  const transcript: OnboardingTranscriptEntry[] = body.transcript ?? [];
 
   if (employee.role === "account_manager") {
-    const profileMd = buildProfileMarkdown(answers);
+    let profile;
+    try {
+      profile = await synthesizeBusinessProfile({ transcript });
+    } catch {
+      return NextResponse.json(
+        { error: "Couldn't save your Business Profile — try again." },
+        { status: 500 },
+      );
+    }
 
     await supabase.from("business_profiles").upsert({
       user_id: user.id,
-      business_name: answers.businessName || null,
-      profile_md: profileMd,
-      contact_name: answers.name || null,
+      business_name: profile.businessName || null,
+      profile_md: profile.profileMd,
+      contact_name: profile.contactName || null,
       updated_at: new Date().toISOString(),
     });
 

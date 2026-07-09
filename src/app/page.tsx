@@ -47,30 +47,6 @@ export default async function Home() {
               </div>
             </div>
           </section>
-
-          <section className="grid gap-px overflow-hidden rounded-lg border border-gray-200 bg-gray-200 md:grid-cols-3">
-            {[
-              {
-                label: "Meet Emma",
-                desc: "Lead Sourcer focused on finding fast-fit opportunities.",
-              },
-              {
-                label: "Daily Reports",
-                desc: "See what she found, learned, and recommends.",
-              },
-              {
-                label: "Approval Queue",
-                desc: "Review leads before Emma sends any outreach.",
-              },
-            ].map((feature) => (
-              <article key={feature.label} className="bg-white p-8">
-                <Eyebrow>{feature.label}</Eyebrow>
-                <Text size="md" weight="medium" className="mt-3">
-                  {feature.desc}
-                </Text>
-              </article>
-            ))}
-          </section>
         </main>
       </div>
     </div>

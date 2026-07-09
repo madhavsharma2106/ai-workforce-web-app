@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnedEmployeeForApi } from "@/lib/employees";
-import { buildProfileMarkdown } from "@/lib/businessProfile";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -16,16 +15,17 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   const body = await request.json();
-  const answers: Record<string, string> = body.answers ?? {};
-  const profileMd = buildProfileMarkdown(answers);
+  const businessName: string = body.businessName ?? "";
+  const contactName: string = body.contactName ?? "";
+  const profileMd: string = body.profileMd ?? "";
 
   const { data: profile, error } = await supabase
     .from("business_profiles")
     .upsert({
       user_id: user.id,
-      business_name: answers.businessName || null,
+      business_name: businessName || null,
       profile_md: profileMd,
-      contact_name: answers.name || null,
+      contact_name: contactName || null,
       updated_at: new Date().toISOString(),
     })
     .select("business_name, profile_md, contact_name, updated_at")
