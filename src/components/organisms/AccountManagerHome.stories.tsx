@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import type { Employee } from "@/lib/employees";
 import AccountManagerHome from "./AccountManagerHome";
 
 const filledProfileMd = `## Business
@@ -19,16 +18,6 @@ Direct, no-fluff.
 
 ## Current priorities
 Push for Q3 renewals before the pricing change.`;
-
-const otherEmployees: Employee[] = [
-  {
-    id: "emp-emma",
-    user_id: "story-user",
-    role: "lead_sourcer",
-    status: "active",
-    created_at: new Date().toISOString(),
-  },
-];
 
 const meta = {
   title: "Organisms/AccountManagerHome",
@@ -55,7 +44,6 @@ export const Default: Story = {
     contactName: "Jordan Reyes",
     profileMd: filledProfileMd,
     updatedAt: new Date().toISOString(),
-    otherEmployees,
   },
 };
 
@@ -65,6 +53,5 @@ export const Empty: Story = {
     contactName: null,
     profileMd: "",
     updatedAt: null,
-    otherEmployees: [],
   },
 };

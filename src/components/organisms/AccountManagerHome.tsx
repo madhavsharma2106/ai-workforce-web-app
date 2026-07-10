@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import {
-  Badge,
   Button,
   Card,
   EmployeeAvatar,
@@ -13,17 +11,13 @@ import {
   Text,
   Textarea,
 } from "@/components/atoms";
-import { ROLE_LABELS, ROLE_TITLES, type Employee } from "@/lib/employees";
+import { Markdown } from "@/components/molecules";
+import { ROLE_TITLES } from "@/lib/employees";
 
 type Profile = {
   businessName: string;
   contactName: string;
   profileMd: string;
-};
-
-const ROLE_BLURBS: Partial<Record<Employee["role"], string>> = {
-  lead_sourcer: "every search and email draft",
-  sales_representative: "outreach context and case studies",
 };
 
 type Props = {
@@ -32,7 +26,6 @@ type Props = {
   contactName: string | null;
   profileMd: string;
   updatedAt: string | null;
-  otherEmployees: Employee[];
 };
 
 const AccountManagerHome = ({
@@ -41,7 +34,6 @@ const AccountManagerHome = ({
   contactName,
   profileMd,
   updatedAt,
-  otherEmployees,
 }: Props) => {
   const [profile, setProfile] = useState<Profile>({
     businessName: businessName ?? "",
@@ -100,44 +92,23 @@ const AccountManagerHome = ({
   return (
     <main className="space-y-10">
       <Card as="section" padding="lg">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-4">
-            <EmployeeAvatar seed={employeeId} size="lg" />
-            <div>
-              <Eyebrow>Active employee</Eyebrow>
-              <Heading as="h2" size="md" className="mt-1">
-                Hi, I&apos;m Alex
-              </Heading>
-              <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-                I keep{" "}
-                {profile.businessName ? `${profile.businessName}'s` : "your"}{" "}
-                Business Profile current so everyone you hire understands your
-                business without asking you the basics twice.
-              </Text>
-            </div>
+        <div className="flex items-center gap-4">
+          <EmployeeAvatar seed={employeeId} size="lg" />
+          <div>
+            <Eyebrow>{ROLE_TITLES.account_manager}</Eyebrow>
+            <Heading as="h2" size="md" className="mt-1">
+              Hi, I&apos;m Alex
+            </Heading>
+            <Text size="sm" tone="muted" className="mt-2 max-w-xl">
+              I keep{" "}
+              {profile.businessName ? `${profile.businessName}'s` : "your"}{" "}
+              Business Profile current so everyone you hire understands your
+              business without asking you the basics twice.
+            </Text>
+            <Text size="xs" tone="muted" className="mt-3">
+              Updated {updatedLabel ?? "never"}
+            </Text>
           </div>
-          <Badge tone="accent" size="md">
-            Living profile
-          </Badge>
-        </div>
-
-        <div className="mt-8 grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-2">
-          {[
-            {
-              label: "Supporting",
-              value: `${otherEmployees.length} employee${otherEmployees.length === 1 ? "" : "s"}`,
-            },
-            { label: "Updated", value: updatedLabel ?? "Never" },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white p-5">
-              <Text size="xs" tone="muted" weight="medium">
-                {stat.label}
-              </Text>
-              <Text size="xl" weight="semibold" className="mt-2 font-mono">
-                {stat.value}
-              </Text>
-            </div>
-          ))}
         </div>
       </Card>
 
@@ -146,7 +117,7 @@ const AccountManagerHome = ({
           <div>
             <Eyebrow>Business Profile</Eyebrow>
             <Heading as="h3" size="md" className="mt-1">
-              What I know about your business
+              How I&apos;d describe your business
             </Heading>
           </div>
           {mode === "view" && (
@@ -178,11 +149,15 @@ const AccountManagerHome = ({
             </div>
             <div>
               <Text size="xs" tone="muted" weight="medium">
-                Profile
+                Description
               </Text>
-              <Text size="sm" className="mt-1 whitespace-pre-wrap">
-                {profile.profileMd || "(not provided)"}
-              </Text>
+              {profile.profileMd ? (
+                <Markdown content={profile.profileMd} />
+              ) : (
+                <Text size="sm" className="mt-1">
+                  (not provided)
+                </Text>
+              )}
             </div>
           </div>
         ) : (
@@ -221,7 +196,7 @@ const AccountManagerHome = ({
             </div>
             <div>
               <Text size="xs" tone="muted" weight="medium" className="mb-1.5">
-                Profile
+                Description
               </Text>
               <Textarea
                 value={draft.profileMd}
@@ -256,39 +231,6 @@ const AccountManagerHome = ({
               </Button>
             </div>
           </div>
-        )}
-      </Card>
-
-      <Card as="section" padding="lg" className="space-y-4">
-        <Eyebrow>Supporting</Eyebrow>
-        {otherEmployees.length > 0 ? (
-          <div className="space-y-3">
-            {otherEmployees.map((employee) => (
-              <div key={employee.id} className="flex items-start gap-3">
-                <EmployeeAvatar
-                  seed={employee.id}
-                  size="sm"
-                  className="shrink-0"
-                />
-                <Text size="sm">
-                  I make sure{" "}
-                  <span className="font-medium">
-                    {ROLE_LABELS[employee.role]} ({ROLE_TITLES[employee.role]})
-                  </span>{" "}
-                  has this for {ROLE_BLURBS[employee.role] ?? "day-to-day work"}
-                  .
-                </Text>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <Text size="sm" tone="muted">
-            I&apos;m not supporting anyone yet —{" "}
-            <Link href="/dashboard" className="text-gray-900 underline">
-              hire an employee from the dashboard
-            </Link>{" "}
-            to put this to work.
-          </Text>
         )}
       </Card>
     </main>

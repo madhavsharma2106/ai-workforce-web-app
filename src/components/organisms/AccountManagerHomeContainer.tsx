@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { listEmployees } from "@/lib/employees";
 import AccountManagerHome from "./AccountManagerHome";
 
 type Props = {
@@ -12,13 +11,12 @@ export default async function AccountManagerHomeContainer({
   userId,
 }: Props) {
   const supabase = await createClient();
-  const [{ data: profile }, otherEmployees] = await Promise.all([
+  const [{ data: profile }] = await Promise.all([
     supabase
       .from("business_profiles")
       .select("business_name, contact_name, profile_md, updated_at")
       .eq("user_id", userId)
       .maybeSingle(),
-    listEmployees(supabase, userId),
   ]);
 
   return (
@@ -28,7 +26,6 @@ export default async function AccountManagerHomeContainer({
       contactName={profile?.contact_name ?? null}
       profileMd={profile?.profile_md ?? ""}
       updatedAt={profile?.updated_at ?? null}
-      otherEmployees={otherEmployees.filter((e) => e.id !== employeeId)}
     />
   );
 }

@@ -1,4 +1,5 @@
 import { Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import { ROLE_TITLES } from "@/lib/employees";
 
 type Props = {
   employeeId: string;
@@ -10,7 +11,7 @@ const SalesRepresentativeHome = ({ employeeId }: Props) => (
       <div className="flex items-center gap-4">
         <EmployeeAvatar seed={employeeId} size="lg" />
         <div>
-          <Eyebrow>Active employee</Eyebrow>
+          <Eyebrow>{ROLE_TITLES.sales_representative}</Eyebrow>
           <Heading as="h2" size="md" className="mt-1">
             Hi, I&apos;m Oliver
           </Heading>

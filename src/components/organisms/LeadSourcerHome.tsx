@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import LeadCard from "@/components/organisms/LeadCard";
 import type { Day } from "@/lib/types";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import { ROLE_TITLES } from "@/lib/employees";
 
 const defaultBadLeadCriteria =
   "companies that already have strong video case studies, agencies, or consumer brands";
@@ -142,7 +143,7 @@ const LeadSourcerHome = ({ employeeId }: Props) => {
             <EmployeeAvatar seed={employeeId} size="lg" />
             <div>
               <Eyebrow>
-                Active employee · Day {day.id} · {day.dateLabel}
+                {ROLE_TITLES.lead_sourcer} · Day {day.id} · {day.dateLabel}
               </Eyebrow>
               <Heading as="h2" size="md" className="mt-1">
                 Emma is working
