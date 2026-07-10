@@ -48,9 +48,6 @@ const EmployeeOnboarding = ({ employeeId, role }: Props) => {
     const data = await response.json();
     if (!response.ok) return;
 
-    if (data.day) {
-      sessionStorage.setItem(`day:${employeeId}`, JSON.stringify(data.day));
-    }
     router.push(data.redirectTo);
   };
 

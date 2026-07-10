@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnedEmployee, ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 import { Breadcrumb } from "@/components/atoms";
-import LeadSourcerHome from "@/components/organisms/LeadSourcerHome";
+import LeadSourcerHomeContainer from "@/components/organisms/LeadSourcerHomeContainer";
 import AccountManagerHomeContainer from "@/components/organisms/AccountManagerHomeContainer";
 import SalesRepresentativeHome from "@/components/organisms/SalesRepresentativeHome";
 
@@ -18,7 +18,7 @@ export default async function EmployeeHomePage({ params }: Params) {
   }
 
   const roleHome: Record<EmployeeRole, React.ReactNode> = {
-    lead_sourcer: <LeadSourcerHome employeeId={employee.id} />,
+    lead_sourcer: <LeadSourcerHomeContainer employeeId={employee.id} userId={user.id} />,
     sales_representative: <SalesRepresentativeHome employeeId={employee.id} />,
     account_manager: (
       <AccountManagerHomeContainer employeeId={employee.id} userId={user.id} />

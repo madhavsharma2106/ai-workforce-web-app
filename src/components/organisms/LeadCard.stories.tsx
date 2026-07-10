@@ -3,7 +3,7 @@ import type { Lead } from "@/lib/types";
 import LeadCard from "./LeadCard";
 
 const baseLead: Lead = {
-  id: 1,
+  id: "lead-1",
   company: "Northwind Robotics",
   website: "northwindrobotics.com",
   fit: "Series B SaaS company with a growing outbound sales team and no in-house video capability.",
@@ -12,6 +12,7 @@ const baseLead: Lead = {
   draft:
     "Hi Priya,\n\nI noticed Northwind Robotics has been scaling its outbound team...",
   sources: "LinkedIn, company blog, Crunchbase",
+  status: "pending",
 };
 
 const meta = {

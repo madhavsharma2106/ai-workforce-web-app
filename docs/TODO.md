@@ -1,0 +1,3 @@
+- Inital onboarding chat message is double
+- No message to user when something goes wrong
+- chat messages are not tied together in a thread

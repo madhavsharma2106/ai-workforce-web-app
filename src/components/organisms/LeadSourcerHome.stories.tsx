@@ -1,57 +1,61 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import type { Day } from "@/lib/types";
+import type { AgentRun, Lead } from "@/lib/types";
 import LeadSourcerHome from "./LeadSourcerHome";
 
 const employeeId = "story-lead-sourcer";
 
-const mockDay: Day = {
-  id: 4,
-  dateLabel: "Thursday, July 9",
-  researched: 32,
-  standup: "Focused on Series B-C SaaS teams that just posted SDR openings — a good signal they're ramping outbound and could use help with creative.",
-  learned: "Companies that mention \"in-house creative\" in job posts are worse fits — they've already solved this problem.",
-  leads: [
-    {
-      id: 1,
-      company: "Northwind Robotics",
-      website: "northwindrobotics.com",
-      fit: "Series B SaaS company with a growing outbound sales team and no in-house video capability.",
-      decisionMaker: "Priya Shah, VP Marketing",
-      email: "priya@northwindrobotics.com",
-      draft: "Hi Priya,\n\nI noticed Northwind Robotics has been scaling its outbound team...",
-      sources: "LinkedIn, company blog, Crunchbase",
-    },
-    {
-      id: 2,
-      company: "Fieldstack",
-      website: "fieldstack.io",
-      fit: "Recently raised a Series A, hiring 3 SDRs, no video presence on their site.",
-      decisionMaker: "Marcus Lee, Head of Growth",
-      email: "",
-      draft: "Hi Marcus,\n\nCongrats on the raise — saw Fieldstack is scaling the sales team...",
-      sources: "LinkedIn, Crunchbase",
-      personId: "person_fieldstack",
-      emailRevealed: false,
-    },
-    {
-      id: 3,
-      company: "Vantage Metrics",
-      website: "vantagemetrics.com",
-      fit: "Mature analytics platform, strong existing outbound motion.",
-      decisionMaker: "Dana Ruiz, VP Sales",
-      email: "dana@vantagemetrics.com",
-      draft: "Hi Dana,\n\nVantage Metrics' outbound content is already strong, but...",
-      sources: "LinkedIn, company blog",
-    },
-  ],
-  statuses: { 1: "pending", 2: "pending", 3: "rejected" },
-  drafts: {
-    1: "Hi Priya,\n\nI noticed Northwind Robotics has been scaling its outbound team...",
-    2: "Hi Marcus,\n\nCongrats on the raise — saw Fieldstack is scaling the sales team...",
-    3: "Hi Dana,\n\nVantage Metrics' outbound content is already strong, but...",
-  },
-  feedback: { 3: "Already contacted" },
+const mockRun: AgentRun = {
+  id: "run-1",
+  user_id: "user-1",
+  employee_id: employeeId,
+  trigger: "manual",
+  status: "completed",
+  summary:
+    "Focused on Series B-C SaaS teams that just posted SDR openings — a good signal they're ramping outbound and could use help with creative.",
+  job_id: null,
+  started_at: new Date().toISOString(),
+  completed_at: new Date().toISOString(),
+  created_at: new Date().toISOString(),
 };
+
+const mockLeads: Lead[] = [
+  {
+    id: "lead-1",
+    company: "Northwind Robotics",
+    website: "northwindrobotics.com",
+    fit: "Series B SaaS company with a growing outbound sales team and no in-house video capability.",
+    decisionMaker: "Priya Shah, VP Marketing",
+    email: "priya@northwindrobotics.com",
+    draft: "Hi Priya,\n\nI noticed Northwind Robotics has been scaling its outbound team...",
+    sources: "Apollo.io; company site",
+    status: "pending",
+  },
+  {
+    id: "lead-2",
+    company: "Fieldstack",
+    website: "fieldstack.io",
+    fit: "Recently raised a Series A, hiring 3 SDRs, no video presence on their site.",
+    decisionMaker: "Marcus Lee, Head of Growth",
+    email: "",
+    draft: "Hi Marcus,\n\nCongrats on the raise — saw Fieldstack is scaling the sales team...",
+    sources: "Apollo.io",
+    personId: "person_fieldstack",
+    emailRevealed: false,
+    status: "pending",
+  },
+  {
+    id: "lead-3",
+    company: "Vantage Metrics",
+    website: "vantagemetrics.com",
+    fit: "Mature analytics platform, strong existing outbound motion.",
+    decisionMaker: "Dana Ruiz, VP Sales",
+    email: "dana@vantagemetrics.com",
+    draft: "Hi Dana,\n\nVantage Metrics' outbound content is already strong, but...",
+    sources: "Apollo.io; company site",
+    status: "rejected",
+    feedbackReason: "Already contacted",
+  },
+];
 
 const meta = {
   title: "Organisms/LeadSourcerHome",
@@ -70,17 +74,28 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Populated: Story = {
-  args: { employeeId },
-  render: (args) => {
-    sessionStorage.setItem(`day:${args.employeeId}`, JSON.stringify(mockDay));
-    return <LeadSourcerHome {...args} />;
+  args: {
+    employeeId,
+    initialRun: mockRun,
+    initialLeads: mockLeads,
+    initialResearchedCount: 32,
+  },
+};
+
+export const Researching: Story = {
+  args: {
+    employeeId,
+    initialRun: { ...mockRun, status: "running", summary: null },
+    initialLeads: [],
+    initialResearchedCount: 0,
   },
 };
 
 export const Empty: Story = {
-  args: { employeeId: "story-lead-sourcer-empty" },
-  render: (args) => {
-    sessionStorage.removeItem(`day:${args.employeeId}`);
-    return <LeadSourcerHome {...args} />;
+  args: {
+    employeeId: "story-lead-sourcer-empty",
+    initialRun: null,
+    initialLeads: [],
+    initialResearchedCount: 0,
   },
 };

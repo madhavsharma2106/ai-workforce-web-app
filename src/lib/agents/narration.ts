@@ -19,6 +19,9 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
       return `Handing this off to ${name}.`;
     },
   },
+  save_lead: {
+    before: (input) => `Queuing ${input.company as string} for your review.`,
+  },
 };
 
 export function narrateBefore(toolName: string, input: Record<string, unknown>): string {

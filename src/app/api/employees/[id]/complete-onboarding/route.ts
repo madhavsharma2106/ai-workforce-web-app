@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { markEmployeeActive, requireOwnedEmployeeForApi } from "@/lib/employees";
-import { buildFirstDay, searchLeadsForClient } from "@/lib/leadSearch";
 import { synthesizeBusinessProfile } from "@/lib/businessProfile";
 import type { OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
-import {
-  ApolloConfigError,
-  ApolloRequestError,
-} from "@/lib/integrations/apollo";
+import { inngest } from "@/lib/inngest/client";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -50,33 +46,16 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   if (employee.role === "lead_sourcer") {
-    const { data: profile } = await supabase
-      .from("business_profiles")
-      .select("profile_md, contact_name")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    const clientDescription =
-      profile?.profile_md ||
-      "Small businesses that need outbound sales pipeline.";
-
-    try {
-      const { leads, researched } = await searchLeadsForClient(
-        clientDescription,
-      );
-      const day = buildFirstDay(leads, researched, profile?.contact_name ?? "");
-
-      await markEmployeeActive(supabase, id);
-      return NextResponse.json({ redirectTo: `/employee/${id}`, day });
-    } catch (error) {
-      if (error instanceof ApolloConfigError) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-      if (error instanceof ApolloRequestError) {
-        return NextResponse.json({ error: error.message }, { status: 502 });
-      }
-      throw error;
-    }
+    await markEmployeeActive(supabase, id);
+    await inngest.send({
+      name: "employee/run.requested",
+      data: {
+        userId: user.id,
+        initiatingRole: "lead_sourcer",
+        message: "Run your first lead search.",
+      },
+    });
+    return NextResponse.json({ redirectTo: `/employee/${id}` });
   }
 
   return NextResponse.json({ error: "Unsupported role" }, { status: 400 });

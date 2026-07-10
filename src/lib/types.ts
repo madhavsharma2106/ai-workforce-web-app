@@ -1,5 +1,7 @@
+export type ApprovalStatus = "pending" | "approved" | "rejected";
+
 export type Lead = {
-  id: number;
+  id: string;
   company: string;
   website: string;
   fit: string;
@@ -9,20 +11,8 @@ export type Lead = {
   sources: string;
   personId?: string;
   emailRevealed?: boolean;
-};
-
-export type ApprovalStatus = "pending" | "approved" | "rejected";
-
-export type Day = {
-  id: number;
-  dateLabel: string;
-  leads: Lead[];
-  statuses: Record<number, ApprovalStatus>;
-  drafts: Record<number, string>;
-  feedback: Record<number, string>;
-  standup: string;
-  learned: string;
-  researched: number;
+  status: ApprovalStatus;
+  feedbackReason?: string;
 };
 
 export type AgentRunTrigger = "manual" | "delegation";

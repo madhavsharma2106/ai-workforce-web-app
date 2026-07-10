@@ -75,7 +75,7 @@ export async function searchPeople(
 ): Promise<ApolloPerson[]> {
   const { icp } = keywordsFromCriteria(criteria);
 
-  const data = await apolloFetch("/mixed_people/search", {
+  const data = await apolloFetch("/mixed_people/api_search", {
     q_keywords: icp,
     page: criteria.page ?? 1,
     per_page: criteria.perPage ?? 10,

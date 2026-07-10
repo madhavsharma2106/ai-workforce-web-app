@@ -1,49 +1,79 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import LeadCard from "@/components/organisms/LeadCard";
-import type { Day } from "@/lib/types";
+import type { AgentRun, Lead } from "@/lib/types";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
 import { ROLE_TITLES } from "@/lib/employees";
 
-const defaultBadLeadCriteria =
-  "companies that already have strong video case studies, agencies, or consumer brands";
+const POLL_INTERVAL_MS = 3000;
+const STUCK_THRESHOLD_MS = 90_000;
+const SEARCH_AGAIN_MESSAGE = "Run today's lead search.";
 
 type Props = {
   employeeId: string;
+  initialRun: AgentRun | null;
+  initialLeads: Lead[];
+  initialResearchedCount: number;
 };
 
-const LeadSourcerHome = ({ employeeId }: Props) => {
-  const [day, setDay] = useState<Day | null | undefined>(undefined);
-  const [editingLeadId, setEditingLeadId] = useState<number | null>(null);
-  const [feedbackLeadId, setFeedbackLeadId] = useState<number | null>(null);
-  const [revealingLeadId, setRevealingLeadId] = useState<number | null>(null);
+const isInProgress = (run: AgentRun | null) =>
+  run === null || run.status === "queued" || run.status === "running";
+
+const LeadSourcerHome = ({
+  employeeId,
+  initialRun,
+  initialLeads,
+  initialResearchedCount,
+}: Props) => {
+  const [run, setRun] = useState<AgentRun | null>(initialRun);
+  const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  const [researchedCount, setResearchedCount] = useState(initialResearchedCount);
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
+  const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
+  const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
+  const [now, setNow] = useState<number | null>(null);
+  const draftsRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(`day:${employeeId}`);
-    // sessionStorage is a browser-only API, so this can't be read during
-    // SSR/render — an effect is the only place this initial sync can happen.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDay(stored ? (JSON.parse(stored) as Day) : null);
-  }, [employeeId]);
+    if (!isInProgress(run)) return;
+
+    const interval = setInterval(async () => {
+      setNow(Date.now());
+      const response = await fetch(`/api/employees/${employeeId}/latest-run`);
+      if (!response.ok) return;
+      const data = await response.json();
+      setRun(data.run);
+      setLeads(data.leads);
+      setResearchedCount(data.researchedCount);
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [employeeId, run]);
 
   const approvedCount = useMemo(
-    () =>
-      day ? Object.values(day.statuses).filter((s) => s === "approved").length : 0,
-    [day],
+    () => leads.filter((lead) => lead.status === "approved").length,
+    [leads],
   );
   const pendingCount = useMemo(
-    () =>
-      day ? Object.values(day.statuses).filter((s) => s === "pending").length : 0,
-    [day],
+    () => leads.filter((lead) => lead.status === "pending").length,
+    [leads],
   );
 
-  const updateDay = (updater: (day: Day) => Day) => {
-    setDay((current) => (current ? updater(current) : current));
+  const patchLead = async (id: string, body: Record<string, unknown>) => {
+    await fetch(`/api/leads/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
   };
 
-  const handleRevealEmail = async (id: number) => {
-    const lead = day?.leads.find((l) => l.id === id);
+  const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
+    setLeads((current) => current.map((lead) => (lead.id === id ? updater(lead) : lead)));
+  };
+
+  const handleRevealEmail = async (id: string) => {
+    const lead = leads.find((l) => l.id === id);
     if (!lead || !lead.personId || lead.emailRevealed) return;
 
     setRevealingLeadId(id);
@@ -51,17 +81,14 @@ const LeadSourcerHome = ({ employeeId }: Props) => {
       const response = await fetch("/api/leads/reveal-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personId: lead.personId }),
+        body: JSON.stringify({ personId: lead.personId, leadId: id }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Failed to reveal email.");
-      updateDay((current) => ({
+      updateLead(id, (current) => ({
         ...current,
-        leads: current.leads.map((l) =>
-          l.id === id
-            ? { ...l, email: data.email ?? l.email, emailRevealed: true }
-            : l,
-        ),
+        email: data.email ?? current.email,
+        emailRevealed: true,
       }));
     } catch {
       // Reveal is a secondary action — leave the lead locked and let the
@@ -71,69 +98,96 @@ const LeadSourcerHome = ({ employeeId }: Props) => {
     }
   };
 
-  const handleApprove = (id: number) => {
-    updateDay((current) => ({
-      ...current,
-      statuses: { ...current.statuses, [id]: "approved" },
-    }));
+  const handleApprove = (id: string) => {
+    updateLead(id, (current) => ({ ...current, status: "approved" }));
+    void patchLead(id, { status: "approved" });
     if (feedbackLeadId === id) setFeedbackLeadId(null);
     void handleRevealEmail(id);
   };
 
-  const handleReject = (id: number) => {
-    updateDay((current) => ({
-      ...current,
-      statuses: { ...current.statuses, [id]: "rejected" },
-    }));
+  const handleReject = (id: string) => {
+    updateLead(id, (current) => ({ ...current, status: "rejected" }));
+    void patchLead(id, { status: "rejected" });
     setFeedbackLeadId(id);
     setEditingLeadId(null);
   };
 
   const handleApproveAll = () => {
-    updateDay((current) => {
-      const nextStatuses = { ...current.statuses };
-      current.leads.forEach((lead) => {
-        if (nextStatuses[lead.id] === "pending") nextStatuses[lead.id] = "approved";
-      });
-      return { ...current, statuses: nextStatuses };
-    });
+    leads.filter((lead) => lead.status === "pending").forEach((lead) => handleApprove(lead.id));
     setFeedbackLeadId(null);
   };
 
-  const handleDraftChange = (id: number, value: string) => {
-    updateDay((current) => ({
-      ...current,
-      drafts: { ...current.drafts, [id]: value },
-    }));
+  const handleDraftChange = (id: string, value: string) => {
+    draftsRef.current[id] = value;
+    updateLead(id, (current) => ({ ...current, draft: value }));
+  };
+
+  const handleToggleEdit = (id: string) => {
+    const wasEditing = editingLeadId === id;
+    setEditingLeadId(wasEditing ? null : id);
+    if (wasEditing && draftsRef.current[id] !== undefined) {
+      void patchLead(id, { draft: draftsRef.current[id] });
+    }
   };
 
   const handleFeedbackSubmit = (reason: string) => {
     if (feedbackLeadId === null) return;
-    updateDay((current) => ({
-      ...current,
-      feedback: { ...current.feedback, [feedbackLeadId]: reason },
-    }));
+    const id = feedbackLeadId;
+    updateLead(id, (current) => ({ ...current, feedbackReason: reason }));
+    void patchLead(id, { feedbackReason: reason });
     setFeedbackLeadId(null);
   };
 
-  if (day === undefined) {
-    return null;
-  }
+  const handleSearchAgain = () => {
+    setRun({
+      id: "",
+      user_id: "",
+      employee_id: employeeId,
+      trigger: "manual",
+      status: "queued",
+      summary: null,
+      job_id: null,
+      started_at: null,
+      completed_at: null,
+      created_at: new Date().toISOString(),
+    });
+    void fetch(`/api/employees/${employeeId}/run`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: SEARCH_AGAIN_MESSAGE }),
+    });
+  };
 
-  if (day === null) {
+  if (run === null || run.status === "queued" || run.status === "running") {
+    const stuck =
+      run !== null && now !== null && now - new Date(run.created_at).getTime() > STUCK_THRESHOLD_MS;
     return (
       <Card as="section" padding="lg">
         <Eyebrow>Emma</Eyebrow>
         <Heading as="h2" size="md" className="mt-1">
-          No run to show yet
+          Researching today&apos;s leads…
         </Heading>
         <Text size="sm" tone="muted" className="mt-2">
-          This preview build doesn&apos;t persist Emma&apos;s work across page
-          reloads — head back to her onboarding to kick off a fresh run.
+          Emma is searching for companies that match your profile and drafting
+          outreach — this can take a minute.
         </Text>
+        {stuck && (
+          <div className="mt-4 space-y-2">
+            <Text size="sm" tone="muted">
+              This is taking longer than expected.
+            </Text>
+            <Button variant="secondary" onClick={handleSearchAgain}>
+              Search again
+            </Button>
+          </div>
+        )}
       </Card>
     );
   }
+
+  const dateLabel = run.created_at
+    ? new Date(run.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    : "";
 
   return (
     <main className="space-y-10">
@@ -143,7 +197,7 @@ const LeadSourcerHome = ({ employeeId }: Props) => {
             <EmployeeAvatar seed={employeeId} size="lg" />
             <div>
               <Eyebrow>
-                {ROLE_TITLES.lead_sourcer} · Day {day.id} · {day.dateLabel}
+                {ROLE_TITLES.lead_sourcer} · {dateLabel}
               </Eyebrow>
               <Heading as="h2" size="md" className="mt-1">
                 Emma is working
@@ -154,14 +208,16 @@ const LeadSourcerHome = ({ employeeId }: Props) => {
             <Badge tone="accent" size="md">
               {pendingCount > 0 ? "Waiting for approval" : "All caught up"}
             </Badge>
+            <Button variant="secondary" size="sm" onClick={handleSearchAgain}>
+              Search again
+            </Button>
           </div>
         </div>
 
-        <div className="grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-3">
           {[
-            { label: "Researched", value: `${day.researched} companies` },
-            { label: "Qualified", value: `${day.leads.length} leads` },
-            { label: "Drafted", value: `${day.leads.length} emails` },
+            { label: "Researched", value: `${researchedCount} companies` },
+            { label: "Qualified", value: `${leads.length} leads` },
             { label: "In queue", value: `${pendingCount} for review` },
           ].map((stat) => (
             <div key={stat.label} className="bg-white p-5">
@@ -176,29 +232,14 @@ const LeadSourcerHome = ({ employeeId }: Props) => {
         </div>
       </Card>
 
-      <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
+      {run.summary && (
         <Card as="article" padding="lg">
           <Eyebrow>Daily standup</Eyebrow>
           <blockquote className="mt-4 border-l-2 border-gray-900 pl-4">
-            <Text size="lg">{day.standup}</Text>
+            <Text size="lg">{run.summary}</Text>
           </blockquote>
         </Card>
-
-        <article className="space-y-3">
-          <Card padding="sm">
-            <Eyebrow tone="muted">What I learned</Eyebrow>
-            <Text size="sm" tone="subtle" className="mt-2">
-              {day.learned}
-            </Text>
-          </Card>
-          <Card padding="sm">
-            <Eyebrow tone="muted">What I&apos;m avoiding</Eyebrow>
-            <Text size="sm" tone="subtle" className="mt-2">
-              {defaultBadLeadCriteria}
-            </Text>
-          </Card>
-        </article>
-      </section>
+      )}
 
       <Card as="section" padding="lg" className="space-y-6">
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -214,22 +255,20 @@ const LeadSourcerHome = ({ employeeId }: Props) => {
         </div>
 
         <div className="grid gap-4">
-          {day.leads.map((lead) => (
+          {leads.map((lead) => (
             <LeadCard
               key={lead.id}
               lead={lead}
-              status={day.statuses[lead.id]}
-              draftText={day.drafts[lead.id]}
+              status={lead.status}
+              draftText={lead.draft}
               isEditing={editingLeadId === lead.id}
               feedbackActive={feedbackLeadId === lead.id}
-              feedbackReason={day.feedback[lead.id]}
+              feedbackReason={lead.feedbackReason}
               onApprove={() => handleApprove(lead.id)}
               onReject={() => handleReject(lead.id)}
               onRevealEmail={() => handleRevealEmail(lead.id)}
               isRevealingEmail={revealingLeadId === lead.id}
-              onToggleEdit={() =>
-                setEditingLeadId((current) => (current === lead.id ? null : lead.id))
-              }
+              onToggleEdit={() => handleToggleEdit(lead.id)}
               onDraftChange={(value) => handleDraftChange(lead.id, value)}
               onFeedbackSubmit={handleFeedbackSubmit}
             />
