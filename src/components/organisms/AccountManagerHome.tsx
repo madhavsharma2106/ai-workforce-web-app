@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Input, Text, Textarea } from "@/components/atoms";
+import {
+  Badge,
+  Button,
+  Card,
+  EmployeeAvatar,
+  Eyebrow,
+  Heading,
+  Input,
+  Text,
+  Textarea,
+} from "@/components/atoms";
 import { ROLE_LABELS, ROLE_TITLES, type Employee } from "@/lib/employees";
 
 type Profile = {
@@ -99,7 +109,8 @@ const AccountManagerHome = ({
                 Hi, I&apos;m Alex
               </Heading>
               <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-                I keep {profile.businessName ? `${profile.businessName}'s` : "your"}{" "}
+                I keep{" "}
+                {profile.businessName ? `${profile.businessName}'s` : "your"}{" "}
                 Business Profile current so everyone you hire understands your
                 business without asking you the basics twice.
               </Text>
@@ -112,7 +123,10 @@ const AccountManagerHome = ({
 
         <div className="mt-8 grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-2">
           {[
-            { label: "Supporting", value: `${otherEmployees.length} employee${otherEmployees.length === 1 ? "" : "s"}` },
+            {
+              label: "Supporting",
+              value: `${otherEmployees.length} employee${otherEmployees.length === 1 ? "" : "s"}`,
+            },
             { label: "Updated", value: updatedLabel ?? "Never" },
           ].map((stat) => (
             <div key={stat.label} className="bg-white p-5">
@@ -251,13 +265,18 @@ const AccountManagerHome = ({
           <div className="space-y-3">
             {otherEmployees.map((employee) => (
               <div key={employee.id} className="flex items-start gap-3">
-                <EmployeeAvatar seed={employee.id} size="sm" className="shrink-0" />
+                <EmployeeAvatar
+                  seed={employee.id}
+                  size="sm"
+                  className="shrink-0"
+                />
                 <Text size="sm">
                   I make sure{" "}
                   <span className="font-medium">
                     {ROLE_LABELS[employee.role]} ({ROLE_TITLES[employee.role]})
                   </span>{" "}
-                  has this for {ROLE_BLURBS[employee.role] ?? "day-to-day work"}.
+                  has this for {ROLE_BLURBS[employee.role] ?? "day-to-day work"}
+                  .
                 </Text>
               </div>
             ))}
