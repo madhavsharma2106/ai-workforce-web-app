@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getLatestRunWithLeads } from "@/lib/leads";
+import { getLatestRunWithLeads, getRunHistory } from "@/lib/leads";
 import LeadSourcerHome from "./LeadSourcerHome";
 
 type Props = {
@@ -8,10 +8,16 @@ type Props = {
 };
 
 export default async function LeadSourcerHomeContainer({ employeeId, userId }: Props) {
-  const { run, leads, researchedCount } = await getLatestRunWithLeads(
-    await createClient(),
-    { userId, employeeId },
-  );
+  const supabase = await createClient();
+  const { run, leads, researchedCount } = await getLatestRunWithLeads(supabase, {
+    userId,
+    employeeId,
+  });
+  const history = await getRunHistory(supabase, {
+    userId,
+    employeeId,
+    excludeRunId: run?.id,
+  });
 
   return (
     <LeadSourcerHome
@@ -19,6 +25,7 @@ export default async function LeadSourcerHomeContainer({ employeeId, userId }: P
       initialRun={run}
       initialLeads={leads}
       initialResearchedCount={researchedCount}
+      initialHistory={history}
     />
   );
 }

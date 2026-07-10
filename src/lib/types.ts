@@ -57,6 +57,11 @@ export type AgentRunStep = {
   created_at: string;
 };
 
+export type TaskHistoryItem = AgentRun & {
+  leadCounts: { approved: number; rejected: number; pending: number; total: number };
+  researchedCount: number;
+};
+
 export type DelegationStatus = "pending" | "accepted" | "completed" | "declined";
 
 export type Delegation = {

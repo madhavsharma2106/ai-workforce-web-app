@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { AgentRun, ApprovalStatus, Lead } from "@/lib/types";
+import type { AgentRun, ApprovalStatus, Lead, TaskHistoryItem } from "@/lib/types";
 
 type LeadRow = {
   id: string;
@@ -69,6 +69,19 @@ export async function insertLead(
   return toLead(data as LeadRow);
 }
 
+export async function getLeadsByRunId(
+  supabase: SupabaseClient,
+  input: { runId: string },
+): Promise<Lead[]> {
+  const { data: leadRows } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("run_id", input.runId)
+    .order("created_at", { ascending: true });
+
+  return ((leadRows as LeadRow[] | null) ?? []).map(toLead);
+}
+
 export async function getLatestRunWithLeads(
   supabase: SupabaseClient,
   input: { userId: string; employeeId: string },
@@ -84,12 +97,8 @@ export async function getLatestRunWithLeads(
 
   if (!run) return { run: null, leads: [], researchedCount: 0 };
 
-  const [{ data: leadRows }, { data: researchStep }] = await Promise.all([
-    supabase
-      .from("leads")
-      .select("*")
-      .eq("run_id", run.id)
-      .order("created_at", { ascending: true }),
+  const [leads, { data: researchStep }] = await Promise.all([
+    getLeadsByRunId(supabase, { runId: run.id }),
     supabase
       .from("agent_run_steps")
       .select("output")
@@ -103,9 +112,63 @@ export async function getLatestRunWithLeads(
 
   return {
     run: run as AgentRun,
-    leads: ((leadRows as LeadRow[] | null) ?? []).map(toLead),
+    leads,
     researchedCount,
   };
+}
+
+export async function getRunHistory(
+  supabase: SupabaseClient,
+  input: { userId: string; employeeId: string; excludeRunId?: string; limit?: number },
+): Promise<TaskHistoryItem[]> {
+  let query = supabase
+    .from("agent_runs")
+    .select("*")
+    .eq("user_id", input.userId)
+    .eq("employee_id", input.employeeId)
+    .order("created_at", { ascending: false })
+    .limit(input.limit ?? 10);
+
+  if (input.excludeRunId) {
+    query = query.neq("id", input.excludeRunId);
+  }
+
+  const { data: runs } = await query;
+  const runRows = (runs as AgentRun[] | null) ?? [];
+  if (runRows.length === 0) return [];
+
+  const runIds = runRows.map((r) => r.id);
+
+  const [{ data: leadRows }, { data: researchRows }] = await Promise.all([
+    supabase.from("leads").select("run_id, status").in("run_id", runIds),
+    supabase
+      .from("agent_run_steps")
+      .select("run_id, output")
+      .in("run_id", runIds)
+      .eq("tool_name", "research_companies"),
+  ]);
+
+  const countsByRun = new Map<string, { approved: number; rejected: number; pending: number }>();
+  for (const row of (leadRows as { run_id: string; status: ApprovalStatus }[] | null) ?? []) {
+    const counts = countsByRun.get(row.run_id) ?? { approved: 0, rejected: 0, pending: 0 };
+    counts[row.status] += 1;
+    countsByRun.set(row.run_id, counts);
+  }
+
+  const researchedByRun = new Map<string, number>();
+  for (const row of (researchRows as { run_id: string; output: unknown }[] | null) ?? []) {
+    const researched = (row.output as { researched?: number } | null)?.researched ?? 0;
+    researchedByRun.set(row.run_id, researched);
+  }
+
+  return runRows.map((run) => {
+    const counts = countsByRun.get(run.id) ?? { approved: 0, rejected: 0, pending: 0 };
+    return {
+      ...run,
+      leadCounts: { ...counts, total: counts.approved + counts.rejected + counts.pending },
+      researchedCount: researchedByRun.get(run.id) ?? 0,
+    };
+  });
 }
 
 export async function getFeedbackContext(

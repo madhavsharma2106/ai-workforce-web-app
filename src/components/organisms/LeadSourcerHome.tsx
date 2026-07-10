@@ -2,19 +2,23 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import LeadCard from "@/components/organisms/LeadCard";
-import type { AgentRun, Lead } from "@/lib/types";
+import TaskHistory from "@/components/organisms/TaskHistory";
+import type { AgentRun, Lead, TaskHistoryItem } from "@/lib/types";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Markdown } from "@/components/molecules";
 import { ROLE_TITLES } from "@/lib/employees";
+import { formatRunTimestamp } from "@/lib/agentRunStatus";
 
 const POLL_INTERVAL_MS = 3000;
 const STUCK_THRESHOLD_MS = 90_000;
-const SEARCH_AGAIN_MESSAGE = "Run today's lead search.";
+const SEARCH_AGAIN_MESSAGE = "Run a new lead search.";
 
 type Props = {
   employeeId: string;
   initialRun: AgentRun | null;
   initialLeads: Lead[];
   initialResearchedCount: number;
+  initialHistory: TaskHistoryItem[];
 };
 
 const isInProgress = (run: AgentRun | null) =>
@@ -25,6 +29,7 @@ const LeadSourcerHome = ({
   initialRun,
   initialLeads,
   initialResearchedCount,
+  initialHistory,
 }: Props) => {
   const [run, setRun] = useState<AgentRun | null>(initialRun);
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
@@ -162,32 +167,33 @@ const LeadSourcerHome = ({
     const stuck =
       run !== null && now !== null && now - new Date(run.created_at).getTime() > STUCK_THRESHOLD_MS;
     return (
-      <Card as="section" padding="lg">
-        <Eyebrow>Emma</Eyebrow>
-        <Heading as="h2" size="md" className="mt-1">
-          Researching today&apos;s leads…
-        </Heading>
-        <Text size="sm" tone="muted" className="mt-2">
-          Emma is searching for companies that match your profile and drafting
-          outreach — this can take a minute.
-        </Text>
-        {stuck && (
-          <div className="mt-4 space-y-2">
-            <Text size="sm" tone="muted">
-              This is taking longer than expected.
-            </Text>
-            <Button variant="secondary" onClick={handleSearchAgain}>
-              Search again
-            </Button>
-          </div>
-        )}
-      </Card>
+      <main className="space-y-10">
+        <Card as="section" padding="lg">
+          <Eyebrow>Emma</Eyebrow>
+          <Heading as="h2" size="md" className="mt-1">
+            Researching leads…
+          </Heading>
+          <Text size="sm" tone="muted" className="mt-2">
+            Emma is searching for companies that match your profile and drafting
+            outreach — this can take a minute.
+          </Text>
+          {stuck && (
+            <div className="mt-4 space-y-2">
+              <Text size="sm" tone="muted">
+                This is taking longer than expected.
+              </Text>
+              <Button variant="secondary" onClick={handleSearchAgain}>
+                Search again
+              </Button>
+            </div>
+          )}
+        </Card>
+        <TaskHistory employeeId={employeeId} history={initialHistory} />
+      </main>
     );
   }
 
-  const dateLabel = run.created_at
-    ? new Date(run.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    : "";
+  const dateLabel = run.created_at ? formatRunTimestamp(run.created_at) : "";
 
   return (
     <main className="space-y-10">
@@ -234,9 +240,9 @@ const LeadSourcerHome = ({
 
       {run.summary && (
         <Card as="article" padding="lg">
-          <Eyebrow>Daily standup</Eyebrow>
+          <Eyebrow>Update from Emma</Eyebrow>
           <blockquote className="mt-4 border-l-2 border-gray-900 pl-4">
-            <Text size="lg">{run.summary}</Text>
+            <Markdown content={run.summary} />
           </blockquote>
         </Card>
       )}
@@ -289,6 +295,8 @@ const LeadSourcerHome = ({
           </Badge>
         </div>
       </Card>
+
+      <TaskHistory employeeId={employeeId} history={initialHistory} />
     </main>
   );
 };

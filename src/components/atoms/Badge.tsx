@@ -1,12 +1,15 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "./cn";
 
-type Tone = "neutral" | "accent" | "danger";
+export type BadgeTone = "neutral" | "accent" | "success" | "warning" | "danger";
+type Tone = BadgeTone;
 type Size = "xs" | "sm" | "md";
 
 const toneClasses: Record<Tone, string> = {
   neutral: "bg-gray-100 text-gray-600",
   accent: "bg-(--accent-soft) text-(--accent-hover)",
+  success: "bg-green-50 text-green-600",
+  warning: "bg-amber-50 text-amber-600",
   danger: "bg-red-50 text-red-600",
 };
 

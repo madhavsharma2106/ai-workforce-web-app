@@ -77,6 +77,34 @@ export async function insertAgentRunStep(
   return data as AgentRunStep;
 }
 
+export async function getAgentRun(
+  supabase: SupabaseClient,
+  input: { userId: string; employeeId: string; runId: string },
+): Promise<AgentRun | null> {
+  const { data } = await supabase
+    .from("agent_runs")
+    .select("*")
+    .eq("id", input.runId)
+    .eq("user_id", input.userId)
+    .eq("employee_id", input.employeeId)
+    .maybeSingle();
+
+  return data as AgentRun | null;
+}
+
+export async function getAgentRunSteps(
+  supabase: SupabaseClient,
+  input: { runId: string },
+): Promise<AgentRunStep[]> {
+  const { data } = await supabase
+    .from("agent_run_steps")
+    .select("*")
+    .eq("run_id", input.runId)
+    .order("seq", { ascending: true });
+
+  return (data as AgentRunStep[] | null) ?? [];
+}
+
 export async function insertDelegation(
   supabase: SupabaseClient,
   input: {

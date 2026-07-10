@@ -169,7 +169,7 @@ const LeadCard: FC<Props> = ({
             </span>
             {feedbackReason}
             <p className="mt-1 text-xs text-gray-400">
-              Emma will remember this for tomorrow.
+              Emma will remember this for next time.
             </p>
           </div>
         )}
