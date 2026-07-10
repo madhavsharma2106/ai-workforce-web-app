@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import type { TaskHistoryItem } from "@/lib/types";
-import { Badge, Card, Eyebrow, Heading, Text } from "@/components/atoms";
-import { AGENT_RUN_STATUS_LABEL, AGENT_RUN_STATUS_TONE, formatRunTimestamp } from "@/lib/agentRunStatus";
+import { Badge, Card, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
+import { AGENT_RUN_STATUS_LABEL, AGENT_RUN_STATUS_TONE } from "@/lib/agentRunStatus";
 
 type Props = {
   employeeId: string;
@@ -32,7 +32,7 @@ const TaskHistory = ({ employeeId, history }: Props) => (
           >
             <div className="min-w-0">
               <Text size="sm" weight="medium">
-                {formatRunTimestamp(task.created_at)}
+                <LocalDate date={task.created_at} />
               </Text>
               <Text size="sm" tone="muted" className="mt-0.5 truncate">
                 {task.summary ?? `Researched ${task.researchedCount} companies`}

@@ -4,10 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import LeadCard from "@/components/organisms/LeadCard";
 import TaskHistory from "@/components/organisms/TaskHistory";
 import type { AgentRun, Lead, TaskHistoryItem } from "@/lib/types";
-import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
 import { ROLE_TITLES } from "@/lib/employees";
-import { formatRunTimestamp } from "@/lib/agentRunStatus";
 
 const POLL_INTERVAL_MS = 3000;
 const STUCK_THRESHOLD_MS = 90_000;
@@ -193,8 +192,6 @@ const LeadSourcerHome = ({
     );
   }
 
-  const dateLabel = run.created_at ? formatRunTimestamp(run.created_at) : "";
-
   return (
     <main className="space-y-10">
       <Card as="section" padding="lg">
@@ -203,7 +200,7 @@ const LeadSourcerHome = ({
             <EmployeeAvatar seed={employeeId} size="lg" />
             <div>
               <Eyebrow>
-                {ROLE_TITLES.lead_sourcer} · {dateLabel}
+                {ROLE_TITLES.lead_sourcer} · <LocalDate date={run.created_at} />
               </Eyebrow>
               <Heading as="h2" size="md" className="mt-1">
                 Emma is working

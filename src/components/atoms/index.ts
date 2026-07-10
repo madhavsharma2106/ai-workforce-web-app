@@ -8,4 +8,5 @@ export { Breadcrumb } from "./Breadcrumb";
 export { EmployeeAvatar } from "./EmployeeAvatar";
 export { Eyebrow } from "./Eyebrow";
 export { Heading } from "./Heading";
+export { LocalDate } from "./LocalDate";
 export { Text } from "./Text";

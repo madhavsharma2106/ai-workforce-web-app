@@ -1,7 +1,7 @@
 import type { AgentRun, AgentRunStep, ApprovalStatus, Lead } from "@/lib/types";
-import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import { AGENT_RUN_STATUS_LABEL, AGENT_RUN_STATUS_TONE, formatRunTimestamp } from "@/lib/agentRunStatus";
+import { AGENT_RUN_STATUS_LABEL, AGENT_RUN_STATUS_TONE } from "@/lib/agentRunStatus";
 import { ROLE_TITLES } from "@/lib/employees";
 
 const LEAD_STATUS_LABEL: Record<ApprovalStatus, { label: string; tone: "neutral" | "accent" | "danger" }> = {
@@ -28,7 +28,7 @@ const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
             <EmployeeAvatar seed={employeeId} size="lg" />
             <div>
               <Eyebrow>
-                {ROLE_TITLES.lead_sourcer} · {formatRunTimestamp(run.created_at)}
+                {ROLE_TITLES.lead_sourcer} · <LocalDate date={run.created_at} />
               </Eyebrow>
               <Heading as="h1" size="md" className="mt-1">
                 Task recap

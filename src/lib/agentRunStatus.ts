@@ -16,11 +16,3 @@ export const AGENT_RUN_STATUS_TONE: Record<AgentRunStatus, BadgeTone> = {
   completed: "success",
   failed: "danger",
 };
-
-export const formatRunTimestamp = (iso: string) =>
-  new Date(iso).toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
