@@ -9,9 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "lint": "eslint"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.95",
@@ -33,19 +31,14 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@storybook/react-vite": "^10.4.6",
     "@tailwindcss/postcss": "^4",
-    "@tailwindcss/vite": "^4.3.2",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
-    "storybook": "^10.4.6",
     "supabase": "^2.109.0",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "vite": "^7.3.6",
-    "vite-tsconfig-paths": "^6.1.1"
+    "typescript": "^5"
   }
 }
