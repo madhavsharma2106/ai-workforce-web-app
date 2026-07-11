@@ -70,6 +70,34 @@ function keywordsFromCriteria({ icp, excludeCriteria }: ApolloSearchCriteria) {
   return { icp, excludeCriteria };
 }
 
+function parseApolloPerson(person: Record<string, unknown>, fallbackId: string): ApolloPerson {
+  return {
+    id: String(person.id ?? fallbackId),
+    name: String(person.name ?? "Unknown"),
+    title: (person.title as string) ?? null,
+    email: (person.email as string) ?? null,
+    organization: person.organization
+      ? {
+          name: String(
+            (person.organization as Record<string, unknown>).name ?? "",
+          ),
+          website_url:
+            ((person.organization as Record<string, unknown>)
+              .website_url as string) ?? null,
+          primary_domain:
+            ((person.organization as Record<string, unknown>)
+              .primary_domain as string) ?? null,
+        }
+      : null,
+  };
+}
+
+/**
+ * Search results are masked previews — `organization.name` comes back as the
+ * literal placeholder string "organization" and there's no
+ * website_url/primary_domain at all. Every candidate needs `enrichPerson`
+ * (below) before its real company name/domain is usable.
+ */
 export async function searchPeople(
   criteria: ApolloSearchCriteria,
 ): Promise<ApolloPerson[]> {
@@ -83,27 +111,20 @@ export async function searchPeople(
 
   const people = Array.isArray(data.people) ? data.people : [];
 
-  return people.map(
-    (person: Record<string, unknown>): ApolloPerson => ({
-      id: String(person.id),
-      name: String(person.name ?? "Unknown"),
-      title: (person.title as string) ?? null,
-      email: (person.email as string) ?? null,
-      organization: person.organization
-        ? {
-            name: String(
-              (person.organization as Record<string, unknown>).name ?? "",
-            ),
-            website_url:
-              ((person.organization as Record<string, unknown>)
-                .website_url as string) ?? null,
-            primary_domain:
-              ((person.organization as Record<string, unknown>)
-                .primary_domain as string) ?? null,
-          }
-        : null,
-    }),
-  );
+  return people.map((person: Record<string, unknown>) => parseApolloPerson(person, String(person.id)));
+}
+
+/**
+ * Unlocks a candidate's real name and organization (name/website/domain) via
+ * `/people/match` — this is what actually populates the fields search
+ * results only preview. Costs an Apollo credit per call. Does not reveal the
+ * personal email; use `revealEmail` for that separately.
+ */
+export async function enrichPerson(personId: string): Promise<ApolloPerson | null> {
+  const data = await apolloFetch("/people/match", { id: personId });
+  const person = data.person as Record<string, unknown> | undefined;
+  if (!person) return null;
+  return parseApolloPerson(person, personId);
 }
 
 export async function revealEmail(personId: string): Promise<string | null> {

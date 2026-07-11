@@ -14,7 +14,7 @@ Loaded at request/job time from `roles/<role>.md` (`src/lib/roles.ts`) — git s
 
 ## Tools
 
-Each role has a tool registry in `src/lib/agents/toolsByRole.ts` (`Record<EmployeeRole, Record<string, Tool>>`) — the seam for adding role-specific tools (Apollo search, save business profile, etc.) later without touching the runtime. Tools live in `src/lib/agents/tools/`, one file per concern. Every role currently gets `delegate_to_employee` (below); nothing else is built yet.
+Each role has a tool registry in `src/lib/agents/toolsByRole.ts` (`Record<EmployeeRole, Record<string, Tool>>`) — the seam for adding role-specific tools later without touching the runtime. Tools live in `src/lib/agents/tools/`, one file per concern. Every role gets `delegate_to_employee`; the Lead Sourcer additionally gets `search_leads` (Apollo search + company research) and `save_lead`.
 
 ## Delegation — LangGraph.js
 
@@ -36,4 +36,4 @@ Inngest jobs run with no user session, so they use a service-role Supabase clien
 
 ## Current status
 
-This is platform infrastructure, not finished role behavior. The Account Manager and Lead Sourcer both have real graph nodes now; Sales Representative (see [roles/sales-representative.md](../roles/sales-representative.md)) is still a stub that proves handoff routing with no Outlook/send logic behind it — Oliver is hireable and routable via `delegate_to_employee` like Emma, but has no tools beyond the default handoff tool. The Lead Sourcer's node pre-fetches Apollo search results and company research as plain code (no judgment call in that part, so it doesn't need to be inside the model's tool loop — see `src/lib/agents/graph.ts`'s `buildLeadSourcerBriefing`), then hands the model a `save_lead` tool to persist each company it qualifies, with a fit reasoning and draft grounded in the pre-fetched research. Each remaining role's actual tools, persistence, and UI land in that role's own follow-up pass — check `roles/<role>.md` for what a given role can actually do today versus what's planned.
+This is platform infrastructure, not finished role behavior. The Account Manager and Lead Sourcer both have real graph nodes now; Sales Representative (see [roles/sales-representative.md](../roles/sales-representative.md)) is still a stub that proves handoff routing with no Outlook/send logic behind it — Oliver is hireable and routable via `delegate_to_employee` like Emma, but has no tools beyond the default handoff tool. The Lead Sourcer calls `search_leads` (Apollo search + company research, bundled into one tool call since neither step has a judgment call in it — see `src/lib/agents/tools/searchLeadsTool.ts`) and then `save_lead` to persist each company it qualifies, with a fit reasoning and draft grounded in the returned research. Each remaining role's actual tools, persistence, and UI land in that role's own follow-up pass — check `roles/<role>.md` for what a given role can actually do today versus what's planned.

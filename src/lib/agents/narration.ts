@@ -22,6 +22,15 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
   save_lead: {
     before: (input) => `Queuing ${input.company as string} for your review.`,
   },
+  search_leads: {
+    before: (input) => `Searching for companies matching "${input.icp as string}".`,
+    after: (_input, output) => {
+      const result = output as { totalFound: number; candidates: unknown[] };
+      if (result.totalFound === 0) return "Apollo didn't return any matches for that search.";
+      const companyWord = result.totalFound === 1 ? "company" : "companies";
+      return `Found ${result.totalFound} ${companyWord}, ${result.candidates.length} new since last search.`;
+    },
+  },
 };
 
 export function narrateBefore(toolName: string, input: Record<string, unknown>): string {

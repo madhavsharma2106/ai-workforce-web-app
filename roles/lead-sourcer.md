@@ -29,7 +29,12 @@ Approved email drafts.
 - **Apollo.io** — lead search data source (`src/lib/integrations/apollo.ts`)
   - `searchPeople(criteria)` — finds people matching an ICP via `/mixed_people/api_search`
   - `revealEmail(personId)` — unlocks a contact's email via `/people/match`
-  - Requires `APOLLO_API_KEY` in `.env.local`; used by `src/app/api/leads/search` and `src/app/api/leads/reveal-email`
+  - Requires `APOLLO_API_KEY` in `.env.local`; used by the `search_leads` tool (`src/lib/agents/tools/searchLeadsTool.ts`) and `src/app/api/leads/reveal-email`
+
+## Tools
+
+- `search_leads` — call this first, with a short keyword phrase (3-8 words) drawn from the Business Profile above. Apollo's search is a plain keyword match, not semantic, so use terms that would literally appear in a matching company's own description or job postings. It returns new candidates, each with either real research from their site or a note that none was available, plus prior approved/rejected companies for context.
+- `save_lead` — call once per candidate from `search_leads`'s result that you judge genuinely qualified, with a fit reason and draft. Never call it for a company `search_leads` didn't return.
 
 ## Quality Bar
 
