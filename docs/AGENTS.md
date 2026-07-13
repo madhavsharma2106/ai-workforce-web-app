@@ -28,7 +28,7 @@ There's a second, app-triggered path into this same machinery: approving a lead 
 
 ## Making work visible: "Thinking" and handoffs
 
-No raw model reasoning is shown to users. Claude's extended-thinking mode isn't enabled, because its tone/verbosity can't be controlled to match [UX.md](UX.md)'s voice rules. Instead, "Thinking" (the UX.md term for this) is synthesized narration: `src/lib/agents/narration.ts` maps each tool name to `before`/`after` copy, written once when a step is persisted to `agent_run_steps.label`. Every new tool needs a narration entry or it falls back to a generic label — an ongoing authoring cost, not a one-time setup. A handoff's explanation comes from the model-written `reason` argument on `delegate_to_employee`, constrained by its schema description to read as something a client could see directly, not internal justification.
+No raw model reasoning is shown to users. Claude's extended-thinking mode isn't enabled, because its tone/verbosity can't be controlled to match [UX.md](UX.md)'s voice rules. Instead, "Thinking" (the UX.md term for this) is synthesized narration: `src/lib/agents/narration.ts` maps each tool name to `before`/`after` copy, written once when a step is persisted to `agent_run_steps.label`. Every new tool needs a narration entry or it falls back to a generic label — an ongoing authoring cost, not a one-time setup. A handoff's explanation comes from the model-written `reason` argument on `delegate_to_employee`, constrained by its schema description to read as something a founder could see directly, not internal justification.
 
 ## Background execution — Inngest
 

@@ -112,7 +112,7 @@ Decide the single next question to ask (or that you're done). Ask one thing at a
       return { done: false, question: FALLBACK_QUESTIONS[role] };
     }
     // Mid-conversation failure: wrap up gracefully with what we already have
-    // rather than leaving the client stuck.
+    // rather than leaving the founder stuck.
     return { done: true };
   }
 }

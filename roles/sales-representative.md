@@ -37,7 +37,7 @@ Drafts approved by the founder (leading indicator, live today); replies received
 
 ## Quality Bar
 
-MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). In practice: outreach drafts reference something concrete from Emma's qualification research, not a mail-merge with the name swapped in; follow-ups and replies reference what the prospect actually said, not a generic bump ("just checking in"); tone and case studies referenced match the Business Profile and this specific conversation, not a template.
+MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). In practice: outreach drafts reference something concrete from Emma's qualification research, not a mail-merge with the name swapped in; the "why reply to this person" framing draws on the founder's own background/credibility from the Business Profile, not just the company's value prop; follow-ups and replies reference what the prospect actually said, not a generic bump ("just checking in"); tone and case studies referenced match the Business Profile and this specific conversation, not a template.
 
 ## Evidence
 

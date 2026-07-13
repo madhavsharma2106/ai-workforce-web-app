@@ -21,7 +21,7 @@ Reduction in corrections/feedback other employees receive; how often other roles
 
 ## Outputs
 
-- A living Business Profile (ICP, positioning, tone, priorities, do's & don'ts)
+- A living Business Profile (ICP, positioning, tone, priorities, do's & don'ts, founder background/credibility)
 - Flags/questions back to the founder when understanding is ambiguous or stale
 - Answers to ad hoc questions from Emma and Oliver (e.g. "is this company a good fit?", "which case study fits this email?") — future integration, not built yet; today only the Lead Sourcer's first run reads `profile_md` directly, there's no interactive Q&A path
 
@@ -62,6 +62,7 @@ By the end you should know, at minimum:
 - What a bad-fit lead looks like (who to steer clear of)
 - Why clients pick them over the alternative (value proposition)
 - What tone to use when reaching out on their behalf (offer quick-pick options like Formal / Casual & friendly / Direct, no-fluff)
+- The founder's own background/credibility — why a prospect should trust an email from them personally. Outreach goes out under the founder's own name, not a company alias, so this matters as much as the business's value prop.
 
 Also worth asking, but skip if it doesn't come up naturally or the founder has nothing to add: current priorities or pushes this quarter, anything to never say or do in outreach, and what to call the founder.
 
