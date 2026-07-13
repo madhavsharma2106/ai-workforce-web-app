@@ -10,7 +10,7 @@ type Props = {
 
 export default async function LeadSourcerHomeContainer({ employeeId, userId }: Props) {
   const supabase = await createClient();
-  const [{ run, leads, researchedCount }, employees] = await Promise.all([
+  const [{ run, leads, researchedCount, passedCandidates }, employees] = await Promise.all([
     getLatestRunWithLeads(supabase, { userId, employeeId }),
     listEmployees(supabase, userId),
   ]);
@@ -27,6 +27,7 @@ export default async function LeadSourcerHomeContainer({ employeeId, userId }: P
       initialLeads={leads}
       initialResearchedCount={researchedCount}
       initialHistory={history}
+      initialPassedCandidates={passedCandidates}
       oliverHired={employees.some((e) => e.role === "sales_representative")}
     />
   );

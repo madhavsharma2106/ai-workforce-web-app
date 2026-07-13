@@ -44,6 +44,21 @@ const DEFAULT_FEEDBACK_OPTIONS = [
   "Other",
 ];
 
+const titleCase = (value: string) =>
+  value.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+const withProtocol = (url: string) => (/^https?:\/\//i.test(url) ? url : `https://${url}`);
+
+function companySnapshot(lead: Lead): string | null {
+  const parts = [
+    lead.industry ? titleCase(lead.industry) : null,
+    typeof lead.employeeCount === "number" ? `${lead.employeeCount.toLocaleString()} employees` : null,
+    lead.location,
+    lead.foundedYear ? `Founded ${lead.foundedYear}` : null,
+  ].filter((part): part is string => Boolean(part));
+  return parts.length > 0 ? parts.join(" • ") : null;
+}
+
 const LeadCard: FC<Props> = ({
   lead,
   status,
@@ -66,6 +81,7 @@ const LeadCard: FC<Props> = ({
 }) => {
   const statusMeta = statusLabel[status];
   const emailLocked = Boolean(lead.personId) && !lead.emailRevealed;
+  const snapshot = companySnapshot(lead);
 
   return (
     <Card
@@ -80,20 +96,53 @@ const LeadCard: FC<Props> = ({
               {lead.company.charAt(0)}
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
                 {lead.company}
+                {lead.companyLinkedinUrl && (
+                  <a
+                    href={withProtocol(lead.companyLinkedinUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-normal text-indigo-600 underline decoration-dotted underline-offset-2 hover:text-indigo-700"
+                  >
+                    LinkedIn
+                  </a>
+                )}
               </p>
-              <p className="font-mono text-xs text-gray-400">
-                {lead.website}
-              </p>
+              {lead.website ? (
+                <a
+                  href={withProtocol(lead.website)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-xs text-gray-400 underline decoration-dotted underline-offset-2 hover:text-gray-600"
+                >
+                  {lead.website}
+                </a>
+              ) : (
+                <p className="font-mono text-xs text-gray-400">{lead.website}</p>
+              )}
             </div>
           </div>
-          <div className="grid gap-x-6 gap-y-1 text-sm text-gray-500 sm:grid-cols-2">
-            <div>
+          {snapshot && <p className="text-xs text-gray-500">{snapshot}</p>}
+          <div className="space-y-1 text-sm text-gray-500">
+            <p>
               <span className="text-gray-400">Decision maker </span>
               <span className="text-gray-700">{lead.decisionMaker}</span>
-            </div>
-            <div>
+              {lead.contactLinkedinUrl && (
+                <>
+                  {" "}
+                  <a
+                    href={withProtocol(lead.contactLinkedinUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-indigo-600 underline decoration-dotted underline-offset-2 hover:text-indigo-700"
+                  >
+                    LinkedIn
+                  </a>
+                </>
+              )}
+            </p>
+            <p>
               <span className="text-gray-400">Email </span>
               {emailLocked ? (
                 <button
@@ -107,11 +156,16 @@ const LeadCard: FC<Props> = ({
               ) : (
                 <span className="text-gray-700">{lead.email}</span>
               )}
-            </div>
+            </p>
           </div>
           <div className="rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-600">
-            <span className="font-medium text-gray-900">Fit — </span>
-            {lead.fit}
+            <Eyebrow tone="muted" tracking="wide">
+              Why this is a good fit
+            </Eyebrow>
+            <p className="mt-1.5">{lead.fit}</p>
+            {lead.researchSnippet && (
+              <p className="mt-2 text-xs text-gray-500 italic">"{lead.researchSnippet}"</p>
+            )}
           </div>
           <p className="text-xs text-gray-400">Sources: {lead.sources}</p>
         </div>

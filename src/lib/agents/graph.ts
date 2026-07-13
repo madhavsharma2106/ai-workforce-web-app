@@ -9,8 +9,8 @@ import { createAgentRun, updateAgentRun, insertAgentRunStep, insertDelegation } 
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 import type { DelegationRequest } from "./tools/delegationTool";
 
-/** Lead Sourcer needs room for ~10 save_lead calls plus a wrap-up message. */
-const LEAD_SOURCER_MAX_STEPS = 20;
+/** Lead Sourcer needs room for ~10 save_lead calls, a note_passed_candidates call per search, and a wrap-up message. */
+const LEAD_SOURCER_MAX_STEPS = 24;
 
 const ROLES: EmployeeRole[] = ["account_manager", "lead_sourcer", "sales_representative"];
 

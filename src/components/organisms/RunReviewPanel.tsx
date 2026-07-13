@@ -1,5 +1,6 @@
 import Link from "next/link";
 import LeadCard from "@/components/organisms/LeadCard";
+import PassedCandidatesList from "@/components/organisms/PassedCandidatesList";
 import type { AgentRun, Lead } from "@/lib/types";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
@@ -15,6 +16,7 @@ type Props = {
   oliverHired: boolean;
   feedbackLeadId: string | null;
   revealingLeadId: string | null;
+  passedCandidates: { company: string; reason: string }[];
   onSearchAgain: () => void;
   onApproveAll: () => void;
   onApprove: (id: string) => void;
@@ -33,6 +35,7 @@ const RunReviewPanel = ({
   oliverHired,
   feedbackLeadId,
   revealingLeadId,
+  passedCandidates,
   onSearchAgain,
   onApproveAll,
   onApprove,
@@ -150,6 +153,8 @@ const RunReviewPanel = ({
         </Badge>
       </div>
     </Card>
+
+    <PassedCandidatesList candidates={passedCandidates} />
   </>
 );
 

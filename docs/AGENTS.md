@@ -14,7 +14,7 @@ Loaded at request/job time from `roles/<role>.md` (`src/lib/roles.ts`) — git s
 
 ## Tools
 
-Each role has a tool registry in `src/lib/agents/toolsByRole.ts` (`Record<EmployeeRole, Record<string, Tool>>`) — the seam for adding role-specific tools later without touching the runtime. Tools live in `src/lib/agents/tools/`, one file per concern. Every role gets `delegate_to_employee`; the Lead Sourcer additionally gets `search_leads` (Apollo search + company research) and `save_lead`; the Sales Representative gets `draft_outreach_email`, scoped to whichever lead its run was seeded for (see below).
+Each role has a tool registry in `src/lib/agents/toolsByRole.ts` (`Record<EmployeeRole, Record<string, Tool>>`) — the seam for adding role-specific tools later without touching the runtime. Tools live in `src/lib/agents/tools/`, one file per concern. Every role gets `delegate_to_employee`; the Lead Sourcer additionally gets `search_leads` (Apollo search + company research), `save_lead`, and `note_passed_candidates` (documents why candidates it didn't qualify were passed on, so the founder can see every candidate was actually reviewed — see `docs/QUALITY.md`); the Sales Representative gets `draft_outreach_email`, scoped to whichever lead its run was seeded for (see below).
 
 ## Delegation — LangGraph.js
 

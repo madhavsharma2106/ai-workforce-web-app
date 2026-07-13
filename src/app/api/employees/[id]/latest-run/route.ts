@@ -12,10 +12,10 @@ export async function GET(request: Request, { params }: Params) {
   if (result instanceof NextResponse) return result;
   const { user, employee } = result;
 
-  const { run, leads, researchedCount } = await getLatestRunWithLeads(supabase, {
+  const { run, leads, researchedCount, passedCandidates } = await getLatestRunWithLeads(supabase, {
     userId: user.id,
     employeeId: employee.id,
   });
 
-  return NextResponse.json({ run, leads, researchedCount });
+  return NextResponse.json({ run, leads, researchedCount, passedCandidates });
 }

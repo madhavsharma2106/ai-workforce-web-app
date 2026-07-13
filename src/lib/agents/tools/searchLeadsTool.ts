@@ -37,6 +37,14 @@ export type SearchLeadsResult = {
     decisionMaker: string;
     personId?: string;
     research: string | null;
+    industry: string | null;
+    employeeCount: number | null;
+    location: string | null;
+    foundedYear: number | null;
+    companyLinkedinUrl: string | null;
+    contactLinkedinUrl: string | null;
+    seniority: string | null;
+    departments: string[];
   }[];
   experience: {
     approvedCompanies: string[];
@@ -63,8 +71,11 @@ export function createSearchLeadsTool(
       "(3-8 words, no punctuation) using terms that would literally appear in a matching " +
       "company's own description or job postings: industry/sector, company type, and any " +
       "explicit target-client language (e.g. \"NGO\", \"nonprofit\", \"fast-moving startup\"). " +
-      "Returns each new candidate with whatever research on their site could be found — " +
-      "only qualify and save_lead companies present in this result, never invent one.",
+      "Returns each new candidate with whatever research on their site could be found, plus " +
+      "firmographic and contact facts from Apollo (industry, headcount, location, founded year, " +
+      "LinkedIn URLs, seniority, departments — any of these may be null if Apollo didn't have it). " +
+      "When you save_lead, copy these fields through exactly as given, never infer or guess a value " +
+      "that wasn't provided. Only qualify and save_lead companies present in this result, never invent one.",
     inputSchema: z.object({
       icp: z.string().describe("Short keyword phrase describing the target company profile."),
     }),
@@ -108,6 +119,14 @@ export function createSearchLeadsTool(
           decisionMaker: person.title ? `${person.name}, ${person.title}` : person.name,
           personId: person.id || undefined,
           research: page ? `${page.title || website}: ${page.text}` : null,
+          industry: person.organization!.industry,
+          employeeCount: person.organization!.estimated_num_employees,
+          location: person.organization!.location,
+          foundedYear: person.organization!.founded_year,
+          companyLinkedinUrl: person.organization!.linkedin_url,
+          contactLinkedinUrl: person.linkedin_url,
+          seniority: person.seniority,
+          departments: person.departments,
         })),
         experience: {
           approvedCompanies: feedback.approvedCompanies,

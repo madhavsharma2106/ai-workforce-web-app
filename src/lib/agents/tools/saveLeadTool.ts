@@ -27,6 +27,19 @@ export function createSaveLeadTool(
       decisionMaker: z.string().describe("The contact's name and title, e.g. 'Jane Doe, VP Marketing'."),
       sources: z.string().describe("Where this came from, e.g. 'Apollo.io; company site'."),
       personId: z.string().optional().describe("Apollo person id, if this candidate came from Apollo, so their email can be revealed later."),
+      researchSnippet: z
+        .string()
+        .describe(
+          "A short, literal factual detail from the research you were given — the page's title, a specific stated fact — not your interpretation (that's what fit is for). If no site research was available for this candidate, say so honestly, e.g. 'No company site content found — qualified from Apollo profile data only.'",
+        ),
+      industry: z.string().optional().describe("Copied exactly from the candidate's data. Leave unset if not provided."),
+      employeeCount: z.number().optional().describe("Copied exactly from the candidate's data. Leave unset if not provided."),
+      location: z.string().optional().describe("Copied exactly from the candidate's data. Leave unset if not provided."),
+      foundedYear: z.number().optional().describe("Copied exactly from the candidate's data. Leave unset if not provided."),
+      companyLinkedinUrl: z.string().optional().describe("Copied exactly from the candidate's data. Leave unset if not provided."),
+      contactLinkedinUrl: z.string().optional().describe("Copied exactly from the candidate's data. Leave unset if not provided."),
+      seniority: z.string().optional().describe("Copied exactly from the candidate's data. Leave unset if not provided."),
+      departments: z.array(z.string()).optional().describe("Copied exactly from the candidate's data. Leave unset if not provided."),
     }),
     execute: async (input) => {
       await insertLead(supabase, {
@@ -39,6 +52,15 @@ export function createSaveLeadTool(
         decisionMaker: input.decisionMaker,
         sources: input.sources,
         personId: input.personId,
+        researchSnippet: input.researchSnippet,
+        industry: input.industry,
+        employeeCount: input.employeeCount,
+        location: input.location,
+        foundedYear: input.foundedYear,
+        companyLinkedinUrl: input.companyLinkedinUrl,
+        contactLinkedinUrl: input.contactLinkedinUrl,
+        seniority: input.seniority,
+        departments: input.departments,
       });
       return { saved: true };
     },

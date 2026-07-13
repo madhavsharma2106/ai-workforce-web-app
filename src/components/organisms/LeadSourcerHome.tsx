@@ -10,12 +10,15 @@ import { Tabs } from "@/components/atoms";
 const POLL_INTERVAL_MS = 3000;
 const SEARCH_AGAIN_MESSAGE = "Run a new lead search.";
 
+type PassedCandidate = { company: string; reason: string };
+
 type Props = {
   employeeId: string;
   initialRun: AgentRun | null;
   initialLeads: Lead[];
   initialResearchedCount: number;
   initialHistory: TaskHistoryItem[];
+  initialPassedCandidates: PassedCandidate[];
   oliverHired: boolean;
 };
 
@@ -28,11 +31,13 @@ const LeadSourcerHome = ({
   initialLeads,
   initialResearchedCount,
   initialHistory,
+  initialPassedCandidates,
   oliverHired,
 }: Props) => {
   const [run, setRun] = useState<AgentRun | null>(initialRun);
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [researchedCount, setResearchedCount] = useState(initialResearchedCount);
+  const [passedCandidates, setPassedCandidates] = useState<PassedCandidate[]>(initialPassedCandidates);
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
   const [now, setNow] = useState<number | null>(null);
@@ -49,6 +54,7 @@ const LeadSourcerHome = ({
       setRun(data.run);
       setLeads(data.leads);
       setResearchedCount(data.researchedCount);
+      setPassedCandidates(data.passedCandidates);
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
@@ -163,6 +169,7 @@ const LeadSourcerHome = ({
         oliverHired={oliverHired}
         feedbackLeadId={feedbackLeadId}
         revealingLeadId={revealingLeadId}
+        passedCandidates={passedCandidates}
         onSearchAgain={handleSearchAgain}
         onApproveAll={handleApproveAll}
         onApprove={handleApprove}

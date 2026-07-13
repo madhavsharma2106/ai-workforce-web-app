@@ -5,6 +5,7 @@ import { createDelegateToEmployeeTool, type DelegationRequest } from "./tools/de
 import { createSaveLeadTool } from "./tools/saveLeadTool";
 import { createSearchLeadsTool } from "./tools/searchLeadsTool";
 import { createDraftOutreachTool } from "./tools/draftOutreachTool";
+import { createNotePassedCandidatesTool } from "./tools/notePassedCandidatesTool";
 
 /**
  * Context a role-specific tool factory needs. `supabase`/`userId`/`employeeId`/`runId`
@@ -31,6 +32,7 @@ const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
       employeeId: ctx.employeeId,
       runId: ctx.runId,
     }),
+    note_passed_candidates: createNotePassedCandidatesTool(),
   }),
   sales_representative: (ctx): ToolSet => {
     if (!ctx.leadId) return {};

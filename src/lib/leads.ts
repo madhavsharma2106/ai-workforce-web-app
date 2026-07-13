@@ -15,6 +15,15 @@ type LeadRow = {
   status: ApprovalStatus;
   draft_status: ApprovalStatus;
   feedback_reason: string | null;
+  research_snippet: string | null;
+  industry: string | null;
+  employee_count: number | null;
+  location: string | null;
+  founded_year: number | null;
+  company_linkedin_url: string | null;
+  contact_linkedin_url: string | null;
+  contact_seniority: string | null;
+  contact_departments: string[] | null;
 };
 
 function toLead(row: LeadRow): Lead {
@@ -32,6 +41,15 @@ function toLead(row: LeadRow): Lead {
     status: row.status,
     draftStatus: row.draft_status,
     feedbackReason: row.feedback_reason ?? undefined,
+    researchSnippet: row.research_snippet ?? undefined,
+    industry: row.industry ?? undefined,
+    employeeCount: row.employee_count ?? undefined,
+    location: row.location ?? undefined,
+    foundedYear: row.founded_year ?? undefined,
+    companyLinkedinUrl: row.company_linkedin_url ?? undefined,
+    contactLinkedinUrl: row.contact_linkedin_url ?? undefined,
+    seniority: row.contact_seniority ?? undefined,
+    departments: row.contact_departments ?? undefined,
   };
 }
 
@@ -47,6 +65,15 @@ export async function insertLead(
     decisionMaker: string;
     sources: string;
     personId?: string;
+    researchSnippet?: string;
+    industry?: string;
+    employeeCount?: number;
+    location?: string;
+    foundedYear?: number;
+    companyLinkedinUrl?: string;
+    contactLinkedinUrl?: string;
+    seniority?: string;
+    departments?: string[];
   },
 ): Promise<Lead> {
   const { data, error } = await supabase
@@ -61,6 +88,15 @@ export async function insertLead(
       decision_maker: input.decisionMaker,
       sources: input.sources,
       person_id: input.personId ?? null,
+      research_snippet: input.researchSnippet ?? null,
+      industry: input.industry ?? null,
+      employee_count: input.employeeCount ?? null,
+      location: input.location ?? null,
+      founded_year: input.foundedYear ?? null,
+      company_linkedin_url: input.companyLinkedinUrl ?? null,
+      contact_linkedin_url: input.contactLinkedinUrl ?? null,
+      contact_seniority: input.seniority ?? null,
+      contact_departments: input.departments ?? null,
     })
     .select("*")
     .single();
@@ -82,10 +118,25 @@ export async function getLeadsByRunId(
   return ((leadRows as LeadRow[] | null) ?? []).map(toLead);
 }
 
+type PassedCandidate = { company: string; reason: string };
+
+/** Sums `totalFound` across every `search_leads` call in a run (there can be more than one keyword pass per run). */
+function sumResearchedCount(rows: { output: unknown }[]): number {
+  return rows.reduce((sum, row) => {
+    const output = row.output as { totalFound?: number } | null;
+    return sum + (output?.totalFound ?? 0);
+  }, 0);
+}
+
 export async function getLatestRunWithLeads(
   supabase: SupabaseClient,
   input: { userId: string; employeeId: string },
-): Promise<{ run: AgentRun | null; leads: Lead[]; researchedCount: number }> {
+): Promise<{
+  run: AgentRun | null;
+  leads: Lead[];
+  researchedCount: number;
+  passedCandidates: PassedCandidate[];
+}> {
   const { data: run } = await supabase
     .from("agent_runs")
     .select("*")
@@ -95,26 +146,41 @@ export async function getLatestRunWithLeads(
     .limit(1)
     .maybeSingle();
 
-  if (!run) return { run: null, leads: [], researchedCount: 0 };
+  if (!run) return { run: null, leads: [], researchedCount: 0, passedCandidates: [] };
 
-  const [leads, { data: researchStep }] = await Promise.all([
+  const [leads, { data: researchSteps }, passedCandidates] = await Promise.all([
     getLeadsByRunId(supabase, { runId: run.id }),
     supabase
       .from("agent_run_steps")
       .select("output")
       .eq("run_id", run.id)
-      .eq("tool_name", "research_companies")
-      .maybeSingle(),
+      .eq("tool_name", "search_leads"),
+    getPassedCandidates(supabase, { runId: run.id }),
   ]);
 
-  const researchedCount =
-    ((researchStep?.output as { researched?: number } | null)?.researched) ?? 0;
+  const researchedCount = sumResearchedCount((researchSteps as { output: unknown }[] | null) ?? []);
 
   return {
     run: run as AgentRun,
     leads,
     researchedCount,
+    passedCandidates,
   };
+}
+
+export async function getPassedCandidates(
+  supabase: SupabaseClient,
+  input: { runId: string },
+): Promise<PassedCandidate[]> {
+  const { data } = await supabase
+    .from("agent_run_steps")
+    .select("input")
+    .eq("run_id", input.runId)
+    .eq("tool_name", "note_passed_candidates")
+    .order("seq", { ascending: true });
+
+  const rows = (data as { input: unknown }[] | null) ?? [];
+  return rows.flatMap((row) => (row.input as { passed?: PassedCandidate[] } | null)?.passed ?? []);
 }
 
 export async function getRunHistory(
@@ -145,7 +211,7 @@ export async function getRunHistory(
       .from("agent_run_steps")
       .select("run_id, output")
       .in("run_id", runIds)
-      .eq("tool_name", "research_companies"),
+      .eq("tool_name", "search_leads"),
   ]);
 
   const countsByRun = new Map<string, { approved: number; rejected: number; pending: number }>();
@@ -157,8 +223,8 @@ export async function getRunHistory(
 
   const researchedByRun = new Map<string, number>();
   for (const row of (researchRows as { run_id: string; output: unknown }[] | null) ?? []) {
-    const researched = (row.output as { researched?: number } | null)?.researched ?? 0;
-    researchedByRun.set(row.run_id, researched);
+    const totalFound = (row.output as { totalFound?: number } | null)?.totalFound ?? 0;
+    researchedByRun.set(row.run_id, (researchedByRun.get(row.run_id) ?? 0) + totalFound);
   }
 
   return runRows.map((run) => {

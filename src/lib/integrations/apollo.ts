@@ -48,10 +48,18 @@ export type ApolloPerson = {
   name: string;
   title: string | null;
   email: string | null;
+  linkedin_url: string | null;
+  seniority: string | null;
+  departments: string[];
   organization: {
     name: string;
     website_url: string | null;
     primary_domain: string | null;
+    industry: string | null;
+    estimated_num_employees: number | null;
+    founded_year: number | null;
+    location: string | null;
+    linkedin_url: string | null;
   } | null;
 };
 
@@ -70,23 +78,34 @@ function keywordsFromCriteria({ icp, excludeCriteria }: ApolloSearchCriteria) {
   return { icp, excludeCriteria };
 }
 
+function locationFromOrg(org: Record<string, unknown>): string | null {
+  const parts = [org.city, org.state, org.country].filter(
+    (part): part is string => typeof part === "string" && part.length > 0,
+  );
+  return parts.length > 0 ? parts.join(", ") : null;
+}
+
 function parseApolloPerson(person: Record<string, unknown>, fallbackId: string): ApolloPerson {
+  const org = person.organization as Record<string, unknown> | undefined;
+
   return {
     id: String(person.id ?? fallbackId),
     name: String(person.name ?? "Unknown"),
     title: (person.title as string) ?? null,
     email: (person.email as string) ?? null,
-    organization: person.organization
+    linkedin_url: (person.linkedin_url as string) ?? null,
+    seniority: (person.seniority as string) ?? null,
+    departments: Array.isArray(person.departments) ? (person.departments as string[]) : [],
+    organization: org
       ? {
-          name: String(
-            (person.organization as Record<string, unknown>).name ?? "",
-          ),
-          website_url:
-            ((person.organization as Record<string, unknown>)
-              .website_url as string) ?? null,
-          primary_domain:
-            ((person.organization as Record<string, unknown>)
-              .primary_domain as string) ?? null,
+          name: String(org.name ?? ""),
+          website_url: (org.website_url as string) ?? null,
+          primary_domain: (org.primary_domain as string) ?? null,
+          industry: (org.industry as string) ?? null,
+          estimated_num_employees: (org.estimated_num_employees as number) ?? null,
+          founded_year: (org.founded_year as number) ?? null,
+          location: locationFromOrg(org),
+          linkedin_url: (org.linkedin_url as string) ?? null,
         }
       : null,
   };

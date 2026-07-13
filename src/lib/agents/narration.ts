@@ -22,6 +22,15 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
   save_lead: {
     before: (input) => `Queuing ${input.company as string} for your review.`,
   },
+  note_passed_candidates: {
+    before: () => "Reviewing the rest of the candidates.",
+    after: (_input, output) => {
+      const result = output as { noted: number };
+      return result.noted === 0
+        ? "Every candidate from this search was qualified."
+        : `Passed on ${result.noted} other ${result.noted === 1 ? "candidate" : "candidates"}.`;
+    },
+  },
   draft_outreach_email: {
     before: (input) => `Drafting outreach for ${input.company as string}.`,
     after: () => "Drafted a first outreach email for your review.",

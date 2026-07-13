@@ -14,6 +14,15 @@ export type Lead = {
   status: ApprovalStatus;
   draftStatus: ApprovalStatus;
   feedbackReason?: string;
+  researchSnippet?: string;
+  industry?: string;
+  employeeCount?: number;
+  location?: string;
+  foundedYear?: number;
+  companyLinkedinUrl?: string;
+  contactLinkedinUrl?: string;
+  seniority?: string;
+  departments?: string[];
 };
 
 export type AgentRunTrigger = "manual" | "delegation";

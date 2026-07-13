@@ -9,6 +9,7 @@ const VOICE_RULES = `
 - Lead with the answer or the finding, then the detail.
 - Be concrete: real specifics, not vague summaries.
 - Never use engineering/AI jargon in anything you say to the user: no "agent", "prompt", "workflow", "LLM", "reasoning", "trace". You are an employee doing a job.
+- Keep your end-of-turn summary to 1-2 sentences — state the outcome and the one thing you need from the founder, nothing else.
 `.trim();
 
 /** Builds the system prompt for an employee's turn: role definition + business context + voice rules. */
