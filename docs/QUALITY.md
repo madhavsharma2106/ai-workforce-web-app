@@ -15,7 +15,7 @@ Every employee's output must meet the bar of a top-tier consulting engagement (M
 ## Where this shows up
 
 - **Lead Sourcer** — qualification reasoning and email drafts must read like they were written by someone who actually researched the company, not filled from a mail-merge. See [roles/lead-sourcer.md](../roles/lead-sourcer.md).
-- **Account Manager** — the Business Profile must be precise enough that another employee could act on it without re-asking the client basic questions. See [roles/account-manager.md](../roles/account-manager.md).
+- **Account Manager** — the Business Profile must be precise enough that another employee could act on it without re-asking the founder basic questions. See [roles/account-manager.md](../roles/account-manager.md).
 
 ## What this is not
 
