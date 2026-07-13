@@ -83,17 +83,17 @@ export async function generateNextQuestion(input: {
   const agentName = ROLE_LABELS[role];
   const roleMarkdown = loadRoleMarkdown(role);
   const knownProfileText = knownProfile
-    ? `\n\nExisting Business Profile on file for this client (don't re-ask what's already covered here):\n${knownProfile}`
+    ? `\n\nExisting Business Profile on file for this founder (don't re-ask what's already covered here):\n${knownProfile}`
     : "";
 
-  const prompt = `You are ${agentName}, onboarding a new client. Follow the "## Onboarding" section below for what to cover and how to speak.
+  const prompt = `You are ${agentName}, onboarding a new founder. Follow the "## Onboarding" section below for what to cover and how to speak.
 
 ${roleMarkdown}${knownProfileText}
 
 Conversation so far:
 ${formatTranscript(transcript)}
 
-Decide the single next question to ask (or that you're done). Ask one thing at a time, in character as ${agentName}, adapting to what's already been said — don't just work down a checklist. Offer 2-4 short "chips" (quick-pick answers) only when the question has a small set of natural options. Set "optional" for questions the client can reasonably skip. Set "done": true once you have enough to do the job well per the Onboarding guidance.`;
+Decide the single next question to ask (or that you're done). Ask one thing at a time, in character as ${agentName}, adapting to what's already been said — don't just work down a checklist. Offer 2-4 short "chips" (quick-pick answers) only when the question has a small set of natural options. Set "optional" for questions the founder can reasonably skip. Set "done": true once you have enough to do the job well per the Onboarding guidance.`;
 
   try {
     const { object } = await generateObject({

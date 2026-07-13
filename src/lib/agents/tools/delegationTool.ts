@@ -26,7 +26,7 @@ export function createDelegateToEmployeeTool(
       reason: z
         .string()
         .describe(
-          "A short, first-person line explaining the handoff, written as you'd say it directly to the client — e.g. \"she's better positioned to run lead search from here.\" Not internal justification.",
+          "A short, first-person line explaining the handoff, written as you'd say it directly to the founder — e.g. \"she's better positioned to run lead search from here.\" Not internal justification.",
         ),
       context: z
         .string()
@@ -35,7 +35,7 @@ export function createDelegateToEmployeeTool(
     }),
     execute: async (input) => {
       if (!isRoleHired(input.to_role)) {
-        return { handedOff: false, note: `The client hasn't hired anyone for ${input.to_role} yet.` };
+        return { handedOff: false, note: `The founder hasn't hired anyone for ${input.to_role} yet.` };
       }
       onDelegate(input);
       return { handedOff: true };

@@ -66,7 +66,7 @@ export function createSearchLeadsTool(
 ) {
   return tool({
     description:
-      "Search Apollo.io for candidate leads matching the client's ideal customer profile. " +
+      "Search Apollo.io for candidate leads matching the founder's ideal customer profile. " +
       "Apollo's search is a plain keyword match, not a semantic query — pass a short phrase " +
       "(3-8 words, no punctuation) using terms that would literally appear in a matching " +
       "company's own description or job postings: industry/sector, company type, and any " +

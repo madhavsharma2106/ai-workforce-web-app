@@ -29,11 +29,11 @@ export async function buildSystemPrompt(input: {
     .maybeSingle();
 
   const businessProfile = profile?.profile_md
-    ? `## Business Profile (what you know about this client)\n${profile.profile_md}`
-    : `## Business Profile\n(Not written yet — the Account Manager hasn't completed onboarding with this client.)`;
+    ? `## Business Profile (what you know about this founder)\n${profile.profile_md}`
+    : `## Business Profile\n(Not written yet — the Account Manager hasn't completed onboarding with this founder.)`;
 
   return [
-    `You are ${employeeName}, filling the following role for a client:`,
+    `You are ${employeeName}, filling the following role for a founder:`,
     roleMarkdown,
     businessProfile,
     VOICE_RULES,
