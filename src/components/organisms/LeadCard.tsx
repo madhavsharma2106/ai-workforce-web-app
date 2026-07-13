@@ -9,14 +9,19 @@ type ApprovalStatus = "pending" | "approved" | "rejected";
 type Props = {
   lead: Lead;
   status: ApprovalStatus;
-  draftText: string;
-  isEditing: boolean;
+  showDraft?: boolean;
+  draftText?: string;
+  isEditing?: boolean;
   feedbackActive: boolean;
   feedbackReason?: string;
+  feedbackOptions?: string[];
+  approvedMessage?: string;
+  rejectedNote?: string;
+  approveDisabled?: boolean;
   onApprove: () => void;
   onReject: () => void;
-  onToggleEdit: () => void;
-  onDraftChange: (value: string) => void;
+  onToggleEdit?: () => void;
+  onDraftChange?: (value: string) => void;
   onFeedbackSubmit: (reason: string) => void;
   onRevealEmail: () => void;
   isRevealingEmail: boolean;
@@ -31,7 +36,7 @@ const statusLabel: Record<
   rejected: { label: "Rejected", tone: "danger" },
 };
 
-const feedbackOptions = [
+const DEFAULT_FEEDBACK_OPTIONS = [
   "Too small",
   "Wrong industry",
   "Already contacted",
@@ -42,10 +47,15 @@ const feedbackOptions = [
 const LeadCard: FC<Props> = ({
   lead,
   status,
+  showDraft = true,
   draftText,
-  isEditing,
+  isEditing = false,
   feedbackActive,
   feedbackReason,
+  feedbackOptions = DEFAULT_FEEDBACK_OPTIONS,
+  approvedMessage = "Approved for sending.",
+  rejectedNote = "Emma will remember this for next time.",
+  approveDisabled = false,
   onApprove,
   onReject,
   onToggleEdit,
@@ -103,41 +113,47 @@ const LeadCard: FC<Props> = ({
             <span className="font-medium text-gray-900">Fit — </span>
             {lead.fit}
           </div>
+          <p className="text-xs text-gray-400">Sources: {lead.sources}</p>
         </div>
 
         <Badge tone={statusMeta.tone}>{statusMeta.label}</Badge>
       </div>
 
       <div className="mt-4 space-y-3">
-        <div className="space-y-2 rounded-md border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
-          <Eyebrow tone="muted" tracking="wide">
-            Draft email
-          </Eyebrow>
-          {isEditing ? (
-            <Textarea
-              rows={5}
-              value={draftText}
-              onChange={(event) => onDraftChange(event.target.value)}
-            />
-          ) : (
-            <p className="whitespace-pre-wrap leading-relaxed">{draftText}</p>
-          )}
-          <p className="text-xs text-gray-400">Sources: {lead.sources}</p>
-        </div>
+        {showDraft && (
+          <div className="space-y-2 rounded-md border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
+            <Eyebrow tone="muted" tracking="wide">
+              Draft email
+            </Eyebrow>
+            {isEditing ? (
+              <Textarea
+                rows={5}
+                value={draftText}
+                onChange={(event) => onDraftChange?.(event.target.value)}
+              />
+            ) : (
+              <p className="whitespace-pre-wrap leading-relaxed">{draftText}</p>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-2">
-          <Button onClick={onApprove}>Approve</Button>
+          <Button onClick={onApprove} disabled={approveDisabled}>
+            Approve
+          </Button>
           <Button variant="danger" onClick={onReject}>
             Reject
           </Button>
-          <Button variant="secondary" onClick={onToggleEdit}>
-            {isEditing ? "Done" : "Edit"}
-          </Button>
+          {showDraft && (
+            <Button variant="secondary" onClick={onToggleEdit}>
+              {isEditing ? "Done" : "Edit"}
+            </Button>
+          )}
         </div>
 
         {status === "approved" && (
           <div className="rounded-md bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
-            Approved for sending.
+            {approvedMessage}
           </div>
         )}
 
@@ -168,9 +184,7 @@ const LeadCard: FC<Props> = ({
               Feedback recorded —{" "}
             </span>
             {feedbackReason}
-            <p className="mt-1 text-xs text-gray-400">
-              Emma will remember this for next time.
-            </p>
+            <p className="mt-1 text-xs text-gray-400">{rejectedNote}</p>
           </div>
         )}
       </div>

@@ -30,6 +30,9 @@ type GraphContext = {
   employeeIdByRole: Partial<Record<EmployeeRole, string>>;
   initiatingRole: EmployeeRole;
   runIdByRole: Partial<Record<EmployeeRole, string>>;
+  // Fixed for the whole job (one lead per Oliver-drafting job) — context
+  // level, not graph state, since it never changes mid-run.
+  leadId?: string;
 };
 
 // KNOWN GAP: if a role is revisited within one graph run (e.g. A -> B -> A
@@ -82,6 +85,7 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
       userId: ctx.userId,
       employeeId,
       runId,
+      leadId: ctx.leadId,
     });
 
     const agent = createEmployeeAgent({
@@ -195,6 +199,7 @@ export function buildEmployeeGraph(input: {
   userId: string;
   employeeIdByRole: Partial<Record<EmployeeRole, string>>;
   initiatingRole: EmployeeRole;
+  leadId?: string;
 }) {
   const ctx: GraphContext = { ...input, runIdByRole: {} };
 

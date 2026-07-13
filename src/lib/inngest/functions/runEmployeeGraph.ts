@@ -1,8 +1,8 @@
 import type { ModelMessage } from "ai";
 import { inngest } from "../client";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { listEmployees, type EmployeeRole } from "@/lib/employees";
-import { buildEmployeeGraph } from "@/lib/agents/graph";
+import type { EmployeeRole } from "@/lib/employees";
+import { runGraphJob } from "@/lib/agents/runGraphJob";
 
 /**
  * One Inngest job = one LangGraph delegation graph run, which may traverse
@@ -18,27 +18,10 @@ export const runEmployeeGraph = inngest.createFunction(
     };
 
     const supabase = createAdminClient();
-    const employees = await listEmployees(supabase, userId);
-
-    const employeeIdByRole: Partial<Record<EmployeeRole, string>> = {};
-    for (const employee of employees) {
-      employeeIdByRole[employee.role] = employee.id;
-    }
-
-    const graph = buildEmployeeGraph({
-      supabase,
-      userId,
-      employeeIdByRole,
-      initiatingRole,
-    });
-
     const initialMessages: ModelMessage[] = [{ role: "user", content: message }];
 
     await step.run("run-graph", async () => {
-      await graph.invoke(
-        { messages: initialMessages },
-        { recursionLimit: 6, configurable: { thread_id: crypto.randomUUID() } },
-      );
+      await runGraphJob(supabase, { userId, initiatingRole, messages: initialMessages });
     });
 
     return { status: "completed" };

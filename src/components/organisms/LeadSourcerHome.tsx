@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import RunInProgressCard from "@/components/organisms/RunInProgressCard";
 import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import TaskHistory from "@/components/organisms/TaskHistory";
@@ -16,6 +16,7 @@ type Props = {
   initialLeads: Lead[];
   initialResearchedCount: number;
   initialHistory: TaskHistoryItem[];
+  oliverHired: boolean;
 };
 
 const isInProgress = (run: AgentRun | null) =>
@@ -27,16 +28,15 @@ const LeadSourcerHome = ({
   initialLeads,
   initialResearchedCount,
   initialHistory,
+  oliverHired,
 }: Props) => {
   const [run, setRun] = useState<AgentRun | null>(initialRun);
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [researchedCount, setResearchedCount] = useState(initialResearchedCount);
-  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
   const [now, setNow] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"current" | "previous">("current");
-  const draftsRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
     if (!isInProgress(run)) return;
@@ -102,6 +102,7 @@ const LeadSourcerHome = ({
   };
 
   const handleApprove = (id: string) => {
+    if (!oliverHired) return;
     updateLead(id, (current) => ({ ...current, status: "approved" }));
     void patchLead(id, { status: "approved" });
     if (feedbackLeadId === id) setFeedbackLeadId(null);
@@ -112,25 +113,12 @@ const LeadSourcerHome = ({
     updateLead(id, (current) => ({ ...current, status: "rejected" }));
     void patchLead(id, { status: "rejected" });
     setFeedbackLeadId(id);
-    setEditingLeadId(null);
   };
 
   const handleApproveAll = () => {
+    if (!oliverHired) return;
     leads.filter((lead) => lead.status === "pending").forEach((lead) => handleApprove(lead.id));
     setFeedbackLeadId(null);
-  };
-
-  const handleDraftChange = (id: string, value: string) => {
-    draftsRef.current[id] = value;
-    updateLead(id, (current) => ({ ...current, draft: value }));
-  };
-
-  const handleToggleEdit = (id: string) => {
-    const wasEditing = editingLeadId === id;
-    setEditingLeadId(wasEditing ? null : id);
-    if (wasEditing && draftsRef.current[id] !== undefined) {
-      void patchLead(id, { draft: draftsRef.current[id] });
-    }
   };
 
   const handleFeedbackSubmit = (reason: string) => {
@@ -172,7 +160,7 @@ const LeadSourcerHome = ({
         researchedCount={researchedCount}
         pendingCount={pendingCount}
         approvedCount={approvedCount}
-        editingLeadId={editingLeadId}
+        oliverHired={oliverHired}
         feedbackLeadId={feedbackLeadId}
         revealingLeadId={revealingLeadId}
         onSearchAgain={handleSearchAgain}
@@ -180,8 +168,6 @@ const LeadSourcerHome = ({
         onApprove={handleApprove}
         onReject={handleReject}
         onRevealEmail={handleRevealEmail}
-        onToggleEdit={handleToggleEdit}
-        onDraftChange={handleDraftChange}
         onFeedbackSubmit={handleFeedbackSubmit}
       />
     );

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import LeadCard from "@/components/organisms/LeadCard";
 import type { AgentRun, Lead } from "@/lib/types";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
@@ -11,7 +12,7 @@ type Props = {
   researchedCount: number;
   pendingCount: number;
   approvedCount: number;
-  editingLeadId: string | null;
+  oliverHired: boolean;
   feedbackLeadId: string | null;
   revealingLeadId: string | null;
   onSearchAgain: () => void;
@@ -19,8 +20,6 @@ type Props = {
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onRevealEmail: (id: string) => void;
-  onToggleEdit: (id: string) => void;
-  onDraftChange: (id: string, value: string) => void;
   onFeedbackSubmit: (reason: string) => void;
 };
 
@@ -31,7 +30,7 @@ const RunReviewPanel = ({
   researchedCount,
   pendingCount,
   approvedCount,
-  editingLeadId,
+  oliverHired,
   feedbackLeadId,
   revealingLeadId,
   onSearchAgain,
@@ -39,8 +38,6 @@ const RunReviewPanel = ({
   onApprove,
   onReject,
   onRevealEmail,
-  onToggleEdit,
-  onDraftChange,
   onFeedbackSubmit,
 }: Props) => (
   <>
@@ -94,6 +91,18 @@ const RunReviewPanel = ({
       </Card>
     )}
 
+    {!oliverHired && (
+      <Card as="section" padding="md" className="border-indigo-200 bg-indigo-50">
+        <Text size="sm" className="text-indigo-900">
+          <span className="font-medium">Hire Oliver (Sales Representative)</span>{" "}
+          to draft and approve outreach for leads you approve here.{" "}
+          <Link href="/dashboard" className="underline underline-offset-2">
+            Hire Oliver
+          </Link>
+        </Text>
+      </Card>
+    )}
+
     <Card as="section" padding="lg" className="space-y-6">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
@@ -102,7 +111,7 @@ const RunReviewPanel = ({
             Review & approve leads
           </Heading>
         </div>
-        <Button className="px-4!" onClick={onApproveAll}>
+        <Button className="px-4!" onClick={onApproveAll} disabled={!oliverHired}>
           Approve all
         </Button>
       </div>
@@ -113,16 +122,15 @@ const RunReviewPanel = ({
             key={lead.id}
             lead={lead}
             status={lead.status}
-            draftText={lead.draft}
-            isEditing={editingLeadId === lead.id}
+            showDraft={false}
+            approvedMessage="Approved — handed off to Oliver for outreach."
+            approveDisabled={!oliverHired}
             feedbackActive={feedbackLeadId === lead.id}
             feedbackReason={lead.feedbackReason}
             onApprove={() => onApprove(lead.id)}
             onReject={() => onReject(lead.id)}
             onRevealEmail={() => onRevealEmail(lead.id)}
             isRevealingEmail={revealingLeadId === lead.id}
-            onToggleEdit={() => onToggleEdit(lead.id)}
-            onDraftChange={(value) => onDraftChange(lead.id, value)}
             onFeedbackSubmit={onFeedbackSubmit}
           />
         ))}

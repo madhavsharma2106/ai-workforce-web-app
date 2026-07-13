@@ -22,6 +22,10 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
   save_lead: {
     before: (input) => `Queuing ${input.company as string} for your review.`,
   },
+  draft_outreach_email: {
+    before: (input) => `Drafting outreach for ${input.company as string}.`,
+    after: () => "Drafted a first outreach email for your review.",
+  },
   search_leads: {
     before: (input) => `Searching for companies matching "${input.icp as string}".`,
     after: (_input, output) => {

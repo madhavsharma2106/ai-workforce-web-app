@@ -12,6 +12,7 @@ export type Lead = {
   personId?: string;
   emailRevealed?: boolean;
   status: ApprovalStatus;
+  draftStatus: ApprovalStatus;
   feedbackReason?: string;
 };
 

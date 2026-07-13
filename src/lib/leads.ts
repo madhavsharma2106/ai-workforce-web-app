@@ -13,6 +13,7 @@ type LeadRow = {
   person_id: string | null;
   email_revealed: boolean;
   status: ApprovalStatus;
+  draft_status: ApprovalStatus;
   feedback_reason: string | null;
 };
 
@@ -29,6 +30,7 @@ function toLead(row: LeadRow): Lead {
     personId: row.person_id ?? undefined,
     emailRevealed: row.email_revealed,
     status: row.status,
+    draftStatus: row.draft_status,
     feedbackReason: row.feedback_reason ?? undefined,
   };
 }
@@ -43,7 +45,6 @@ export async function insertLead(
     website: string;
     fit: string;
     decisionMaker: string;
-    draft: string;
     sources: string;
     personId?: string;
   },
@@ -58,7 +59,6 @@ export async function insertLead(
       website: input.website,
       fit: input.fit,
       decision_maker: input.decisionMaker,
-      draft: input.draft,
       sources: input.sources,
       person_id: input.personId ?? null,
     })
@@ -200,6 +200,66 @@ export async function getFeedbackContext(
       .map((r) => r.website.replace(/^https?:\/\//i, "").replace(/^www\./i, "").split("/")[0])
       .filter(Boolean),
   };
+}
+
+export async function getLeadById(
+  supabase: SupabaseClient,
+  input: { id: string; userId: string },
+): Promise<Lead | null> {
+  const { data } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", input.id)
+    .eq("user_id", input.userId)
+    .maybeSingle();
+
+  return data ? toLead(data as LeadRow) : null;
+}
+
+export async function getLeadsAwaitingOutreach(
+  supabase: SupabaseClient,
+  input: { userId: string },
+): Promise<Lead[]> {
+  // Not filtered by employee_id: that column is permanently Emma's id
+  // (set at insert), so Oliver's queue is defined by `status`, not row
+  // ownership.
+  const { data } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("user_id", input.userId)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
+
+  return ((data as LeadRow[] | null) ?? []).map(toLead);
+}
+
+export async function saveDraftEmail(
+  supabase: SupabaseClient,
+  input: { id: string; userId: string; draft: string; runId: string },
+): Promise<void> {
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      draft: input.draft,
+      draft_status: "pending",
+      draft_run_id: input.runId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.id)
+    .eq("user_id", input.userId);
+  if (error) throw error;
+}
+
+export async function updateLeadDraftStatus(
+  supabase: SupabaseClient,
+  input: { id: string; userId: string; status: ApprovalStatus },
+): Promise<void> {
+  const { error } = await supabase
+    .from("leads")
+    .update({ draft_status: input.status, updated_at: new Date().toISOString() })
+    .eq("id", input.id)
+    .eq("user_id", input.userId);
+  if (error) throw error;
 }
 
 export async function updateLeadStatus(
