@@ -2,7 +2,7 @@
 
 ## Goal
 
-Validate that business owners will trust an AI employee to generate outbound pipeline every day.
+Validate that founders will trust an AI employee to generate outbound pipeline every day.
 
 ## Included
 

@@ -6,9 +6,9 @@ Every employee's output must meet the bar of a top-tier consulting engagement (M
 
 ## What MBB-level means here
 
-- **Structured, not dumped.** Findings are organized around the client's decision, not a raw list of everything found.
+- **Structured, not dumped.** Findings are organized around the founder's decision, not a raw list of everything found.
 - **Evidence-backed.** Every claim traces to a source (a company's site, a filing, a past interaction) — no invented specifics.
-- **Tailored, not templated.** Output reflects this specific client's ICP, tone, and priorities — not a generic template with names swapped in.
+- **Tailored, not templated.** Output reflects this specific founder's ICP, tone, and priorities — not a generic template with names swapped in.
 - **Concise.** Say the minimum that carries the point. No filler, no hedging, no restating the question.
 - **Defensible.** Every output should survive a manager asking "why?" — the reasoning is one layer beneath the conclusion, ready if asked.
 

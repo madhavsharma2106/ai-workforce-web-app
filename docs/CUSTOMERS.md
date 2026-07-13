@@ -1,6 +1,6 @@
 # Customer Personas
 
-## Solo Production Agency Owner
+## Solo Production Agency Founder
 
 **Profile**
 

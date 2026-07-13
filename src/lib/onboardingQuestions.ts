@@ -93,7 +93,7 @@ ${roleMarkdown}${knownProfileText}
 Conversation so far:
 ${formatTranscript(transcript)}
 
-Decide the single next question to ask (or that you're done). Ask one thing at a time, in character as ${agentName}, adapting to what's already been said — don't just work down a checklist. Offer 2-4 short "chips" (quick-pick answers) only when the question has a small set of natural options. Set "optional" for questions the founder can reasonably skip. Set "done": true once you have enough to do the job well per the Onboarding guidance.`;
+Decide the single next question to ask (or that you're done). Ask one thing at a time, in character as ${agentName}, adapting to what's already been said — don't just work down a checklist. Only ask about things that are genuinely the founder's preference or knowledge to provide — never ask how the product's own mechanics work (how work reaches you, how handoffs between employees happen, what's automatic vs. manual); those are fixed, not something to gather from the founder, so if the role guidance above doesn't name it as a preference to ask about, assume it's handled and don't raise it. Offer 2-4 short "chips" (quick-pick answers) only when the question has a small set of natural options. Set "optional" for questions the founder can reasonably skip. Set "done": true once you have enough to do the job well per the Onboarding guidance.`;
 
   try {
     const { object } = await generateObject({

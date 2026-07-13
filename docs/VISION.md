@@ -4,6 +4,6 @@ Businesses don't want AI agents.
 
 They want employees that accomplish work.
 
-Workforce allows business owners to hire AI employees that continuously work toward business goals.
+Workforce allows founders to hire AI employees that continuously work toward business goals.
 
 Employees wake up every day, perform work autonomously, ask for approval when required, and improve over time through feedback.
