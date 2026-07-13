@@ -90,87 +90,88 @@ const LeadCard: FC<Props> = ({
       className="bg-white transition hover:border-gray-300"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-3">
+        <div className="flex-1 space-y-2">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gray-900 text-sm font-medium text-white">
               {lead.company.charAt(0)}
             </div>
-            <div>
-              <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
-                {lead.company}
-                {lead.companyLinkedinUrl && (
-                  <a
-                    href={withProtocol(lead.companyLinkedinUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-normal text-indigo-600 underline decoration-dotted underline-offset-2 hover:text-indigo-700"
-                  >
-                    LinkedIn
-                  </a>
-                )}
-              </p>
-              {lead.website ? (
+            <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
+              {lead.company}
+              {lead.companyLinkedinUrl && (
                 <a
-                  href={withProtocol(lead.website)}
+                  href={withProtocol(lead.companyLinkedinUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs text-gray-400 underline decoration-dotted underline-offset-2 hover:text-gray-600"
+                  className="text-xs font-normal text-indigo-600 underline decoration-dotted underline-offset-2 hover:text-indigo-700"
                 >
-                  {lead.website}
+                  LinkedIn
                 </a>
-              ) : (
-                <p className="font-mono text-xs text-gray-400">{lead.website}</p>
-              )}
-            </div>
-          </div>
-          {snapshot && <p className="text-xs text-gray-500">{snapshot}</p>}
-          <div className="space-y-1 text-sm text-gray-500">
-            <p>
-              <span className="text-gray-400">Decision maker </span>
-              <span className="text-gray-700">{lead.decisionMaker}</span>
-              {lead.contactLinkedinUrl && (
-                <>
-                  {" "}
-                  <a
-                    href={withProtocol(lead.contactLinkedinUrl)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-indigo-600 underline decoration-dotted underline-offset-2 hover:text-indigo-700"
-                  >
-                    LinkedIn
-                  </a>
-                </>
-              )}
-            </p>
-            <p>
-              <span className="text-gray-400">Email </span>
-              {emailLocked ? (
-                <button
-                  type="button"
-                  onClick={onRevealEmail}
-                  disabled={isRevealingEmail}
-                  className="text-indigo-600 underline decoration-dotted underline-offset-2 transition hover:text-indigo-700 disabled:opacity-60"
-                >
-                  {isRevealingEmail ? "Revealing…" : "Reveal email"}
-                </button>
-              ) : (
-                <span className="text-gray-700">{lead.email}</span>
               )}
             </p>
           </div>
-          <div className="rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-600">
-            <Eyebrow tone="muted" tracking="wide">
-              Why this is a good fit
-            </Eyebrow>
-            <p className="mt-1.5">{lead.fit}</p>
-            {lead.researchSnippet && (
-              <p className="mt-2 text-xs text-gray-500 italic">"{lead.researchSnippet}"</p>
-            )}
-          </div>
-          <p className="text-xs text-gray-400">Sources: {lead.sources}</p>
+          {snapshot && <p className="text-sm text-gray-600">{snapshot}</p>}
+          {lead.website && (
+            <p className="text-xs">
+              <a
+                href={withProtocol(lead.website)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-gray-400 underline decoration-dotted underline-offset-2 hover:text-gray-600"
+              >
+                {lead.website}
+              </a>
+            </p>
+          )}
         </div>
 
         <Badge tone={statusMeta.tone}>{statusMeta.label}</Badge>
+      </div>
+
+      <div className="my-3 border-t border-gray-100" />
+
+      <div className="space-y-0.5 text-sm">
+        <p className="font-medium text-gray-800">
+          {lead.decisionMaker}
+          {lead.contactLinkedinUrl && (
+            <>
+              {" "}
+              <a
+                href={withProtocol(lead.contactLinkedinUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-normal text-indigo-600 underline decoration-dotted underline-offset-2 hover:text-indigo-700"
+              >
+                LinkedIn
+              </a>
+            </>
+          )}
+        </p>
+        <p className="text-gray-500">
+          {emailLocked ? (
+            <button
+              type="button"
+              onClick={onRevealEmail}
+              disabled={isRevealingEmail}
+              className="text-indigo-600 underline decoration-dotted underline-offset-2 transition hover:text-indigo-700 disabled:opacity-60"
+            >
+              {isRevealingEmail ? "Revealing…" : "Reveal email"}
+            </button>
+          ) : (
+            lead.email
+          )}
+        </p>
+      </div>
+
+      <div className="my-3 border-t border-gray-100" />
+
+      <div className="rounded-md bg-gray-50 px-3 py-2.5 text-sm">
+        <Eyebrow tone="muted" tracking="wide">
+          Why this is a good fit
+        </Eyebrow>
+        <p className="mt-1.5 text-gray-900">{lead.fit}</p>
+        {lead.researchSnippet && (
+          <p className="mt-2 text-sm text-gray-600 italic">&ldquo;{lead.researchSnippet}&rdquo;</p>
+        )}
       </div>
 
       <div className="mt-4 space-y-3">
@@ -191,18 +192,21 @@ const LeadCard: FC<Props> = ({
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={onApprove} disabled={approveDisabled}>
-            Approve
-          </Button>
-          <Button variant="danger" onClick={onReject}>
-            Reject
-          </Button>
-          {showDraft && (
-            <Button variant="secondary" onClick={onToggleEdit}>
-              {isEditing ? "Done" : "Edit"}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-gray-400">Sources: {lead.sources}</p>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={onApprove} disabled={approveDisabled}>
+              Approve
             </Button>
-          )}
+            <Button variant="danger" onClick={onReject}>
+              Reject
+            </Button>
+            {showDraft && (
+              <Button variant="secondary" onClick={onToggleEdit}>
+                {isEditing ? "Done" : "Edit"}
+              </Button>
+            )}
+          </div>
         </div>
 
         {status === "approved" && (
