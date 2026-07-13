@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import LeadCard from "@/components/organisms/LeadCard";
+import RunInProgressCard from "@/components/organisms/RunInProgressCard";
+import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import TaskHistory from "@/components/organisms/TaskHistory";
 import type { AgentRun, Lead, TaskHistoryItem } from "@/lib/types";
-import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
-import { Markdown } from "@/components/molecules";
-import { ROLE_TITLES } from "@/lib/employees";
+import { Tabs } from "@/components/atoms";
 
 const POLL_INTERVAL_MS = 3000;
-const STUCK_THRESHOLD_MS = 90_000;
 const SEARCH_AGAIN_MESSAGE = "Run a new lead search.";
 
 type Props = {
@@ -37,6 +35,7 @@ const LeadSourcerHome = ({
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
   const [now, setNow] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"current" | "previous">("current");
   const draftsRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
@@ -162,138 +161,46 @@ const LeadSourcerHome = ({
     });
   };
 
-  if (run === null || run.status === "queued" || run.status === "running") {
-    const stuck =
-      run !== null && now !== null && now - new Date(run.created_at).getTime() > STUCK_THRESHOLD_MS;
-    return (
-      <main className="space-y-10">
-        <Card as="section" padding="lg">
-          <Eyebrow>Emma</Eyebrow>
-          <Heading as="h2" size="md" className="mt-1">
-            Researching leads…
-          </Heading>
-          <Text size="sm" tone="muted" className="mt-2">
-            Emma is searching for companies that match your profile and drafting
-            outreach — this can take a minute.
-          </Text>
-          {stuck && (
-            <div className="mt-4 space-y-2">
-              <Text size="sm" tone="muted">
-                This is taking longer than expected.
-              </Text>
-              <Button variant="secondary" onClick={handleSearchAgain}>
-                Search again
-              </Button>
-            </div>
-          )}
-        </Card>
-        <TaskHistory employeeId={employeeId} history={initialHistory} />
-      </main>
+  const currentTaskContent =
+    run === null || run.status === "queued" || run.status === "running" ? (
+      <RunInProgressCard run={run} now={now} onSearchAgain={handleSearchAgain} />
+    ) : (
+      <RunReviewPanel
+        employeeId={employeeId}
+        run={run}
+        leads={leads}
+        researchedCount={researchedCount}
+        pendingCount={pendingCount}
+        approvedCount={approvedCount}
+        editingLeadId={editingLeadId}
+        feedbackLeadId={feedbackLeadId}
+        revealingLeadId={revealingLeadId}
+        onSearchAgain={handleSearchAgain}
+        onApproveAll={handleApproveAll}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onRevealEmail={handleRevealEmail}
+        onToggleEdit={handleToggleEdit}
+        onDraftChange={handleDraftChange}
+        onFeedbackSubmit={handleFeedbackSubmit}
+      />
     );
-  }
 
   return (
     <main className="space-y-10">
-      <Card as="section" padding="lg">
-        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-4">
-            <EmployeeAvatar seed={employeeId} size="lg" />
-            <div>
-              <Eyebrow>
-                {ROLE_TITLES.lead_sourcer} · <LocalDate date={run.created_at} />
-              </Eyebrow>
-              <Heading as="h2" size="md" className="mt-1">
-                Emma is working
-              </Heading>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Badge tone="accent" size="md">
-              {pendingCount > 0 ? "Waiting for approval" : "All caught up"}
-            </Badge>
-            <Button variant="secondary" size="sm" onClick={handleSearchAgain}>
-              Search again
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-3">
-          {[
-            { label: "Researched", value: `${researchedCount} companies` },
-            { label: "Qualified", value: `${leads.length} leads` },
-            { label: "In queue", value: `${pendingCount} for review` },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white p-5">
-              <Text size="xs" tone="muted" weight="medium">
-                {stat.label}
-              </Text>
-              <Text size="xl" weight="semibold" className="mt-2 font-mono">
-                {stat.value}
-              </Text>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {run.summary && (
-        <Card as="article" padding="lg">
-          <Eyebrow>Update from Emma</Eyebrow>
-          <blockquote className="mt-4 border-l-2 border-gray-900 pl-4">
-            <Markdown content={run.summary} />
-          </blockquote>
-        </Card>
+      <Tabs
+        tabs={[
+          { key: "current", label: "Current task" },
+          { key: "previous", label: "Previous tasks" },
+        ]}
+        activeKey={activeTab}
+        onChange={setActiveTab}
+      />
+      {activeTab === "current" ? (
+        currentTaskContent
+      ) : (
+        <TaskHistory employeeId={employeeId} history={initialHistory} />
       )}
-
-      <Card as="section" padding="lg" className="space-y-6">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <Eyebrow>Review</Eyebrow>
-            <Heading as="h3" size="md" className="mt-1">
-              Review & approve leads
-            </Heading>
-          </div>
-          <Button className="px-4!" onClick={handleApproveAll}>
-            Approve all
-          </Button>
-        </div>
-
-        <div className="grid gap-4">
-          {leads.map((lead) => (
-            <LeadCard
-              key={lead.id}
-              lead={lead}
-              status={lead.status}
-              draftText={lead.draft}
-              isEditing={editingLeadId === lead.id}
-              feedbackActive={feedbackLeadId === lead.id}
-              feedbackReason={lead.feedbackReason}
-              onApprove={() => handleApprove(lead.id)}
-              onReject={() => handleReject(lead.id)}
-              onRevealEmail={() => handleRevealEmail(lead.id)}
-              isRevealingEmail={revealingLeadId === lead.id}
-              onToggleEdit={() => handleToggleEdit(lead.id)}
-              onDraftChange={(value) => handleDraftChange(lead.id, value)}
-              onFeedbackSubmit={handleFeedbackSubmit}
-            />
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-gray-50 p-5">
-          <div>
-            <Text size="sm" weight="medium">
-              Approval progress
-            </Text>
-            <Text size="sm" tone="muted" className="mt-0.5">
-              {approvedCount} approved • {pendingCount} pending
-            </Text>
-          </div>
-          <Badge tone="accent" size="sm" className="bg-white! shadow-sm">
-            Emma is learning from your feedback
-          </Badge>
-        </div>
-      </Card>
-
-      <TaskHistory employeeId={employeeId} history={initialHistory} />
     </main>
   );
 };
