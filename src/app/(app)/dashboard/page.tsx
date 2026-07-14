@@ -75,87 +75,40 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="space-y-4">
-        <div>
-          <Eyebrow>Hire</Eyebrow>
-          <Heading as="h2" size="lg" className="mt-1">
-            Choose a role to hire
-          </Heading>
-          <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-            Every employee comes with a clear job description and a dashboard
-            where you review their work.
-          </Text>
-        </div>
+      {(!leadSourcer || !salesRepresentative) && (
+        <section className="space-y-4">
+          <div>
+            <Eyebrow>Hire</Eyebrow>
+            <Heading as="h2" size="lg" className="mt-1">
+              Choose a role to hire
+            </Heading>
+            <Text size="sm" tone="muted" className="mt-2 max-w-xl">
+              Every employee comes with a clear job description and a
+              dashboard where you review their work.
+            </Text>
+          </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          {leadSourcer ? (
-            <Link
-              href={
-                leadSourcer.status === "onboarding"
-                  ? `/employee/${leadSourcer.id}/onboarding`
-                  : `/employee/${leadSourcer.id}`
-              }
-            >
-              <Card
-                padding="lg"
-                className="h-full transition hover:border-gray-400"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--accent-soft)">
-                  <Target size={20} className="text-(--accent)" />
-                </div>
-                <Eyebrow className="mt-4">Hired</Eyebrow>
-                <Text size="lg" weight="semibold" className="mt-3">
-                  Lead Sourcer
-                </Text>
-                <Text size="sm" tone="muted" className="mt-1.5">
-                  Emma is researching prospects and drafting outreach.
-                </Text>
-              </Card>
-            </Link>
-          ) : (
-            <HireRoleButton
-              role="lead_sourcer"
-              title="Lead Sourcer"
-              description="Researches prospects and drafts personalized outreach emails for your approval."
-              icon={<Target size={20} className="text-white" />}
-            />
-          )}
+          <div className="grid gap-4 sm:grid-cols-3">
+            {!leadSourcer && (
+              <HireRoleButton
+                role="lead_sourcer"
+                title="Lead Sourcer"
+                description="Researches prospects and drafts personalized outreach emails for your approval."
+                icon={<Target size={20} className="text-white" />}
+              />
+            )}
 
-          {salesRepresentative ? (
-            <Link
-              href={
-                salesRepresentative.status === "onboarding"
-                  ? `/employee/${salesRepresentative.id}/onboarding`
-                  : `/employee/${salesRepresentative.id}`
-              }
-            >
-              <Card
-                padding="lg"
-                className="h-full transition hover:border-gray-400"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--accent-soft)">
-                  <Users size={20} className="text-(--accent)" />
-                </div>
-                <Eyebrow className="mt-4">Hired</Eyebrow>
-                <Text size="lg" weight="semibold" className="mt-3">
-                  Sales Representative
-                </Text>
-                <Text size="sm" tone="muted" className="mt-1.5">
-                  Oliver is turning Emma&apos;s outreach into real
-                  conversations.
-                </Text>
-              </Card>
-            </Link>
-          ) : (
-            <HireRoleButton
-              role="sales_representative"
-              title="Sales Representative"
-              description="Sends approved outreach and drafts follow-ups — once Emma hands off qualified leads."
-              icon={<Users size={20} className="text-white" />}
-            />
-          )}
-        </div>
-      </section>
+            {!salesRepresentative && (
+              <HireRoleButton
+                role="sales_representative"
+                title="Sales Representative"
+                description="Sends approved outreach and drafts follow-ups — once Emma hands off qualified leads."
+                icon={<Users size={20} className="text-white" />}
+              />
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

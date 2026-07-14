@@ -2,19 +2,11 @@ import { z } from "zod";
 import { getModel } from "@/lib/agents/model";
 import { generateObject } from "@/lib/agents/tracing";
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
-import type { OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
+import { buildTranscriptContext, type OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
 
 const instructionsSchema = z.object({
   instructionsMd: z.string(),
 });
-
-const formatTranscript = (transcript: OnboardingTranscriptEntry[]): string =>
-  transcript
-    .map(
-      (entry, index) =>
-        `${index + 1}. Q: ${entry.prompt}\n   A: ${entry.answer || "(skipped)"}`,
-    )
-    .join("\n");
 
 /**
  * Synthesizes an onboarding conversation into a short Instructions note for
@@ -33,10 +25,11 @@ export async function synthesizeEmployeeInstructions(input: {
   }
 
   const agentName = ROLE_LABELS[role];
+  const transcriptContext = await buildTranscriptContext(transcript);
   const prompt = `You just finished onboarding a new founder as ${agentName}. Turn what they told you into a short markdown note capturing only the founder's own preferences for how you specifically should work — not general business facts (those go in the Business Profile, written separately).
 
 Conversation:
-${formatTranscript(transcript)}
+${transcriptContext}
 
 Write "instructionsMd": a short, concrete markdown note (a few bullet points, "## Heading"s only if genuinely needed) covering things like sign-off style, exclusions, things never to claim or promise, pacing/volume preferences, or anything else the founder specifically asked for. If nothing beyond small talk or a generic "nothing to add" came up, return an empty string — don't invent content.`;
 
@@ -63,12 +56,13 @@ export async function mergeEmployeeInstructions(input: {
   const { role, existingInstructionsMd, transcript } = input;
 
   const agentName = ROLE_LABELS[role];
+  const transcriptContext = await buildTranscriptContext(transcript);
   const prompt = `You are ${agentName}. Here's your current Instructions note — the founder's own preferences for how you specifically should work, as distinct from the shared Business Profile:
 
 ${existingInstructionsMd || "(nothing on file yet)"}
 
 The founder just answered a few follow-up questions closing gaps in that note:
-${formatTranscript(transcript)}
+${transcriptContext}
 
 Write the full, updated "instructionsMd": fold the new answers in — keep bullets that are still valid, update or replace any the new answers supersede, add new ones for anything not covered before. Keep it a short, concrete markdown note (a few bullet points, "## Heading"s only if genuinely needed), not a rewrite from scratch.`;
 

@@ -3,6 +3,7 @@ import { getModel } from "@/lib/agents/model";
 import { generateObject } from "@/lib/agents/tracing";
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 import { loadRoleMarkdown } from "@/lib/roles";
+import { buildReferencedPageContext } from "@/lib/urlContext";
 
 export type OnboardingTranscriptEntry = { prompt: string; answer: string };
 
@@ -67,6 +68,21 @@ const formatTranscript = (transcript: OnboardingTranscriptEntry[]): string =>
     : "(nothing asked yet — this is the opening question)";
 
 /**
+ * The numbered Q/A transcript plus the content of any URL the founder has
+ * shared in an answer so far (see `src/lib/urlContext.ts`) — the single
+ * place every prompt-building call site turns a transcript into context, so
+ * a shared URL only needs to be fetched once and every synthesis step
+ * benefits from it.
+ */
+export async function buildTranscriptContext(
+  transcript: OnboardingTranscriptEntry[],
+): Promise<string> {
+  const referencedPages = await buildReferencedPageContext(transcript);
+  const base = formatTranscript(transcript);
+  return referencedPages ? `${base}\n\n${referencedPages}` : base;
+}
+
+/**
  * Generates the next onboarding question, adapted to the conversation so
  * far. What to cover and when to stop comes from the role's "## Onboarding"
  * section in `roles/<role>.md` — this function only supplies the mechanics
@@ -88,13 +104,14 @@ export async function generateNextQuestion(input: {
   const knownProfileText = knownProfile
     ? `\n\nExisting Business Profile on file for this founder (don't re-ask what's already covered here):\n${knownProfile}`
     : "";
+  const transcriptContext = await buildTranscriptContext(transcript);
 
   const prompt = `You are ${agentName}, onboarding a new founder. Follow the "## Onboarding" section below for what to cover and how to speak.
 
 ${roleMarkdown}${knownProfileText}
 
 Conversation so far:
-${formatTranscript(transcript)}
+${transcriptContext}
 
 Decide the single next question to ask (or that you're done). Ask one thing at a time, in character as ${agentName}, adapting to what's already been said — don't just work down a checklist. Only ask about things that are genuinely the founder's preference or knowledge to provide — never ask how the product's own mechanics work (how work reaches you, how handoffs between employees happen, what's automatic vs. manual); those are fixed, not something to gather from the founder, so if the role guidance above doesn't name it as a preference to ask about, assume it's handled and don't raise it. Offer 2-4 short "chips" (quick-pick answers) only when the question has a small set of natural options. Set "optional" for questions the founder can reasonably skip.
 
@@ -144,6 +161,7 @@ export async function generateGapFollowup(input: {
   const knownProfileText = knownProfile
     ? `\n\nExisting Business Profile on file for this founder (don't re-ask what's already covered here):\n${knownProfile}`
     : "";
+  const transcriptContext = await buildTranscriptContext(transcript);
 
   const prompt = `You are ${agentName}. The founder already onboarded you once. Here's what's on file for you specifically today:
 
@@ -154,7 +172,7 @@ Follow the "## Onboarding" section below for the minimum-knowledge checklist and
 ${roleMarkdown}
 
 Questions you've already asked this session:
-${formatTranscript(transcript)}
+${transcriptContext}
 
 Your job right now is not to re-run onboarding — it's to judge, against one guiding question, whether what's on file would let you do genuinely good, specific work for this founder today, or whether something would come out generic or templated because of a gap. Check the "at minimum" checklist as a floor: a checklist item only counts as covered if the existing note answers it specifically and concretely — an item that's technically present but vague or generic is still a gap worth asking about. Don't re-ask anything the existing note already answers well.
 

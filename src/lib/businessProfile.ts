@@ -1,21 +1,13 @@
 import { z } from "zod";
 import { getModel } from "@/lib/agents/model";
 import { generateObject } from "@/lib/agents/tracing";
-import type { OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
+import { buildTranscriptContext, type OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
 
 const profileSchema = z.object({
   businessName: z.string(),
   contactName: z.string(),
   profileMd: z.string(),
 });
-
-const formatTranscript = (transcript: OnboardingTranscriptEntry[]): string =>
-  transcript
-    .map(
-      (entry, index) =>
-        `${index + 1}. Q: ${entry.prompt}\n   A: ${entry.answer || "(skipped)"}`,
-    )
-    .join("\n");
 
 /**
  * Synthesizes an onboarding conversation into a Business Profile other
@@ -26,11 +18,12 @@ export async function synthesizeBusinessProfile(input: {
   transcript: OnboardingTranscriptEntry[];
 }): Promise<{ businessName: string; contactName: string; profileMd: string }> {
   const { transcript } = input;
+  const transcriptContext = await buildTranscriptContext(transcript);
 
   const prompt = `You just finished an onboarding conversation with a new founder as Alex, their Account Manager. Turn it into a Business Profile other AI employees (a lead sourcer, a sales rep) will read as context before doing their jobs — it needs to be precise enough that they don't have to re-ask the founder anything basic.
 
 Conversation:
-${formatTranscript(transcript)}
+${transcriptContext}
 
 Write:
 - "businessName": the business's name, or "" if it wasn't mentioned.
@@ -57,6 +50,7 @@ export async function mergeBusinessProfile(input: {
   transcript: OnboardingTranscriptEntry[];
 }): Promise<{ businessName: string; contactName: string; profileMd: string }> {
   const { existingProfile, transcript } = input;
+  const transcriptContext = await buildTranscriptContext(transcript);
 
   const prompt = `You are Alex, the founder's Account Manager. Here's the current Business Profile other AI employees read as context:
 
@@ -66,7 +60,7 @@ export async function mergeBusinessProfile(input: {
 ${existingProfile.profileMd || "(nothing on file yet)"}
 
 The founder just answered a few follow-up questions closing gaps in that profile:
-${formatTranscript(transcript)}
+${transcriptContext}
 
 Write the full, updated profile:
 - "businessName" / "contactName": updated only if the conversation gave new or corrected values, otherwise keep the existing ones as-is.
