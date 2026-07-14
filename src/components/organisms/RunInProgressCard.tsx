@@ -23,16 +23,16 @@ const RunInProgressCard = ({ run, now, onSearchAgain }: Props) => {
         I'm searching for companies that match your profile and drafting
         outreach — this can take a minute.
       </Text>
-      <div className="mt-4 space-y-2">
-        {stuck && (
+      {stuck && (
+        <div className="mt-4 space-y-2">
           <Text size="sm" tone="muted">
             This is taking longer than expected.
           </Text>
-        )}
-        <Button variant="secondary" onClick={onSearchAgain}>
-          Search again
-        </Button>
-      </div>
+          <Button variant="secondary" onClick={onSearchAgain}>
+            Search again
+          </Button>
+        </div>
+      )}
     </Card>
   );
 };
