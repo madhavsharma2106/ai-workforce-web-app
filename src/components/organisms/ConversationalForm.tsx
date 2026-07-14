@@ -18,7 +18,7 @@ type Props = {
   agentName: string;
   confirmLabel: string;
   fetchNextQuestion: (transcript: OnboardingTranscriptEntry[]) => Promise<NextQuestionResult>;
-  onComplete: (transcript: OnboardingTranscriptEntry[]) => void;
+  onComplete: (transcript: OnboardingTranscriptEntry[]) => void | Promise<void>;
 };
 
 type Message = {
@@ -41,6 +41,7 @@ const ConversationalForm = ({
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [error, setError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messageIdRef = useRef(0);
@@ -128,6 +129,15 @@ const ConversationalForm = ({
   };
 
   const retry = () => void loadNext(transcript);
+
+  const confirm = async () => {
+    setSubmitting(true);
+    try {
+      await onComplete(transcript);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <Card padding="none" className="flex h-full flex-col bg-white">
@@ -237,9 +247,10 @@ const ConversationalForm = ({
             size="lg"
             fullWidth
             className="sm:w-auto"
-            onClick={() => onComplete(transcript)}
+            onClick={confirm}
+            disabled={submitting}
           >
-            {confirmLabel}
+            {submitting ? "Saving…" : confirmLabel}
           </Button>
         )}
       </div>
