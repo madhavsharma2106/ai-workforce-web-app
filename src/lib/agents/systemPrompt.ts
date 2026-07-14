@@ -17,25 +17,42 @@ export async function buildSystemPrompt(input: {
   supabase: SupabaseClient;
   userId: string;
   role: EmployeeRole;
+  employeeId: string;
 }): Promise<string> {
-  const { supabase, userId, role } = input;
+  const { supabase, userId, role, employeeId } = input;
   const roleMarkdown = loadRoleMarkdown(role);
   const employeeName = ROLE_LABELS[role];
 
-  const { data: profile } = await supabase
-    .from("business_profiles")
-    .select("profile_md")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const [{ data: profile }, { data: employee }] = await Promise.all([
+    supabase
+      .from("business_profiles")
+      .select("profile_md")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("employees")
+      .select("instructions_md")
+      .eq("id", employeeId)
+      .maybeSingle(),
+  ]);
 
   const businessProfile = profile?.profile_md
     ? `## Business Profile (what you know about this founder)\n${profile.profile_md}`
     : `## Business Profile\n(Not written yet — the Account Manager hasn't completed onboarding with this founder.)`;
 
-  return [
+  const sections = [
     `You are ${employeeName}, filling the following role for a founder:`,
     roleMarkdown,
     businessProfile,
-    VOICE_RULES,
-  ].join("\n\n");
+  ];
+
+  if (employee?.instructions_md) {
+    sections.push(
+      `## Instructions (what this founder personally told you)\n${employee.instructions_md}`,
+    );
+  }
+
+  sections.push(VOICE_RULES);
+
+  return sections.join("\n\n");
 }

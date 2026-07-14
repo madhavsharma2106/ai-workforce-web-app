@@ -1,11 +1,34 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { markEmployeeActive, requireOwnedEmployeeForApi } from "@/lib/employees";
+import { markEmployeeActive, requireOwnedEmployeeForApi, type EmployeeRole } from "@/lib/employees";
 import { synthesizeBusinessProfile } from "@/lib/businessProfile";
+import { synthesizeEmployeeInstructions } from "@/lib/employeeInstructions";
 import type { OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
 import { inngest } from "@/lib/inngest/client";
 
 type Params = { params: Promise<{ id: string }> };
+
+/**
+ * Best-effort: a failed synthesis shouldn't block the employee from going
+ * active, it just means the founder starts with an empty Instructions note
+ * instead of a pre-filled one.
+ */
+async function saveEmployeeInstructions(
+  supabase: SupabaseClient,
+  input: { role: EmployeeRole; id: string; transcript: OnboardingTranscriptEntry[] },
+): Promise<void> {
+  const { role, id, transcript } = input;
+  try {
+    const { instructionsMd } = await synthesizeEmployeeInstructions({ role, transcript });
+    await supabase
+      .from("employees")
+      .update({ instructions_md: instructionsMd || null })
+      .eq("id", id);
+  } catch {
+    // Leave instructions_md unset — the founder can still fill it in from the employee's page.
+  }
+}
 
 export async function POST(request: Request, { params }: Params) {
   const { id } = await params;
@@ -41,11 +64,13 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   if (employee.role === "sales_representative") {
+    await saveEmployeeInstructions(supabase, { role: employee.role, id, transcript });
     await markEmployeeActive(supabase, id);
     return NextResponse.json({ redirectTo: `/employee/${id}` });
   }
 
   if (employee.role === "lead_sourcer") {
+    await saveEmployeeInstructions(supabase, { role: employee.role, id, transcript });
     await markEmployeeActive(supabase, id);
     await inngest.send({
       name: "employee/run.requested",

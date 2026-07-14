@@ -33,7 +33,7 @@ Use this exact section order — see [roles/lead-sourcer.md](../roles/lead-sourc
 - **Quality Bar** — the role-specific translation of [QUALITY.md](QUALITY.md). Say what an MBB-level version of this role's Outputs actually looks like — and what falls short — don't just link the doc.
 - **Evidence** — how this role's quality/performance gets tracked over time. "(To be tracked and measured)" is fine pre-launch, but don't skip the section.
 - **Routine** — the ordered list of what the role does when it wakes up. This is the loop, not a feature list.
-- **Experience** — what the role learns from over time (feedback, rejected/approved work, patterns). Ties to "Learning happens through feedback, not instruction editing" in [PRINCIPLES.md](PRINCIPLES.md).
+- **Experience** — what the role learns from over time (feedback, rejected/approved work, patterns). Ties to "Learning happens through feedback and through Instructions" in [PRINCIPLES.md](PRINCIPLES.md).
 - **Do Not** — role-specific boundaries only (see Baseline below for what's already covered for every role): ways this role could overstep into another role's job, or a limit unique to what it has access to.
 
 ## Baseline Do Not rules (every role)
@@ -44,6 +44,10 @@ Every role automatically inherits these from [PRINCIPLES.md](PRINCIPLES.md) — 
 - Never take an irreversible action without human approval ("Humans approve irreversible actions")
 
 A role's Do Not section should list only what's specific to it, on top of this baseline.
+
+## Role definition vs. Instructions
+
+This doc, and everything in `roles/<role>.md`, is the role's fixed job definition — the same for every employee filling that role, not founder-editable. It's distinct from **Instructions** (`employees.instructions_md`, see [DATABASE.md](DATABASE.md)): a founder's own stated preferences for one specific employee (sign-off style, exclusions, things never to claim), captured from that employee's onboarding conversation and directly editable afterward from the employee's own page. Instructions layer on top of the role definition at runtime (`buildSystemPrompt` in [src/lib/agents/systemPrompt.ts](../src/lib/agents/systemPrompt.ts)) — they can't override Do Not boundaries or Tools/Integrations, since those aren't part of what's editable.
 
 ## Check against these before adding a role
 

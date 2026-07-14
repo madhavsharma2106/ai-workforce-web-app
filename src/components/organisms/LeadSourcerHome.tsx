@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import RunInProgressCard from "@/components/organisms/RunInProgressCard";
 import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import TaskHistory from "@/components/organisms/TaskHistory";
+import InstructionsPanel from "@/components/organisms/InstructionsPanel";
 import type { AgentRun, Lead, TaskHistoryItem } from "@/lib/types";
 import { Tabs } from "@/components/atoms";
 
@@ -19,6 +20,8 @@ type Props = {
   initialResearchedCount: number;
   initialHistory: TaskHistoryItem[];
   initialPassedCandidates: PassedCandidate[];
+  initialInstructionsMd: string | null;
+  accountManagerId: string | null;
   oliverHired: boolean;
 };
 
@@ -32,6 +35,8 @@ const LeadSourcerHome = ({
   initialResearchedCount,
   initialHistory,
   initialPassedCandidates,
+  initialInstructionsMd,
+  accountManagerId,
   oliverHired,
 }: Props) => {
   const [run, setRun] = useState<AgentRun | null>(initialRun);
@@ -41,7 +46,7 @@ const LeadSourcerHome = ({
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
   const [now, setNow] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<"current" | "previous">("current");
+  const [activeTab, setActiveTab] = useState<"current" | "previous" | "instructions">("current");
 
   useEffect(() => {
     if (!isInProgress(run)) return;
@@ -185,14 +190,20 @@ const LeadSourcerHome = ({
         tabs={[
           { key: "current", label: "Current task" },
           { key: "previous", label: "Previous tasks" },
+          { key: "instructions", label: "Instructions" },
         ]}
         activeKey={activeTab}
         onChange={setActiveTab}
       />
-      {activeTab === "current" ? (
-        currentTaskContent
-      ) : (
-        <TaskHistory employeeId={employeeId} history={initialHistory} />
+      {activeTab === "current" && currentTaskContent}
+      {activeTab === "previous" && <TaskHistory employeeId={employeeId} history={initialHistory} />}
+      {activeTab === "instructions" && (
+        <InstructionsPanel
+          employeeId={employeeId}
+          role="lead_sourcer"
+          initialInstructionsMd={initialInstructionsMd}
+          accountManagerId={accountManagerId}
+        />
       )}
     </main>
   );

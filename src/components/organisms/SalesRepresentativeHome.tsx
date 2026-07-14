@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import LeadCard from "@/components/organisms/LeadCard";
+import InstructionsPanel from "@/components/organisms/InstructionsPanel";
 import type { Lead } from "@/lib/types";
-import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Tabs, Text } from "@/components/atoms";
 import { ROLE_TITLES } from "@/lib/employees";
 
 const POLL_INTERVAL_MS = 3000;
@@ -13,13 +14,21 @@ const FEEDBACK_OPTIONS = ["Wrong tone", "Too long", "Missing personalization", "
 type Props = {
   employeeId: string;
   initialLeads: Lead[];
+  initialInstructionsMd: string | null;
+  accountManagerId: string | null;
 };
 
-const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
+const SalesRepresentativeHome = ({
+  employeeId,
+  initialLeads,
+  initialInstructionsMd,
+  accountManagerId,
+}: Props) => {
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"leads" | "instructions">("leads");
 
   const isDrafting = useMemo(() => leads.some((lead) => lead.draft === ""), [leads]);
 
@@ -114,8 +123,8 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
     { title: "Rejected", items: rejected },
   ];
 
-  return (
-    <main className="space-y-10">
+  const leadsTabContent = (
+    <>
       <Card as="section" padding="lg">
         <div className="flex items-center gap-4">
           <EmployeeAvatar seed={employeeId} size="lg" />
@@ -188,6 +197,28 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
               </div>
             </Card>
           ),
+      )}
+    </>
+  );
+
+  return (
+    <main className="space-y-10">
+      <Tabs
+        tabs={[
+          { key: "leads", label: "Leads" },
+          { key: "instructions", label: "Instructions" },
+        ]}
+        activeKey={activeTab}
+        onChange={setActiveTab}
+      />
+      {activeTab === "leads" && leadsTabContent}
+      {activeTab === "instructions" && (
+        <InstructionsPanel
+          employeeId={employeeId}
+          role="sales_representative"
+          initialInstructionsMd={initialInstructionsMd}
+          accountManagerId={accountManagerId}
+        />
       )}
     </main>
   );

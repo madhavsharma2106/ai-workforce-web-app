@@ -19,6 +19,8 @@ export default async function LeadSourcerHomeContainer({ employeeId, userId }: P
     employeeId,
     excludeRunId: run?.id,
   });
+  const self = employees.find((e) => e.id === employeeId);
+  const accountManager = employees.find((e) => e.role === "account_manager");
 
   return (
     <LeadSourcerHome
@@ -28,6 +30,8 @@ export default async function LeadSourcerHomeContainer({ employeeId, userId }: P
       initialResearchedCount={researchedCount}
       initialHistory={history}
       initialPassedCandidates={passedCandidates}
+      initialInstructionsMd={self?.instructions_md ?? null}
+      accountManagerId={accountManager?.id ?? null}
       oliverHired={employees.some((e) => e.role === "sales_representative")}
     />
   );

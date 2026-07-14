@@ -72,7 +72,12 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
         .eq("id", state.pendingDelegationId);
     }
 
-    const systemPrompt = await buildSystemPrompt({ supabase: ctx.supabase, userId: ctx.userId, role });
+    const systemPrompt = await buildSystemPrompt({
+      supabase: ctx.supabase,
+      userId: ctx.userId,
+      role,
+      employeeId,
+    });
 
     let delegationRequest: DelegationRequest | null = null;
     let seq = 0;

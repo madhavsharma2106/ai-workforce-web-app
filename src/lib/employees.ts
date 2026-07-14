@@ -14,6 +14,7 @@ export type Employee = {
   user_id: string;
   role: EmployeeRole;
   status: EmployeeStatus;
+  instructions_md: string | null;
   created_at: string;
 };
 

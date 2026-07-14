@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(new URL("/", origin));
+      return NextResponse.redirect(new URL("/dashboard", origin));
     }
   } else if (tokenHash && type) {
     const supabase = await createClient();
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       token_hash: tokenHash,
     });
     if (!error) {
-      return NextResponse.redirect(new URL("/", origin));
+      return NextResponse.redirect(new URL("/dashboard", origin));
     }
   }
 

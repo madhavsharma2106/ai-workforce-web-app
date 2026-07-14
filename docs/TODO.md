@@ -2,4 +2,3 @@
 - No message to user when something goes wrong
 - chat messages are not tied together in a thread
 - timezone is off by -30mins
-- we dont know what instructions / prompt each employee has. this needs to be visible and editable.
