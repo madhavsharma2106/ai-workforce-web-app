@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button, Card, Eyebrow, Heading, Text, Textarea } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import type { EmployeeRole } from "@/lib/employees";
+import KnowledgeRefreshModal from "@/components/organisms/KnowledgeRefreshModal";
+import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 
 const MISSION_LINE: Partial<Record<EmployeeRole, string>> = {
   lead_sourcer: "I research and qualify companies that match your ideal customer, every day.",
@@ -24,6 +25,7 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
   const [draft, setDraft] = useState(instructionsMd);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gapCheckOpen, setGapCheckOpen] = useState(false);
 
   const startEdit = () => {
     setDraft(instructionsMd);
@@ -61,9 +63,14 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
           </Heading>
         </div>
         {mode === "view" && (
-          <Button variant="secondary" onClick={startEdit}>
-            Update instructions
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setGapCheckOpen(true)}>
+              Check for gaps
+            </Button>
+            <Button variant="secondary" onClick={startEdit}>
+              Update instructions
+            </Button>
+          </div>
         )}
       </div>
 
@@ -118,6 +125,19 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
           </div>
         </div>
       )}
+
+      <KnowledgeRefreshModal
+        open={gapCheckOpen}
+        onClose={() => setGapCheckOpen(false)}
+        employeeId={employeeId}
+        role={role}
+        agentName={ROLE_LABELS[role]}
+        onApplied={(result) => {
+          if ("instructionsMd" in result) {
+            setInstructionsMd(result.instructionsMd ?? "");
+          }
+        }}
+      />
     </Card>
   );
 };

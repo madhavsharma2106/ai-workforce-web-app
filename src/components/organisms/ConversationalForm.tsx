@@ -44,6 +44,7 @@ const ConversationalForm = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messageIdRef = useRef(0);
+  const hasLoadedInitial = useRef(false);
 
   const loadNext = async (nextTranscript: OnboardingTranscriptEntry[]) => {
     setIsTyping(true);
@@ -53,6 +54,16 @@ const ConversationalForm = ({
       if (result.done) {
         setCurrentQuestion(null);
         setIsComplete(true);
+        if (result.message) {
+          setMessages((current) => [
+            ...current,
+            {
+              id: `q${messageIdRef.current++}`,
+              from: "agent",
+              text: result.message as string,
+            },
+          ]);
+        }
       } else {
         setCurrentQuestion(result.question);
         setMessages((current) => [
@@ -74,7 +85,12 @@ const ConversationalForm = ({
   useEffect(() => {
     // Fetch the opening question once on mount — the resulting setState
     // happens asynchronously after the LLM call resolves, not synchronously
-    // within the effect body.
+    // within the effect body. Guarded against Strict Mode's dev-only
+    // mount→unmount→remount, which would otherwise fire this twice and,
+    // since the question is LLM-generated (non-deterministic), append two
+    // differently-worded opening questions instead of deduping to one.
+    if (hasLoadedInitial.current) return;
+    hasLoadedInitial.current = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadNext([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps

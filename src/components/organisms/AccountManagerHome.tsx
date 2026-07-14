@@ -12,7 +12,8 @@ import {
   Textarea,
 } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import { ROLE_TITLES } from "@/lib/employees";
+import KnowledgeRefreshModal from "@/components/organisms/KnowledgeRefreshModal";
+import { ROLE_LABELS, ROLE_TITLES } from "@/lib/employees";
 
 type Profile = {
   businessName: string;
@@ -45,6 +46,7 @@ const AccountManagerHome = ({
   const [draft, setDraft] = useState(profile);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gapCheckOpen, setGapCheckOpen] = useState(false);
 
   const startEdit = () => {
     setDraft(profile);
@@ -121,9 +123,14 @@ const AccountManagerHome = ({
             </Heading>
           </div>
           {mode === "view" && (
-            <Button variant="secondary" onClick={startEdit}>
-              Update profile
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={() => setGapCheckOpen(true)}>
+                Check for gaps
+              </Button>
+              <Button variant="secondary" onClick={startEdit}>
+                Update profile
+              </Button>
+            </div>
           )}
         </div>
 
@@ -233,6 +240,26 @@ const AccountManagerHome = ({
           </div>
         )}
       </Card>
+
+      <KnowledgeRefreshModal
+        open={gapCheckOpen}
+        onClose={() => setGapCheckOpen(false)}
+        employeeId={employeeId}
+        role="account_manager"
+        agentName={ROLE_LABELS.account_manager}
+        onApplied={(result) => {
+          if ("businessProfile" in result) {
+            setProfile({
+              businessName: result.businessProfile.businessName,
+              contactName: result.businessProfile.contactName,
+              profileMd: result.businessProfile.profileMd,
+            });
+            if (result.businessProfile.updatedAt) {
+              setSavedAt(result.businessProfile.updatedAt);
+            }
+          }
+        }}
+      />
     </main>
   );
 };

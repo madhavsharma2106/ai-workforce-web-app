@@ -45,3 +45,38 @@ Write:
 
   return object;
 }
+
+/**
+ * Folds a gap-followup conversation into the existing Business Profile —
+ * keeps still-valid content, updates or replaces anything the new answers
+ * supersede, adds anything new. Used by Alex's "Check for gaps" action, as
+ * distinct from fresh-onboarding synthesis above.
+ */
+export async function mergeBusinessProfile(input: {
+  existingProfile: { businessName: string; contactName: string; profileMd: string };
+  transcript: OnboardingTranscriptEntry[];
+}): Promise<{ businessName: string; contactName: string; profileMd: string }> {
+  const { existingProfile, transcript } = input;
+
+  const prompt = `You are Alex, the founder's Account Manager. Here's the current Business Profile other AI employees read as context:
+
+- Business name: ${existingProfile.businessName || "(not provided)"}
+- Founder's name: ${existingProfile.contactName || "(not provided)"}
+- Description:
+${existingProfile.profileMd || "(nothing on file yet)"}
+
+The founder just answered a few follow-up questions closing gaps in that profile:
+${formatTranscript(transcript)}
+
+Write the full, updated profile:
+- "businessName" / "contactName": updated only if the conversation gave new or corrected values, otherwise keep the existing ones as-is.
+- "profileMd": fold the new answers into the existing document — keep sections that are still valid, update or replace any the new answers supersede, add new "## Heading" sections for anything not covered before. Keep it precise and concrete, not a rewrite from scratch.`;
+
+  const { object } = await generateObject({
+    model: getModel(),
+    schema: profileSchema,
+    prompt,
+  });
+
+  return object;
+}

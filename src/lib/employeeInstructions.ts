@@ -48,3 +48,35 @@ Write "instructionsMd": a short, concrete markdown note (a few bullet points, "#
 
   return object;
 }
+
+/**
+ * Folds a gap-followup conversation into the founder's existing Instructions
+ * note for one employee — keeps still-valid points, updates ones the new
+ * answers supersede, adds anything new. Used by the Instructions tab's
+ * "Check for gaps" action, as distinct from fresh-onboarding synthesis above.
+ */
+export async function mergeEmployeeInstructions(input: {
+  role: EmployeeRole;
+  existingInstructionsMd: string;
+  transcript: OnboardingTranscriptEntry[];
+}): Promise<{ instructionsMd: string }> {
+  const { role, existingInstructionsMd, transcript } = input;
+
+  const agentName = ROLE_LABELS[role];
+  const prompt = `You are ${agentName}. Here's your current Instructions note — the founder's own preferences for how you specifically should work, as distinct from the shared Business Profile:
+
+${existingInstructionsMd || "(nothing on file yet)"}
+
+The founder just answered a few follow-up questions closing gaps in that note:
+${formatTranscript(transcript)}
+
+Write the full, updated "instructionsMd": fold the new answers in — keep bullets that are still valid, update or replace any the new answers supersede, add new ones for anything not covered before. Keep it a short, concrete markdown note (a few bullet points, "## Heading"s only if genuinely needed), not a rewrite from scratch.`;
+
+  const { object } = await generateObject({
+    model: getModel(),
+    schema: instructionsSchema,
+    prompt,
+  });
+
+  return object;
+}
