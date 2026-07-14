@@ -19,9 +19,6 @@ export default async function LeadSourcerHomeContainer({ employeeId, userId }: P
     getRunHistory(supabase, { userId, employeeId, excludeRunId: run?.id }),
     run ? getAgentRunSteps(supabase, { runId: run.id }) : Promise.resolve([]),
   ]);
-  const self = employees.find((e) => e.id === employeeId);
-  const accountManager = employees.find((e) => e.role === "account_manager");
-
   return (
     <LeadSourcerHome
       employeeId={employeeId}
@@ -31,8 +28,6 @@ export default async function LeadSourcerHomeContainer({ employeeId, userId }: P
       initialSteps={steps}
       initialHistory={history}
       initialPassedCandidates={passedCandidates}
-      initialInstructionsMd={self?.instructions_md ?? null}
-      accountManagerId={accountManager?.id ?? null}
       oliverHired={employees.some((e) => e.role === "sales_representative")}
     />
   );

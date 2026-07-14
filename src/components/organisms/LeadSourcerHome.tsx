@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import RunInProgressCard from "@/components/organisms/RunInProgressCard";
 import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import SearchAgainModal from "@/components/organisms/SearchAgainModal";
 import TaskHistory from "@/components/organisms/TaskHistory";
-import InstructionsPanel from "@/components/organisms/InstructionsPanel";
 import type { AgentRun, AgentRunStep, Lead, TaskHistoryItem } from "@/lib/types";
 import { Tabs } from "@/components/atoms";
 
@@ -22,8 +22,6 @@ type Props = {
   initialSteps: AgentRunStep[];
   initialHistory: TaskHistoryItem[];
   initialPassedCandidates: PassedCandidate[];
-  initialInstructionsMd: string | null;
-  accountManagerId: string | null;
   oliverHired: boolean;
 };
 
@@ -38,8 +36,6 @@ const LeadSourcerHome = ({
   initialSteps,
   initialHistory,
   initialPassedCandidates,
-  initialInstructionsMd,
-  accountManagerId,
   oliverHired,
 }: Props) => {
   const [run, setRun] = useState<AgentRun | null>(initialRun);
@@ -50,7 +46,7 @@ const LeadSourcerHome = ({
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
   const [now, setNow] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<"current" | "previous" | "instructions">("current");
+  const [activeTab, setActiveTab] = useState<"current" | "previous">("current");
   const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   useEffect(() => {
@@ -196,25 +192,24 @@ const LeadSourcerHome = ({
 
   return (
     <main className="space-y-10">
-      <Tabs
-        tabs={[
-          { key: "current", label: "Current task" },
-          { key: "previous", label: "Previous tasks" },
-          { key: "instructions", label: "Instructions" },
-        ]}
-        activeKey={activeTab}
-        onChange={setActiveTab}
-      />
+      <div className="flex items-center justify-between gap-4">
+        <Tabs
+          tabs={[
+            { key: "current", label: "Current task" },
+            { key: "previous", label: "Previous tasks" },
+          ]}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
+        <Link
+          href={`/employee/${employeeId}/instructions`}
+          className="rounded-md border border-(--border) px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+        >
+          Instructions
+        </Link>
+      </div>
       {activeTab === "current" && currentTaskContent}
       {activeTab === "previous" && <TaskHistory employeeId={employeeId} history={initialHistory} />}
-      {activeTab === "instructions" && (
-        <InstructionsPanel
-          employeeId={employeeId}
-          role="lead_sourcer"
-          initialInstructionsMd={initialInstructionsMd}
-          accountManagerId={accountManagerId}
-        />
-      )}
       <SearchAgainModal
         open={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}

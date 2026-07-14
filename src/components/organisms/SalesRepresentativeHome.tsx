@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import LeadCard from "@/components/organisms/LeadCard";
-import InstructionsPanel from "@/components/organisms/InstructionsPanel";
 import type { Lead } from "@/lib/types";
-import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Tabs, Text } from "@/components/atoms";
+import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
 import { ROLE_TITLES } from "@/lib/employees";
 
 const POLL_INTERVAL_MS = 3000;
@@ -14,21 +14,13 @@ const FEEDBACK_OPTIONS = ["Wrong tone", "Too long", "Missing personalization", "
 type Props = {
   employeeId: string;
   initialLeads: Lead[];
-  initialInstructionsMd: string | null;
-  accountManagerId: string | null;
 };
 
-const SalesRepresentativeHome = ({
-  employeeId,
-  initialLeads,
-  initialInstructionsMd,
-  accountManagerId,
-}: Props) => {
+const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"leads" | "instructions">("leads");
 
   const isDrafting = useMemo(() => leads.some((lead) => lead.draft === ""), [leads]);
 
@@ -126,19 +118,27 @@ const SalesRepresentativeHome = ({
   const leadsTabContent = (
     <>
       <Card as="section" padding="lg">
-        <div className="flex items-center gap-4">
-          <EmployeeAvatar seed={employeeId} size="lg" />
-          <div>
-            <Eyebrow>{ROLE_TITLES.sales_representative}</Eyebrow>
-            <Heading as="h2" size="md" className="mt-1">
-              Hi, I&apos;m Oliver
-            </Heading>
-            <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-              I draft an email for each lead Emma approves, then wait for your
-              sign-off — sending itself isn&apos;t wired up yet in this preview
-              build.
-            </Text>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <EmployeeAvatar seed={employeeId} size="lg" />
+            <div>
+              <Eyebrow>{ROLE_TITLES.sales_representative}</Eyebrow>
+              <Heading as="h2" size="md" className="mt-1">
+                Hi, I&apos;m Oliver
+              </Heading>
+              <Text size="sm" tone="muted" className="mt-2 max-w-xl">
+                I draft an email for each lead Emma approves, then wait for your
+                sign-off — sending itself isn&apos;t wired up yet in this preview
+                build.
+              </Text>
+            </div>
           </div>
+          <Link
+            href={`/employee/${employeeId}/instructions`}
+            className="shrink-0 rounded-md border border-(--border) px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+          >
+            Instructions
+          </Link>
         </div>
       </Card>
 
@@ -201,27 +201,7 @@ const SalesRepresentativeHome = ({
     </>
   );
 
-  return (
-    <main className="space-y-10">
-      <Tabs
-        tabs={[
-          { key: "leads", label: "Leads" },
-          { key: "instructions", label: "Instructions" },
-        ]}
-        activeKey={activeTab}
-        onChange={setActiveTab}
-      />
-      {activeTab === "leads" && leadsTabContent}
-      {activeTab === "instructions" && (
-        <InstructionsPanel
-          employeeId={employeeId}
-          role="sales_representative"
-          initialInstructionsMd={initialInstructionsMd}
-          accountManagerId={accountManagerId}
-        />
-      )}
-    </main>
-  );
+  return <main className="space-y-10">{leadsTabContent}</main>;
 };
 
 export default SalesRepresentativeHome;
