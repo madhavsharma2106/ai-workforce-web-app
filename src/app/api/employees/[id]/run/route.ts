@@ -20,10 +20,15 @@ export async function POST(request: Request, { params }: Params) {
   const body = await request.json().catch(() => ({}));
   const message: string = body.message || "Give me a status update.";
 
-  await inngest.send({
-    name: "employee/run.requested",
-    data: { userId: user.id, initiatingRole: employee.role, message },
-  });
+  try {
+    await inngest.send({
+      name: "employee/run.requested",
+      data: { userId: user.id, initiatingRole: employee.role, message },
+    });
+  } catch (error) {
+    console.error("Failed to send employee/run.requested to Inngest", error);
+    return NextResponse.json({ error: "Couldn't start the run — try again." }, { status: 502 });
+  }
 
   return NextResponse.json({ status: "queued" });
 }

@@ -52,7 +52,15 @@ export async function PATCH(request: Request, { params }: Params) {
       .select("id");
 
     if (changed && changed.length > 0) {
-      await inngest.send({ name: "leads/approved", data: { userId: user.id, leadId: id } });
+      try {
+        await inngest.send({ name: "leads/approved", data: { userId: user.id, leadId: id } });
+      } catch (error) {
+        console.error("Failed to send leads/approved to Inngest", error);
+        return NextResponse.json(
+          { error: "Approved, but couldn't start outreach drafting — try again." },
+          { status: 502 },
+        );
+      }
     }
   } else if (status !== undefined) {
     await updateLeadStatus(supabase, { id, userId: user.id, status });

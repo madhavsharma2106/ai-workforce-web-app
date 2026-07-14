@@ -72,14 +72,20 @@ export async function POST(request: Request, { params }: Params) {
   if (employee.role === "lead_sourcer") {
     await saveEmployeeInstructions(supabase, { role: employee.role, id, transcript });
     await markEmployeeActive(supabase, id);
-    await inngest.send({
-      name: "employee/run.requested",
-      data: {
-        userId: user.id,
-        initiatingRole: "lead_sourcer",
-        message: "Run your first lead search.",
-      },
-    });
+    try {
+      await inngest.send({
+        name: "employee/run.requested",
+        data: {
+          userId: user.id,
+          initiatingRole: "lead_sourcer",
+          message: "Run your first lead search.",
+        },
+      });
+    } catch (error) {
+      // Best-effort, same as instructions synthesis above — the founder can
+      // trigger a search manually from the employee page if this fails.
+      console.error("Failed to send employee/run.requested to Inngest", error);
+    }
     return NextResponse.json({ redirectTo: `/employee/${id}` });
   }
 
