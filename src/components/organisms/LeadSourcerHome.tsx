@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import RunInProgressCard from "@/components/organisms/RunInProgressCard";
 import RunReviewPanel from "@/components/organisms/RunReviewPanel";
+import SearchAgainModal from "@/components/organisms/SearchAgainModal";
 import TaskHistory from "@/components/organisms/TaskHistory";
 import InstructionsPanel from "@/components/organisms/InstructionsPanel";
 import type { AgentRun, Lead, TaskHistoryItem } from "@/lib/types";
@@ -47,6 +48,7 @@ const LeadSourcerHome = ({
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
   const [now, setNow] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"current" | "previous" | "instructions">("current");
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isInProgress(run)) return;
@@ -140,7 +142,8 @@ const LeadSourcerHome = ({
     setFeedbackLeadId(null);
   };
 
-  const handleSearchAgain = () => {
+  const handleSearchAgainSubmit = (customMessage: string | null) => {
+    setSearchModalOpen(false);
     setRun({
       id: "",
       user_id: "",
@@ -156,13 +159,15 @@ const LeadSourcerHome = ({
     void fetch(`/api/employees/${employeeId}/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: SEARCH_AGAIN_MESSAGE }),
+      body: JSON.stringify({ message: customMessage?.trim() || SEARCH_AGAIN_MESSAGE }),
     });
   };
 
+  const handleOpenSearchModal = () => setSearchModalOpen(true);
+
   const currentTaskContent =
     run === null || run.status === "queued" || run.status === "running" ? (
-      <RunInProgressCard run={run} now={now} onSearchAgain={handleSearchAgain} />
+      <RunInProgressCard run={run} now={now} onSearchAgain={handleOpenSearchModal} />
     ) : (
       <RunReviewPanel
         employeeId={employeeId}
@@ -175,7 +180,7 @@ const LeadSourcerHome = ({
         feedbackLeadId={feedbackLeadId}
         revealingLeadId={revealingLeadId}
         passedCandidates={passedCandidates}
-        onSearchAgain={handleSearchAgain}
+        onSearchAgain={handleOpenSearchModal}
         onApproveAll={handleApproveAll}
         onApprove={handleApprove}
         onReject={handleReject}
@@ -205,6 +210,11 @@ const LeadSourcerHome = ({
           accountManagerId={accountManagerId}
         />
       )}
+      <SearchAgainModal
+        open={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        onSubmit={handleSearchAgainSubmit}
+      />
     </main>
   );
 };

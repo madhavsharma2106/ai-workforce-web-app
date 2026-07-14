@@ -194,19 +194,21 @@ const LeadCard: FC<Props> = ({
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-gray-400">Sources: {lead.sources}</p>
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={onApprove} disabled={approveDisabled}>
-              Approve
-            </Button>
-            <Button variant="danger" onClick={onReject}>
-              Reject
-            </Button>
-            {showDraft && (
-              <Button variant="secondary" onClick={onToggleEdit}>
-                {isEditing ? "Done" : "Edit"}
+          {status !== "approved" && (
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={onApprove} disabled={approveDisabled}>
+                Approve
               </Button>
-            )}
-          </div>
+              <Button variant="danger" onClick={onReject}>
+                Reject
+              </Button>
+              {showDraft && (
+                <Button variant="secondary" onClick={onToggleEdit}>
+                  {isEditing ? "Done" : "Edit"}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {status === "approved" && (

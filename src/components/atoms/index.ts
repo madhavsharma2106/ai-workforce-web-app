@@ -9,5 +9,6 @@ export { EmployeeAvatar } from "./EmployeeAvatar";
 export { Eyebrow } from "./Eyebrow";
 export { Heading } from "./Heading";
 export { LocalDate } from "./LocalDate";
+export { Modal } from "./Modal";
 export { Tabs } from "./Tabs";
 export { Text } from "./Text";
