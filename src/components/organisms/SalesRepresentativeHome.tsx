@@ -131,11 +131,12 @@ const SalesRepresentativeHome = ({
           <div>
             <Eyebrow>{ROLE_TITLES.sales_representative}</Eyebrow>
             <Heading as="h2" size="md" className="mt-1">
-              Oliver is drafting outreach
+              Hi, I&apos;m Oliver
             </Heading>
             <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-              Emma&apos;s approved leads land here for a drafted email — sending
-              itself isn&apos;t wired up yet in this preview build.
+              I draft an email for each lead Emma approves, then wait for your
+              sign-off — sending itself isn&apos;t wired up yet in this preview
+              build.
             </Text>
           </div>
         </div>
@@ -158,8 +159,8 @@ const SalesRepresentativeHome = ({
       {leads.length === 0 && (
         <Card as="section" padding="lg">
           <Text size="sm" tone="muted">
-            No leads waiting on outreach yet — approve a lead on Emma&apos;s page to
-            send it here.
+            I don&apos;t have any leads waiting on outreach yet — approve one on
+            Emma&apos;s page and I&apos;ll get started.
           </Text>
         </Card>
       )}
@@ -184,7 +185,6 @@ const SalesRepresentativeHome = ({
                     feedbackReason={lead.feedbackReason}
                     feedbackOptions={FEEDBACK_OPTIONS}
                     approvedMessage="Draft approved — ready to send."
-                    rejectedNote="Oliver will remember this for next time."
                     onApprove={() => handleApprove(lead.id)}
                     onReject={() => handleReject(lead.id)}
                     onToggleEdit={() => handleToggleEdit(lead.id)}

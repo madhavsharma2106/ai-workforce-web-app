@@ -69,7 +69,7 @@ const LeadCard: FC<Props> = ({
   feedbackReason,
   feedbackOptions = DEFAULT_FEEDBACK_OPTIONS,
   approvedMessage = "Approved for sending.",
-  rejectedNote = "Emma will remember this for next time.",
+  rejectedNote = "I'll remember this for next time.",
   approveDisabled = false,
   onApprove,
   onReject,

@@ -62,7 +62,7 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
         </div>
         {mode === "view" && (
           <Button variant="secondary" onClick={startEdit}>
-            Update instructions →
+            Update instructions
           </Button>
         )}
       </div>

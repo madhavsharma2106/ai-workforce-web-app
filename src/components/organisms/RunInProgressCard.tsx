@@ -17,10 +17,10 @@ const RunInProgressCard = ({ run, now, onSearchAgain }: Props) => {
     <Card as="section" padding="lg">
       <Eyebrow>Emma</Eyebrow>
       <Heading as="h2" size="md" className="mt-1">
-        Researching leads…
+        I'm researching leads…
       </Heading>
       <Text size="sm" tone="muted" className="mt-2">
-        Emma is searching for companies that match your profile and drafting
+        I'm searching for companies that match your profile and drafting
         outreach — this can take a minute.
       </Text>
       {stuck && (

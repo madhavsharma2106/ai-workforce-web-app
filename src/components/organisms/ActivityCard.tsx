@@ -24,7 +24,7 @@ const ActivityCard = ({ steps }: Props) => {
         <div>
           <Eyebrow>What happened</Eyebrow>
           <Heading as="h2" size="md" className="mt-1">
-            Activity
+            What I did
           </Heading>
         </div>
         {expanded ? (

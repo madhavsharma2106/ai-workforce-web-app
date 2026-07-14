@@ -56,7 +56,9 @@ const RunReviewPanel = ({
               {ROLE_TITLES.lead_sourcer} · <LocalDate date={run.created_at} />
             </Eyebrow>
             <Heading as="h2" size="md" className="mt-1">
-              Emma is working
+              {pendingCount > 0
+                ? `I found ${pendingCount} ${pendingCount === 1 ? "lead" : "leads"} for you to review`
+                : "I'm all caught up"}
             </Heading>
           </div>
         </div>
@@ -131,7 +133,7 @@ const RunReviewPanel = ({
             lead={lead}
             status={lead.status}
             showDraft={false}
-            approvedMessage="Approved — handed off to Oliver for outreach."
+            approvedMessage="Approved — I've handed this off to Oliver for outreach."
             approveDisabled={!oliverHired}
             feedbackActive={feedbackLeadId === lead.id}
             feedbackReason={lead.feedbackReason}
@@ -154,7 +156,7 @@ const RunReviewPanel = ({
           </Text>
         </div>
         <Badge tone="accent" size="sm" className="bg-white! shadow-sm">
-          Emma is learning from your feedback
+          I'm learning from your feedback
         </Badge>
       </div>
     </Card>

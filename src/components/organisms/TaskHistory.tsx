@@ -20,7 +20,7 @@ const TaskHistory = ({ employeeId, history }: Props) => (
 
     {history.length === 0 ? (
       <Text size="sm" tone="muted">
-        No previous tasks yet — Emma&apos;s past runs will show up here.
+        No previous tasks yet — I'll show my past runs here.
       </Text>
     ) : (
       <div className="divide-y divide-gray-200">
@@ -35,7 +35,7 @@ const TaskHistory = ({ employeeId, history }: Props) => (
                 <LocalDate date={task.created_at} />
               </Text>
               <Text size="sm" tone="muted" className="mt-0.5 truncate">
-                {task.summary ?? `Researched ${task.researchedCount} companies`}
+                {task.summary ?? `I researched ${task.researchedCount} companies`}
               </Text>
             </div>
             <div className="flex shrink-0 items-center gap-3">

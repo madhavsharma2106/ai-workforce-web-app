@@ -43,6 +43,8 @@ A **Role** defines the job (e.g. Lead Sourcer, Account Manager, Sales Representa
 
 This distinction is intentional and should be preserved, not flattened to one voice.
 
+**Exception — live status and activity narration.** Headers, badges, and activity-log lines that report what the employee is doing or just did (a run-in-progress heading, an approval-queue badge, per-step activity narration, a "search again" prompt) read as first person even though they live in dashboard chrome — they're the closest thing to the employee handing you a live update, and third person here is what makes the product feel like software instead of a hire. Reserve third person for copy that isn't reporting the employee's own action: role/name labels (eyebrows, "Meet Emma"), generic status badges with no name in them ("Needs review," "Completed," "Failed"), and cards describing an employee from the roster/hiring perspective (dashboard "choose a role" cards, marketing copy).
+
 Plain labels or titles naming an employee or role (e.g. "Meet Emma," "Onboard Alex") are UI labels, not voiced copy — they imply no speaker and are exempt from the first/third-person distinction above.
 
 ## Tone of voice

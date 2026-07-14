@@ -35,7 +35,7 @@ const SearchAgainModal = ({ open, onClose, onSubmit }: Props) => {
         Search again
       </Heading>
       <Text size="sm" tone="muted" className="mt-2">
-        Want Emma to focus on something specific this time, or search using your usual profile?
+        Want me to focus on something specific this time, or should I use your usual profile?
       </Text>
       <Textarea
         rows={3}

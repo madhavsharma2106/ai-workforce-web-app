@@ -122,7 +122,7 @@ const AccountManagerHome = ({
           </div>
           {mode === "view" && (
             <Button variant="secondary" onClick={startEdit}>
-              Update profile →
+              Update profile
             </Button>
           )}
         </div>
