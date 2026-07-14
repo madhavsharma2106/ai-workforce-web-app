@@ -1,7 +1,8 @@
 import Link from "next/link";
 import LeadCard from "@/components/organisms/LeadCard";
 import PassedCandidatesList from "@/components/organisms/PassedCandidatesList";
-import type { AgentRun, Lead } from "@/lib/types";
+import ActivityCard from "@/components/organisms/ActivityCard";
+import type { AgentRun, AgentRunStep, Lead } from "@/lib/types";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
 import { ROLE_TITLES } from "@/lib/employees";
@@ -10,6 +11,7 @@ type Props = {
   employeeId: string;
   run: AgentRun;
   leads: Lead[];
+  steps: AgentRunStep[];
   researchedCount: number;
   pendingCount: number;
   approvedCount: number;
@@ -29,6 +31,7 @@ const RunReviewPanel = ({
   employeeId,
   run,
   leads,
+  steps,
   researchedCount,
   pendingCount,
   approvedCount,
@@ -93,6 +96,8 @@ const RunReviewPanel = ({
         </blockquote>
       </Card>
     )}
+
+    <ActivityCard steps={steps} />
 
     {!oliverHired && (
       <Card as="section" padding="md" className="border-indigo-200 bg-indigo-50">

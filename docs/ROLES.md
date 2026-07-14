@@ -15,10 +15,12 @@ Use this exact section order — see [roles/lead-sourcer.md](../roles/lead-sourc
 ## Inputs
 ## Outputs
 ## Integrations
+## Tools
 ## Quality Bar
 ## Evidence
 ## Routine
 ## Experience
+## Onboarding
 ## Do Not
 ```
 
@@ -29,11 +31,13 @@ Use this exact section order — see [roles/lead-sourcer.md](../roles/lead-sourc
 - **Success Metric** — one metric, ideally instrumentable. If you can't name a single number that tells you this role is working, it isn't scoped yet.
 - **Inputs** — what the role consumes: client-provided info, feedback, other roles' output, integrations. Mark anything not built yet as "future integration, not built yet" rather than omitting it.
 - **Outputs** — the actual work product a human (or another employee) sees and acts on.
-- **Integrations** — real, named third-party services/files the role calls, or "None yet." Anything listed here must also appear in [INTEGRATIONS.md](INTEGRATIONS.md).
+- **Integrations** — real, named third-party services/files the role calls, or "None yet." Anything listed here must also appear in [INTEGRATIONS.md](INTEGRATIONS.md). If the role has no third-party integration to describe, this section can instead describe the internal system wiring that connects its output to the rest of the app (relevant tables, internal API routes) — e.g. how the Business Profile gets written and read.
+- **Tools** — the tool-loop functions this role's agent can call, sourced from `toolsByRole.ts` and `src/lib/agents/tools/` (see [AGENTS.md](AGENTS.md)). Omit this section entirely if the role has no role-specific tools (e.g. Account Manager).
 - **Quality Bar** — the role-specific translation of [QUALITY.md](QUALITY.md). Say what an MBB-level version of this role's Outputs actually looks like — and what falls short — don't just link the doc.
 - **Evidence** — how this role's quality/performance gets tracked over time. "(To be tracked and measured)" is fine pre-launch, but don't skip the section.
 - **Routine** — the ordered list of what the role does when it wakes up. This is the loop, not a feature list.
 - **Experience** — what the role learns from over time (feedback, rejected/approved work, patterns). Ties to "Learning happens through feedback and through Instructions" in [PRINCIPLES.md](PRINCIPLES.md).
+- **Onboarding** — the opening line and question style for this role's onboarding conversation. Should defer to the Account Manager's Business Profile rather than re-asking what's already captured there — only ask what's genuinely role-specific.
 - **Do Not** — role-specific boundaries only (see Baseline below for what's already covered for every role): ways this role could overstep into another role's job, or a limit unique to what it has access to.
 
 ## Baseline Do Not rules (every role)

@@ -6,7 +6,7 @@ import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import SearchAgainModal from "@/components/organisms/SearchAgainModal";
 import TaskHistory from "@/components/organisms/TaskHistory";
 import InstructionsPanel from "@/components/organisms/InstructionsPanel";
-import type { AgentRun, Lead, TaskHistoryItem } from "@/lib/types";
+import type { AgentRun, AgentRunStep, Lead, TaskHistoryItem } from "@/lib/types";
 import { Tabs } from "@/components/atoms";
 
 const POLL_INTERVAL_MS = 3000;
@@ -19,6 +19,7 @@ type Props = {
   initialRun: AgentRun | null;
   initialLeads: Lead[];
   initialResearchedCount: number;
+  initialSteps: AgentRunStep[];
   initialHistory: TaskHistoryItem[];
   initialPassedCandidates: PassedCandidate[];
   initialInstructionsMd: string | null;
@@ -34,6 +35,7 @@ const LeadSourcerHome = ({
   initialRun,
   initialLeads,
   initialResearchedCount,
+  initialSteps,
   initialHistory,
   initialPassedCandidates,
   initialInstructionsMd,
@@ -43,6 +45,7 @@ const LeadSourcerHome = ({
   const [run, setRun] = useState<AgentRun | null>(initialRun);
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [researchedCount, setResearchedCount] = useState(initialResearchedCount);
+  const [steps, setSteps] = useState<AgentRunStep[]>(initialSteps);
   const [passedCandidates, setPassedCandidates] = useState<PassedCandidate[]>(initialPassedCandidates);
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
@@ -62,6 +65,7 @@ const LeadSourcerHome = ({
       setLeads(data.leads);
       setResearchedCount(data.researchedCount);
       setPassedCandidates(data.passedCandidates);
+      setSteps(data.steps);
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
@@ -173,6 +177,7 @@ const LeadSourcerHome = ({
         employeeId={employeeId}
         run={run}
         leads={leads}
+        steps={steps}
         researchedCount={researchedCount}
         pendingCount={pendingCount}
         approvedCount={approvedCount}

@@ -32,8 +32,6 @@ What's actually banned is the _mechanical_ vocabulary of AI engineering — the 
 
 Never say: **Agent, Prompt, Execution, Workflow, LLM, Reasoning, Trace.** These break the "this is a hire, not a config screen" illusion.
 
-> **Known gap:** `Assignment` and `Daily Report` are the intended terms above but aren't yet used consistently in the product UI (it currently mixes "Daily standup," "Day," and "run" for the same concept). Reconciling this is deferred to the employee-dashboard rework — not in scope until then.
-
 ### Roles vs. Employees
 
 A **Role** defines the job (e.g. Lead Sourcer, Account Manager, Sales Representative). An **Employee** is a specific instance of a role (e.g. Emma, Oliver). You hire for a role, then a person fills it — mirroring real hiring.

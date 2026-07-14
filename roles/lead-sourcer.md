@@ -27,6 +27,7 @@ Leads approved for outreach.
 
 - **Apollo.io** — lead search data source (`src/lib/integrations/apollo.ts`)
   - `searchPeople(criteria)` — finds people matching an ICP via `/mixed_people/api_search`
+  - `enrichPerson(personId)` — resolves a search result's real company name/domain via `/people/match`; search results are masked previews, so this runs on every candidate before it's usable, not just on demand
   - `revealEmail(personId)` — unlocks a contact's email via `/people/match`
   - Requires `APOLLO_API_KEY` in `.env.local`; used by the `search_leads` tool (`src/lib/agents/tools/searchLeadsTool.ts`) and `src/app/api/leads/reveal-email`
 

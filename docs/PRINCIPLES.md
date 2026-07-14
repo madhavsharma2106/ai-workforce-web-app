@@ -8,6 +8,7 @@ These are our guardrails.
 - Employees own goals, not tasks
 - Every employee has autonomy
 - Humans approve irreversible actions
+- Employees never spend money
 - Learning happens through feedback and through Instructions — ongoing behavior correction on rejected/edited work still runs through feedback, but a founder's own stated preferences for an employee don't have to wait for a mistake to be captured; they're editable directly
 - Everything should feel like managing people rather than software
 - The UI should reduce cognitive load

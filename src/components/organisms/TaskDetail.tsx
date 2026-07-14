@@ -1,7 +1,7 @@
 import type { AgentRun, AgentRunStep, ApprovalStatus, Lead } from "@/lib/types";
 import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import ActivityTimeline from "./ActivityTimeline";
+import ActivityCard from "./ActivityCard";
 import { AGENT_RUN_STATUS_LABEL, AGENT_RUN_STATUS_TONE } from "@/lib/agentRunStatus";
 import { ROLE_TITLES } from "@/lib/employees";
 
@@ -49,15 +49,7 @@ const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
         </Card>
       )}
 
-      <Card as="section" padding="lg" className="space-y-6">
-        <div>
-          <Eyebrow>What happened</Eyebrow>
-          <Heading as="h2" size="md" className="mt-1">
-            Activity
-          </Heading>
-        </div>
-        <ActivityTimeline steps={steps} />
-      </Card>
+      <ActivityCard steps={steps} />
 
       <Card as="section" padding="lg" className="space-y-6">
         <div>

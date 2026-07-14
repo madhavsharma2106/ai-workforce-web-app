@@ -27,13 +27,13 @@ Drafts approved by the founder (leading indicator, live today); replies received
 - Drafted responses to interested prospects
 - Conversations surfaced to the founder that need their judgment
 
-## Tools
-
-- `draft_outreach_email` — call once per handoff, using the qualification research provided, to draft a personalized outreach email for founder review.
-
 ## Integrations
 
 - Outlook (Microsoft Graph) — sending from the founder's account and monitoring replies. Not built yet; no file under `src/lib/integrations/` exists for this. Add a row to [docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md) once implemented.
+
+## Tools
+
+- `draft_outreach_email` — call once per handoff, using the qualification research provided, to draft a personalized outreach email for founder review.
 
 ## Quality Bar
 

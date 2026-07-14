@@ -7,7 +7,7 @@
 - 1–5 employees
 - Always busy
 - Needs more clients
-- Uses Gmail
+- Uses Outlook
 - Uses Google Sheets
 - Not technical
 - Will pay if pipeline grows
