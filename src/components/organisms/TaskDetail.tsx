@@ -1,6 +1,7 @@
 import type { AgentRun, AgentRunStep, ApprovalStatus, Lead } from "@/lib/types";
 import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
+import ActivityTimeline from "./ActivityTimeline";
 import { AGENT_RUN_STATUS_LABEL, AGENT_RUN_STATUS_TONE } from "@/lib/agentRunStatus";
 import { ROLE_TITLES } from "@/lib/employees";
 
@@ -18,8 +19,6 @@ type Props = {
 };
 
 const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
-  const narrated = steps.filter((step) => step.label);
-
   return (
     <div className="space-y-8">
       <Card as="section" padding="lg">
@@ -57,29 +56,7 @@ const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
             Activity
           </Heading>
         </div>
-        {narrated.length === 0 ? (
-          <Text size="sm" tone="muted">
-            No activity recorded for this task.
-          </Text>
-        ) : (
-          <ol className="space-y-0">
-            {narrated.map((step, index) => (
-              <li key={step.id} className="flex gap-3">
-                <div className="flex flex-col items-center">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-900 text-xs font-medium text-white">
-                    {index + 1}
-                  </span>
-                  {index < narrated.length - 1 && (
-                    <span className="mt-1 w-px flex-1 bg-gray-200" />
-                  )}
-                </div>
-                <div className="pb-4">
-                  <Markdown content={step.label ?? ""} />
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
+        <ActivityTimeline steps={steps} />
       </Card>
 
       <Card as="section" padding="lg" className="space-y-6">
