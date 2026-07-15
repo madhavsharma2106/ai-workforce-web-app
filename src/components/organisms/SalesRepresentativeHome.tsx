@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import LeadCard from "@/components/organisms/LeadCard";
+import { patchLead, retryDraft, revealLeadEmail } from "@/lib/api/leads";
+import { getDrafts } from "@/lib/api/employees";
 import type { Lead } from "@/lib/types";
 import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
 import { Alert } from "@/components/molecules";
@@ -33,9 +35,8 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
 
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/employees/${employeeId}/drafts`);
-        if (!response.ok) return;
-        const data = await response.json();
+        const data = await getDrafts(employeeId);
+        if (!data) return;
         setLeads(data.leads);
       } catch (error) {
         console.error("Failed to poll drafts", error);
@@ -44,14 +45,6 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
 
     return () => clearInterval(interval);
   }, [employeeId, isDrafting]);
-
-  const patchLead = async (id: string, body: Record<string, unknown>) => {
-    await fetch(`/api/leads/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-  };
 
   const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
     setLeads((current) => current.map((lead) => (lead.id === id ? updater(lead) : lead)));
@@ -63,13 +56,7 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
 
     setRevealingLeadId(id);
     try {
-      const response = await fetch("/api/leads/reveal-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personId: lead.personId, leadId: id }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error ?? "Failed to reveal email.");
+      const data = await revealLeadEmail(lead.personId, id);
       updateLead(id, (current) => ({
         ...current,
         email: data.email ?? current.email,
@@ -114,9 +101,7 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
 
   const handleRetryDraft = (id: string) => {
     updateLead(id, (current) => ({ ...current, draftFailed: false, draftError: undefined }));
-    void fetch(`/api/leads/${id}/retry-draft`, { method: "POST" }).catch((error) =>
-      console.error("Failed to retry draft", error),
-    );
+    void retryDraft(id).catch((error) => console.error("Failed to retry draft", error));
   };
 
   const drafting = leads.filter((lead) => lead.draft === "" && !lead.draftFailed);

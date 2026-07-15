@@ -7,8 +7,10 @@ import RunInProgressCard from "@/components/organisms/RunInProgressCard";
 import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import SearchAgainModal from "@/components/organisms/SearchAgainModal";
 import TaskHistory from "@/components/organisms/TaskHistory";
-import { useLatestRun, type PassedCandidate } from "@/hooks/useLatestRun";
-import type { AgentRun, AgentRunStep, Lead, TaskHistoryItem } from "@/lib/types";
+import { useLatestRun } from "@/hooks/useLatestRun";
+import { patchLead, revealLeadEmail } from "@/lib/api/leads";
+import { triggerRun } from "@/lib/api/employees";
+import type { AgentRun, AgentRunStep, Lead, PassedCandidate, TaskHistoryItem } from "@/lib/types";
 import { Tabs } from "@/components/atoms";
 
 const SEARCH_AGAIN_MESSAGE = "Run a new lead search.";
@@ -55,14 +57,6 @@ const LeadSourcerHome = ({
     [leads],
   );
 
-  const patchLead = async (id: string, body: Record<string, unknown>) => {
-    await fetch(`/api/leads/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-  };
-
   const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
     setLeads((current) => current.map((lead) => (lead.id === id ? updater(lead) : lead)));
   };
@@ -78,13 +72,7 @@ const LeadSourcerHome = ({
 
     setRevealingLeadId(id);
     try {
-      const response = await fetch("/api/leads/reveal-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personId: lead.personId, leadId: id }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error ?? "Failed to reveal email.");
+      const data = await revealLeadEmail(lead.personId, id);
       updateLead(id, (current) => ({
         ...current,
         email: data.email ?? current.email,
@@ -137,11 +125,7 @@ const LeadSourcerHome = ({
       completed_at: null,
       created_at: new Date().toISOString(),
     });
-    void fetch(`/api/employees/${employeeId}/run`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: customMessage?.trim() || SEARCH_AGAIN_MESSAGE }),
-    });
+    void triggerRun(employeeId, customMessage?.trim() || SEARCH_AGAIN_MESSAGE);
   };
 
   const handleOpenSearchModal = () => setSearchModalOpen(true);

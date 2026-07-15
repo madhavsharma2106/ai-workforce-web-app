@@ -29,9 +29,8 @@ export function useLatestRun(employeeId: string, initial: LatestRunState) {
     const interval = setInterval(async () => {
       setNow(Date.now());
       try {
-        const response = await fetch(`/api/employees/${employeeId}/latest-run`);
-        if (!response.ok) return;
-        const data = await response.json();
+        const data = await getLatestRun(employeeId);
+        if (!data) return;
         setRun(data.run);
         setLeads(data.leads);
         setResearchedCount(data.researchedCount);

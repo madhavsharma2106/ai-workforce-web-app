@@ -5,18 +5,10 @@ import ConversationalForm, {
   type NextQuestionResult,
   type TranscriptEntry,
 } from "@/components/organisms/ConversationalForm";
+import { applyKnowledgeRefresh, fetchKnowledgeGapQuestion, type KnowledgeRefreshResult } from "@/lib/api/employees";
 import type { EmployeeRole } from "@/lib/employees";
 
-export type KnowledgeRefreshResult =
-  | { instructionsMd: string }
-  | {
-      businessProfile: {
-        businessName: string;
-        contactName: string;
-        profileMd: string;
-        updatedAt?: string;
-      };
-    };
+export type { KnowledgeRefreshResult };
 
 type Props = {
   open: boolean;
@@ -36,27 +28,11 @@ const KnowledgeRefreshModal = ({
 }: Props) => {
   const fetchNextQuestion = async (
     transcript: TranscriptEntry[],
-  ): Promise<NextQuestionResult> => {
-    const response = await fetch(`/api/employees/${employeeId}/knowledge-gaps`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transcript }),
-    });
-    if (!response.ok) throw new Error("Failed to check for gaps.");
-    return response.json();
-  };
+  ): Promise<NextQuestionResult> => fetchKnowledgeGapQuestion(employeeId, transcript);
 
   const handleComplete = async (transcript: TranscriptEntry[]) => {
-    const response = await fetch(
-      `/api/employees/${employeeId}/apply-knowledge-refresh`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript }),
-      },
-    );
-    const data = await response.json();
-    if (response.ok) onApplied(data as KnowledgeRefreshResult);
+    const result = await applyKnowledgeRefresh(employeeId, transcript);
+    if (result) onApplied(result);
     onClose();
   };
 

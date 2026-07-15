@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button, Card, Eyebrow, Heading, Text, Textarea } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
 import KnowledgeRefreshModal from "@/components/organisms/KnowledgeRefreshModal";
+import { updateInstructions } from "@/lib/api/employees";
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 
 const MISSION_LINE: Partial<Record<EmployeeRole, string>> = {
@@ -37,13 +38,7 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
     setSaving(true);
     setError(null);
     try {
-      const response = await fetch(`/api/employees/${employeeId}/instructions`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instructionsMd: draft }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error ?? "Failed to save.");
+      const data = await updateInstructions(employeeId, draft);
       setInstructionsMd(data.instructionsMd ?? "");
       setMode("view");
     } catch (err) {

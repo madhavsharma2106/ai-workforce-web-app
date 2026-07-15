@@ -16,3 +16,7 @@ export async function revealLeadEmail(personId: string, leadId: string): Promise
   if (!response.ok) throw new Error(data.error ?? "Failed to reveal email.");
   return data;
 }
+
+export async function retryDraft(id: string): Promise<void> {
+  await fetch(`/api/leads/${id}/retry-draft`, { method: "POST" });
+}
