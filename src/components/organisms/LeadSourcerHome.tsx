@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import RunFailedCard from "@/components/organisms/RunFailedCard";
 import RunInProgressCard from "@/components/organisms/RunInProgressCard";
+import RunNotStartedCard from "@/components/organisms/RunNotStartedCard";
 import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import SearchAgainModal from "@/components/organisms/SearchAgainModal";
 import TaskHistory from "@/components/organisms/TaskHistory";
@@ -130,32 +131,46 @@ const LeadSourcerHome = ({
 
   const handleOpenSearchModal = () => setSearchModalOpen(true);
 
-  const currentTaskContent =
-    run === null || run.status === "queued" || run.status === "running" ? (
-      <RunInProgressCard run={run} now={now} onSearchAgain={handleOpenSearchModal} />
-    ) : run.status === "failed" ? (
-      <RunFailedCard run={run} onSearchAgain={handleOpenSearchModal} />
-    ) : (
-      <RunReviewPanel
-        employeeId={employeeId}
-        run={run}
-        leads={leads}
-        steps={steps}
-        researchedCount={researchedCount}
-        pendingCount={pendingCount}
-        approvedCount={approvedCount}
-        oliverHired={oliverHired}
-        feedbackLeadId={feedbackLeadId}
-        revealingLeadId={revealingLeadId}
-        passedCandidates={passedCandidates}
-        onSearchAgain={handleOpenSearchModal}
-        onApproveAll={handleApproveAll}
-        onApprove={handleApprove}
-        onReject={handleReject}
-        onRevealEmail={handleRevealEmail}
-        onFeedbackSubmit={handleFeedbackSubmit}
-      />
-    );
+  const renderCurrentTask = () => {
+    if (!run) {
+      return <RunNotStartedCard onSearchAgain={handleOpenSearchModal} />;
+    }
+
+    switch (run.status) {
+      case "queued":
+      case "running":
+        return <RunInProgressCard run={run} now={now} onSearchAgain={handleOpenSearchModal} />;
+      case "failed":
+        return <RunFailedCard run={run} onSearchAgain={handleOpenSearchModal} />;
+      case "waiting_approval":
+      case "completed":
+        return (
+          <RunReviewPanel
+            employeeId={employeeId}
+            run={run}
+            leads={leads}
+            steps={steps}
+            researchedCount={researchedCount}
+            pendingCount={pendingCount}
+            approvedCount={approvedCount}
+            oliverHired={oliverHired}
+            feedbackLeadId={feedbackLeadId}
+            revealingLeadId={revealingLeadId}
+            passedCandidates={passedCandidates}
+            onSearchAgain={handleOpenSearchModal}
+            onApproveAll={handleApproveAll}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onRevealEmail={handleRevealEmail}
+            onFeedbackSubmit={handleFeedbackSubmit}
+          />
+        );
+      default: {
+        const _exhaustive: never = run.status;
+        return _exhaustive;
+      }
+    }
+  };
 
   return (
     <main className="space-y-10">
@@ -175,7 +190,7 @@ const LeadSourcerHome = ({
           Instructions
         </Link>
       </div>
-      {activeTab === "current" && currentTaskContent}
+      {activeTab === "current" && renderCurrentTask()}
       {activeTab === "previous" && <TaskHistory employeeId={employeeId} history={initialHistory} />}
       <SearchAgainModal
         open={searchModalOpen}

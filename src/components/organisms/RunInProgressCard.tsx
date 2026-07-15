@@ -4,14 +4,13 @@ import { Button, Card, Eyebrow, Heading, Text } from "@/components/atoms";
 const STUCK_THRESHOLD_MS = 90_000;
 
 type Props = {
-  run: AgentRun | null;
+  run: AgentRun;
   now: number | null;
   onSearchAgain: () => void;
 };
 
 const RunInProgressCard = ({ run, now, onSearchAgain }: Props) => {
-  const stuck =
-    run !== null && now !== null && now - new Date(run.created_at).getTime() > STUCK_THRESHOLD_MS;
+  const stuck = now !== null && now - new Date(run.created_at).getTime() > STUCK_THRESHOLD_MS;
 
   return (
     <Card as="section" padding="lg">
