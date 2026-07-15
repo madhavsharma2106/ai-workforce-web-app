@@ -13,6 +13,8 @@ export type Lead = {
   emailRevealed?: boolean;
   status: ApprovalStatus;
   draftStatus: ApprovalStatus;
+  draftFailed?: boolean;
+  draftError?: string;
   feedbackReason?: string;
   researchSnippet?: string;
   industry?: string;
@@ -71,6 +73,8 @@ export type TaskHistoryItem = AgentRun & {
   leadCounts: { approved: number; rejected: number; pending: number; total: number };
   researchedCount: number;
 };
+
+export type PassedCandidate = { company: string; reason: string };
 
 export type DelegationStatus = "pending" | "accepted" | "completed" | "declined";
 

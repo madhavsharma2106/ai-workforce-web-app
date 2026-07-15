@@ -282,6 +282,33 @@ export async function getLeadById(
   return data ? toLead(data as LeadRow) : null;
 }
 
+const FALLBACK_DRAFT_ERROR = "I ran into an unexpected problem and couldn't finish this task.";
+
+// Correlates a lead to its Oliver drafting run: there's no `lead_id` column
+// on `agent_runs`, so this goes through the `delegations` row created for
+// the handoff (`context.leadId`) and its `to_run_id`.
+async function getFailedDraftLeadIds(
+  supabase: SupabaseClient,
+  input: { userId: string },
+): Promise<Map<string, string>> {
+  const { data } = await supabase
+    .from("delegations")
+    .select("context, agent_runs:to_run_id(status, summary)")
+    .eq("user_id", input.userId)
+    .eq("to_role", "sales_representative");
+
+  const failedByLeadId = new Map<string, string>();
+  for (const row of (data as
+    | { context: { leadId?: string } | null; agent_runs: { status: string; summary: string | null } | null }[]
+    | null) ?? []) {
+    if (row.agent_runs?.status !== "failed") continue;
+    const leadId = row.context?.leadId;
+    if (!leadId) continue;
+    failedByLeadId.set(leadId, row.agent_runs.summary ?? FALLBACK_DRAFT_ERROR);
+  }
+  return failedByLeadId;
+}
+
 export async function getLeadsAwaitingOutreach(
   supabase: SupabaseClient,
   input: { userId: string },
@@ -296,7 +323,17 @@ export async function getLeadsAwaitingOutreach(
     .eq("status", "approved")
     .order("created_at", { ascending: false });
 
-  return ((data as LeadRow[] | null) ?? []).map(toLead);
+  const leads = ((data as LeadRow[] | null) ?? []).map(toLead);
+  const stillDrafting = leads.filter((lead) => lead.draft === "");
+  if (stillDrafting.length === 0) return leads;
+
+  const failedByLeadId = await getFailedDraftLeadIds(supabase, { userId: input.userId });
+  if (failedByLeadId.size === 0) return leads;
+
+  return leads.map((lead) => {
+    const draftError = lead.draft === "" ? failedByLeadId.get(lead.id) : undefined;
+    return draftError ? { ...lead, draftFailed: true, draftError } : lead;
+  });
 }
 
 export async function saveDraftEmail(

@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import LeadCard from "@/components/organisms/LeadCard";
 import type { Lead } from "@/lib/types";
-import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import { Alert } from "@/components/molecules";
 import { ROLE_TITLES } from "@/lib/employees";
 
 const POLL_INTERVAL_MS = 3000;
@@ -22,16 +23,23 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
 
-  const isDrafting = useMemo(() => leads.some((lead) => lead.draft === ""), [leads]);
+  const isDrafting = useMemo(
+    () => leads.some((lead) => lead.draft === "" && !lead.draftFailed),
+    [leads],
+  );
 
   useEffect(() => {
     if (!isDrafting) return;
 
     const interval = setInterval(async () => {
-      const response = await fetch(`/api/employees/${employeeId}/drafts`);
-      if (!response.ok) return;
-      const data = await response.json();
-      setLeads(data.leads);
+      try {
+        const response = await fetch(`/api/employees/${employeeId}/drafts`);
+        if (!response.ok) return;
+        const data = await response.json();
+        setLeads(data.leads);
+      } catch (error) {
+        console.error("Failed to poll drafts", error);
+      }
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
@@ -104,7 +112,15 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
     setFeedbackLeadId(null);
   };
 
-  const drafting = leads.filter((lead) => lead.draft === "");
+  const handleRetryDraft = (id: string) => {
+    updateLead(id, (current) => ({ ...current, draftFailed: false, draftError: undefined }));
+    void fetch(`/api/leads/${id}/retry-draft`, { method: "POST" }).catch((error) =>
+      console.error("Failed to retry draft", error),
+    );
+  };
+
+  const drafting = leads.filter((lead) => lead.draft === "" && !lead.draftFailed);
+  const draftFailed = leads.filter((lead) => lead.draft === "" && lead.draftFailed);
   const awaitingApproval = leads.filter((lead) => lead.draft !== "" && lead.draftStatus === "pending");
   const readyToSend = leads.filter((lead) => lead.draftStatus === "approved");
   const rejected = leads.filter((lead) => lead.draftStatus === "rejected");
@@ -153,6 +169,29 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
           <Text size="sm" tone="muted" className="mt-2">
             {drafting.map((lead) => lead.company).join(", ")}
           </Text>
+        </Card>
+      )}
+
+      {draftFailed.length > 0 && (
+        <Card as="section" padding="lg" className="space-y-4">
+          <Eyebrow>Draft failed</Eyebrow>
+          <div className="space-y-3">
+            {draftFailed.map((lead) => (
+              <Alert key={lead.id} variant="error" className="flex items-center justify-between gap-4">
+                <div>
+                  <Text size="sm" weight="medium">
+                    {lead.company}
+                  </Text>
+                  <Text size="sm" tone="muted" className="mt-0.5">
+                    {lead.draftError}
+                  </Text>
+                </div>
+                <Button variant="secondary" size="sm" onClick={() => handleRetryDraft(lead.id)}>
+                  Try again
+                </Button>
+              </Alert>
+            ))}
+          </div>
         </Card>
       )}
 

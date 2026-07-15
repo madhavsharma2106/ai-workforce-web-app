@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import RunFailedCard from "@/components/organisms/RunFailedCard";
 import RunInProgressCard from "@/components/organisms/RunInProgressCard";
 import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import SearchAgainModal from "@/components/organisms/SearchAgainModal";
 import TaskHistory from "@/components/organisms/TaskHistory";
+import { useLatestRun, type PassedCandidate } from "@/hooks/useLatestRun";
 import type { AgentRun, AgentRunStep, Lead, TaskHistoryItem } from "@/lib/types";
 import { Tabs } from "@/components/atoms";
 
-const POLL_INTERVAL_MS = 3000;
 const SEARCH_AGAIN_MESSAGE = "Run a new lead search.";
-
-type PassedCandidate = { company: string; reason: string };
 
 type Props = {
   employeeId: string;
@@ -26,9 +24,6 @@ type Props = {
   oliverHired: boolean;
 };
 
-const isInProgress = (run: AgentRun | null) =>
-  run === null || run.status === "queued" || run.status === "running";
-
 const LeadSourcerHome = ({
   employeeId,
   initialRun,
@@ -39,38 +34,17 @@ const LeadSourcerHome = ({
   initialPassedCandidates,
   oliverHired,
 }: Props) => {
-  const [run, setRun] = useState<AgentRun | null>(initialRun);
-  const [leads, setLeads] = useState<Lead[]>(initialLeads);
-  const [researchedCount, setResearchedCount] = useState(initialResearchedCount);
-  const [steps, setSteps] = useState<AgentRunStep[]>(initialSteps);
-  const [passedCandidates, setPassedCandidates] = useState<PassedCandidate[]>(initialPassedCandidates);
+  const { run, setRun, leads, setLeads, researchedCount, steps, passedCandidates, now } = useLatestRun(employeeId, {
+    run: initialRun,
+    leads: initialLeads,
+    researchedCount: initialResearchedCount,
+    steps: initialSteps,
+    passedCandidates: initialPassedCandidates,
+  });
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
-  const [now, setNow] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"current" | "previous">("current");
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isInProgress(run)) return;
-
-    const interval = setInterval(async () => {
-      setNow(Date.now());
-      try {
-        const response = await fetch(`/api/employees/${employeeId}/latest-run`);
-        if (!response.ok) return;
-        const data = await response.json();
-        setRun(data.run);
-        setLeads(data.leads);
-        setResearchedCount(data.researchedCount);
-        setPassedCandidates(data.passedCandidates);
-        setSteps(data.steps);
-      } catch (error) {
-        console.error("Failed to poll latest run", error);
-      }
-    }, POLL_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [employeeId, run]);
 
   const approvedCount = useMemo(
     () => leads.filter((lead) => lead.status === "approved").length,
@@ -91,6 +65,11 @@ const LeadSourcerHome = ({
 
   const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
     setLeads((current) => current.map((lead) => (lead.id === id ? updater(lead) : lead)));
+  };
+
+  const updateAndPatch = (id: string, updater: (lead: Lead) => Lead, body: Record<string, unknown>) => {
+    updateLead(id, updater);
+    void patchLead(id, body);
   };
 
   const handleRevealEmail = async (id: string) => {
@@ -121,15 +100,13 @@ const LeadSourcerHome = ({
 
   const handleApprove = (id: string) => {
     if (!oliverHired) return;
-    updateLead(id, (current) => ({ ...current, status: "approved" }));
-    void patchLead(id, { status: "approved" });
+    updateAndPatch(id, (current) => ({ ...current, status: "approved" }), { status: "approved" });
     if (feedbackLeadId === id) setFeedbackLeadId(null);
     void handleRevealEmail(id);
   };
 
   const handleReject = (id: string) => {
-    updateLead(id, (current) => ({ ...current, status: "rejected" }));
-    void patchLead(id, { status: "rejected" });
+    updateAndPatch(id, (current) => ({ ...current, status: "rejected" }), { status: "rejected" });
     setFeedbackLeadId(id);
   };
 
@@ -142,8 +119,7 @@ const LeadSourcerHome = ({
   const handleFeedbackSubmit = (reason: string) => {
     if (feedbackLeadId === null) return;
     const id = feedbackLeadId;
-    updateLead(id, (current) => ({ ...current, feedbackReason: reason }));
-    void patchLead(id, { feedbackReason: reason });
+    updateAndPatch(id, (current) => ({ ...current, feedbackReason: reason }), { feedbackReason: reason });
     setFeedbackLeadId(null);
   };
 
