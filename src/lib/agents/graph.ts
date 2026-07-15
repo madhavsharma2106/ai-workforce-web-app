@@ -1,18 +1,34 @@
-import { StateGraph, START, END, Command, MemorySaver, Annotation } from "@langchain/langgraph";
+import {
+  StateGraph,
+  START,
+  END,
+  Command,
+  MemorySaver,
+  Annotation,
+} from "@langchain/langgraph";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModelMessage } from "ai";
 import { createEmployeeAgent } from "./runTurn";
 import { buildSystemPrompt } from "./systemPrompt";
 import { getToolsForRole } from "./toolsByRole";
 import { narrateBefore, narrateAfter } from "./narration";
-import { createAgentRun, updateAgentRun, insertAgentRunStep, insertDelegation } from "@/lib/agentRuns";
+import {
+  createAgentRun,
+  updateAgentRun,
+  insertAgentRunStep,
+  insertDelegation,
+} from "@/lib/agentRuns";
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 import type { DelegationRequest } from "./tools/delegationTool";
 
 /** Lead Sourcer needs room for ~10 save_lead calls, a note_passed_candidates call per search, and a wrap-up message. */
 const LEAD_SOURCER_MAX_STEPS = 24;
 
-const ROLES: EmployeeRole[] = ["account_manager", "lead_sourcer", "sales_representative"];
+const ROLES: EmployeeRole[] = [
+  "account_manager",
+  "lead_sourcer",
+  "sales_representative",
+];
 
 const GraphState = Annotation.Root({
   messages: Annotation<ModelMessage[]>({
@@ -24,12 +40,16 @@ const GraphState = Annotation.Root({
   pendingDelegationId: Annotation<string | undefined>(),
 });
 
-type GraphContext = {
+export type GraphContext = {
   supabase: SupabaseClient;
   userId: string;
   employeeIdByRole: Partial<Record<EmployeeRole, string>>;
   initiatingRole: EmployeeRole;
   runIdByRole: Partial<Record<EmployeeRole, string>>;
+  // Tracks runs that reached a successful "completed" write, so a later
+  // failure elsewhere in the same graph invocation (e.g. a delegated hop)
+  // doesn't get stomped back to "failed" by the catch-all in runGraphJob.
+  completedRunIds: Set<string>;
   // Fixed for the whole job (one lead per Oliver-drafting job) — context
   // level, not graph state, since it never changes mid-run.
   leadId?: string;
@@ -43,7 +63,11 @@ type GraphContext = {
 // latest visit. Confirmed via live testing (2026-07-08); left as-is since it
 // only affects extended multi-hop chains beyond this pass's scope, not the
 // common one-hop handoff. Revisit if/when real work produces longer chains.
-async function ensureRunForRole(ctx: GraphContext, role: EmployeeRole, employeeId: string): Promise<string> {
+async function ensureRunForRole(
+  ctx: GraphContext,
+  role: EmployeeRole,
+  employeeId: string,
+): Promise<string> {
   const existing = ctx.runIdByRole[role];
   if (existing) return existing;
 
@@ -97,7 +121,13 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
       systemPrompt,
       tools,
       maxSteps: role === "lead_sourcer" ? LEAD_SOURCER_MAX_STEPS : undefined,
-      metadata: { conversationKind: "delegation", role, runId, employeeId, userId: ctx.userId },
+      metadata: {
+        conversationKind: "delegation",
+        role,
+        runId,
+        employeeId,
+        userId: ctx.userId,
+      },
       onStepFinish: async (step) => {
         for (const call of step.toolCalls) {
           const input = (call as { input?: unknown }).input;
@@ -108,13 +138,20 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
             type: "thinking",
             toolName: call.toolName,
             input,
-            label: narrateBefore(call.toolName, (input ?? {}) as Record<string, unknown>),
+            label: narrateBefore(
+              call.toolName,
+              (input ?? {}) as Record<string, unknown>,
+            ),
           });
         }
         for (const toolResult of step.toolResults) {
           const input = (toolResult as { input?: unknown }).input;
           const output = (toolResult as { output?: unknown }).output;
-          const label = narrateAfter(toolResult.toolName, (input ?? {}) as Record<string, unknown>, output);
+          const label = narrateAfter(
+            toolResult.toolName,
+            (input ?? {}) as Record<string, unknown>,
+            output,
+          );
           if (!label) continue;
           await insertAgentRunStep(ctx.supabase, {
             userId: ctx.userId,
@@ -146,6 +183,7 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
       summary: result.text || undefined,
       completed_at: new Date().toISOString(),
     });
+    ctx.completedRunIds.add(runId);
 
     if (state.pendingDelegationId) {
       await ctx.supabase
@@ -185,7 +223,10 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
       };
 
       return new Command({
-        update: { messages: [handoffMessage], pendingDelegationId: delegation.id },
+        update: {
+          messages: [handoffMessage],
+          pendingDelegationId: delegation.id,
+        },
         goto: request.to_role,
       });
     }
@@ -206,7 +247,11 @@ export function buildEmployeeGraph(input: {
   initiatingRole: EmployeeRole;
   leadId?: string;
 }) {
-  const ctx: GraphContext = { ...input, runIdByRole: {} };
+  const ctx: GraphContext = {
+    ...input,
+    runIdByRole: {},
+    completedRunIds: new Set(),
+  };
 
   const builder = new StateGraph(GraphState);
   for (const role of ROLES) {
@@ -215,9 +260,11 @@ export function buildEmployeeGraph(input: {
     // reachability check at compile time, since it can't see the runtime
     // `goto` value otherwise.
     const ends = [...ROLES.filter((r) => r !== role), END];
-    builder.addNode(role, makeEmployeeNode(role, ctx), { ends: ends as never[] });
+    builder.addNode(role, makeEmployeeNode(role, ctx), {
+      ends: ends as never[],
+    });
   }
   builder.addEdge(START, ctx.initiatingRole as never);
 
-  return builder.compile({ checkpointer: new MemorySaver() });
+  return { graph: builder.compile({ checkpointer: new MemorySaver() }), ctx };
 }

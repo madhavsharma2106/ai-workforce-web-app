@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import RunFailedCard from "@/components/organisms/RunFailedCard";
 import RunInProgressCard from "@/components/organisms/RunInProgressCard";
 import RunReviewPanel from "@/components/organisms/RunReviewPanel";
 import SearchAgainModal from "@/components/organisms/SearchAgainModal";
@@ -54,14 +55,18 @@ const LeadSourcerHome = ({
 
     const interval = setInterval(async () => {
       setNow(Date.now());
-      const response = await fetch(`/api/employees/${employeeId}/latest-run`);
-      if (!response.ok) return;
-      const data = await response.json();
-      setRun(data.run);
-      setLeads(data.leads);
-      setResearchedCount(data.researchedCount);
-      setPassedCandidates(data.passedCandidates);
-      setSteps(data.steps);
+      try {
+        const response = await fetch(`/api/employees/${employeeId}/latest-run`);
+        if (!response.ok) return;
+        const data = await response.json();
+        setRun(data.run);
+        setLeads(data.leads);
+        setResearchedCount(data.researchedCount);
+        setPassedCandidates(data.passedCandidates);
+        setSteps(data.steps);
+      } catch (error) {
+        console.error("Failed to poll latest run", error);
+      }
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
@@ -168,6 +173,8 @@ const LeadSourcerHome = ({
   const currentTaskContent =
     run === null || run.status === "queued" || run.status === "running" ? (
       <RunInProgressCard run={run} now={now} onSearchAgain={handleOpenSearchModal} />
+    ) : run.status === "failed" ? (
+      <RunFailedCard run={run} onSearchAgain={handleOpenSearchModal} />
     ) : (
       <RunReviewPanel
         employeeId={employeeId}

@@ -2,6 +2,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModelMessage } from "ai";
 import { listEmployees, type EmployeeRole } from "@/lib/employees";
 import { buildEmployeeGraph } from "./graph";
+import { updateAgentRun } from "@/lib/agentRuns";
+
+const FAILURE_SUMMARY = "I ran into an unexpected problem and couldn't finish this task. Please try again.";
 
 /**
  * Resolves the caller's employees and invokes the delegation graph.
@@ -28,7 +31,7 @@ export async function runGraphJob(
     employeeIdByRole[employee.role] = employee.id;
   }
 
-  const graph = buildEmployeeGraph({
+  const { graph, ctx } = buildEmployeeGraph({
     supabase,
     userId: input.userId,
     employeeIdByRole,
@@ -36,8 +39,30 @@ export async function runGraphJob(
     leadId: input.leadId,
   });
 
-  await graph.invoke(
-    { messages: input.messages, pendingDelegationId: input.pendingDelegationId },
-    { recursionLimit: 6, configurable: { thread_id: crypto.randomUUID() } },
-  );
+  try {
+    await graph.invoke(
+      { messages: input.messages, pendingDelegationId: input.pendingDelegationId },
+      { recursionLimit: 6, configurable: { thread_id: crypto.randomUUID() } },
+    );
+  } catch (error) {
+    console.error("runGraphJob: graph invocation failed", error);
+    const completedAt = new Date().toISOString();
+    const runIdsToFail = Object.values(ctx.runIdByRole).filter(
+      (runId): runId is string => Boolean(runId) && !ctx.completedRunIds.has(runId),
+    );
+
+    await Promise.all(
+      runIdsToFail.map((runId) =>
+        updateAgentRun(supabase, runId, {
+          status: "failed",
+          summary: FAILURE_SUMMARY,
+          completed_at: completedAt,
+        }).catch((updateError) =>
+          console.error(`runGraphJob: failed to mark run ${runId} as failed`, updateError),
+        ),
+      ),
+    );
+
+    throw error;
+  }
 }
