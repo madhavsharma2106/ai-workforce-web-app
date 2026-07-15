@@ -1,7 +1,11 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { searchPeople, enrichPerson, type ApolloPerson } from "@/lib/integrations/apollo";
+import {
+  searchPeople,
+  enrichPerson,
+  type ApolloPerson,
+} from "@/lib/integrations/apollo";
 import { fetchCompanyText } from "@/lib/integrations/companyWebsite";
 import { getFeedbackContext } from "@/lib/leads";
 
@@ -20,12 +24,17 @@ async function mapWithConcurrency<T, R>(
       results[current] = await fn(items[current]);
     }
   }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, worker),
+  );
   return results;
 }
 
 function domainFromUrl(url: string): string {
-  return url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").split("/")[0];
+  return url
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .split("/")[0];
 }
 
 export type SearchLeadsResult = {
@@ -70,14 +79,18 @@ export function createSearchLeadsTool(
       "Apollo's search is a plain keyword match, not a semantic query — pass a short phrase " +
       "(3-8 words, no punctuation) using terms that would literally appear in a matching " +
       "company's own description or job postings: industry/sector, company type, and any " +
-      "explicit target-client language (e.g. \"NGO\", \"nonprofit\", \"fast-moving startup\"). " +
+      'explicit target-client language (e.g. "NGO", "nonprofit", "fast-moving startup"). ' +
       "Returns each new candidate with whatever research on their site could be found, plus " +
       "firmographic and contact facts from Apollo (industry, headcount, location, founded year, " +
       "LinkedIn URLs, seniority, departments — any of these may be null if Apollo didn't have it). " +
       "When you save_lead, copy these fields through exactly as given, never infer or guess a value " +
       "that wasn't provided. Only qualify and save_lead companies present in this result, never invent one.",
     inputSchema: z.object({
-      icp: z.string().describe("Short keyword phrase describing the target company profile."),
+      icp: z
+        .string()
+        .describe(
+          "Short keyword phrase describing the target company profile.",
+        ),
     }),
     execute: async (input): Promise<SearchLeadsResult> => {
       const feedback = await getFeedbackContext(supabase, {
@@ -90,25 +103,38 @@ export function createSearchLeadsTool(
       // Search results are masked previews with no usable organization
       // name/domain — each candidate must be enriched via /people/match
       // (an Apollo credit per call) before we know its real company.
-      const enriched = await mapWithConcurrency(previews, CANDIDATE_CONCURRENCY, (person) =>
-        enrichPerson(person.id),
+      const enriched = await mapWithConcurrency(
+        previews,
+        CANDIDATE_CONCURRENCY,
+        (person) => enrichPerson(person.id),
       );
 
       const seen = new Set(feedback.seenDomains);
       const newCandidates: ApolloPerson[] = [];
       for (const person of enriched) {
         if (!person || !person.organization) continue;
-        const domain = domainFromUrl(person.organization.primary_domain ?? person.organization.website_url ?? "");
+        const domain = domainFromUrl(
+          person.organization.primary_domain ??
+            person.organization.website_url ??
+            "",
+        );
         if (!domain || seen.has(domain)) continue;
         seen.add(domain);
         newCandidates.push(person);
       }
 
-      const researched = await mapWithConcurrency(newCandidates, CANDIDATE_CONCURRENCY, async (person) => {
-        const website = person.organization!.primary_domain ?? person.organization!.website_url ?? "";
-        const page = website ? await fetchCompanyText(website) : null;
-        return { person, website, page };
-      });
+      const researched = await mapWithConcurrency(
+        newCandidates,
+        CANDIDATE_CONCURRENCY,
+        async (person) => {
+          const website =
+            person.organization!.primary_domain ??
+            person.organization!.website_url ??
+            "";
+          const page = website ? await fetchCompanyText(website) : null;
+          return { person, website, page };
+        },
+      );
 
       return {
         searched: input.icp,
@@ -116,7 +142,9 @@ export function createSearchLeadsTool(
         candidates: researched.map(({ person, website, page }) => ({
           company: person.organization!.name,
           website,
-          decisionMaker: person.title ? `${person.name}, ${person.title}` : person.name,
+          decisionMaker: person.title
+            ? `${person.name}, ${person.title}`
+            : person.name,
           personId: person.id || undefined,
           research: page ? `${page.title || website}: ${page.text}` : null,
           industry: person.organization!.industry,

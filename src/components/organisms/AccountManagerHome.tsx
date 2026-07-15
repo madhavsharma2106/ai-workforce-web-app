@@ -12,7 +12,7 @@ import {
   Textarea,
 } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import KnowledgeRefreshModal from "@/components/organisms/KnowledgeRefreshModal";
+import { KnowledgeRefreshModal } from "./KnowledgeRefreshModal";
 import { ROLE_LABELS, ROLE_TITLES } from "@/lib/employees";
 
 type Profile = {
@@ -29,7 +29,7 @@ type Props = {
   updatedAt: string | null;
 };
 
-const AccountManagerHome = ({
+export const AccountManagerHome = ({
   employeeId,
   businessName,
   contactName,
@@ -263,5 +263,3 @@ const AccountManagerHome = ({
     </main>
   );
 };
-
-export default AccountManagerHome;

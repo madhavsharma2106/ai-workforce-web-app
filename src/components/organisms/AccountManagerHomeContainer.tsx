@@ -1,12 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
-import AccountManagerHome from "./AccountManagerHome";
+import { AccountManagerHome } from "./AccountManagerHome";
 
 type Props = {
   employeeId: string;
   userId: string;
 };
 
-export default async function AccountManagerHomeContainer({
+export async function AccountManagerHomeContainer({
   employeeId,
   userId,
 }: Props) {

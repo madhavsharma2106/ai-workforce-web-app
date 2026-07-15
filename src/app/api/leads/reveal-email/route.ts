@@ -2,11 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserForApi } from "@/lib/supabase/auth";
 import { updateLeadEmail } from "@/lib/leads";
-import {
-  ApolloConfigError,
-  ApolloRequestError,
-  revealEmail,
-} from "@/lib/integrations/apollo";
+import { revealEmail } from "@/lib/integrations/apollo";
+import { apiErrorResponse } from "@/lib/api/errors";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -31,12 +28,6 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ email });
   } catch (error) {
-    if (error instanceof ApolloConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    if (error instanceof ApolloRequestError) {
-      return NextResponse.json({ error: error.message }, { status: 502 });
-    }
-    throw error;
+    return apiErrorResponse(error);
   }
 }

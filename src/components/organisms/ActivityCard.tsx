@@ -4,17 +4,21 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { AgentRunStep } from "@/lib/types";
 import { Card, Eyebrow, Heading } from "@/components/atoms";
-import ActivityTimeline from "./ActivityTimeline";
+import { ActivityTimeline } from "./ActivityTimeline";
 
 type Props = {
   steps: AgentRunStep[];
 };
 
-const ActivityCard = ({ steps }: Props) => {
+export const ActivityCard = ({ steps }: Props) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card as="section" padding="lg" className={expanded ? "space-y-6" : undefined}>
+    <Card
+      as="section"
+      padding="lg"
+      className={expanded ? "space-y-6" : undefined}
+    >
       <button
         type="button"
         onClick={() => setExpanded((value) => !value)}
@@ -37,5 +41,3 @@ const ActivityCard = ({ steps }: Props) => {
     </Card>
   );
 };
-
-export default ActivityCard;

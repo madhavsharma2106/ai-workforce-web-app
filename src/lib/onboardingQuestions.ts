@@ -153,7 +153,10 @@ export async function generateGapFollowup(input: {
   const { role, currentKnowledgeMd, transcript, knownProfile } = input;
 
   if (transcript.length >= GAP_MAX_QUESTIONS) {
-    return { done: true, message: "That's plenty for now — thanks for the updates." };
+    return {
+      done: true,
+      message: "That's plenty for now — thanks for the updates.",
+    };
   }
 
   const agentName = ROLE_LABELS[role];
@@ -188,12 +191,16 @@ This is a returning conversation, not a first meeting — the founder already kn
     if (object.done || !object.question) {
       return {
         done: true,
-        message: object.message || "Everything looks covered — nothing more to ask.",
+        message:
+          object.message || "Everything looks covered — nothing more to ask.",
       };
     }
 
     return { done: false, question: object.question };
   } catch {
-    return { done: true, message: "Couldn't check for gaps right now — try again later." };
+    return {
+      done: true,
+      message: "Couldn't check for gaps right now — try again later.",
+    };
   }
 }

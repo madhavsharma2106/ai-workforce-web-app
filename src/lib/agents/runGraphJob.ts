@@ -4,7 +4,8 @@ import { listEmployees, type EmployeeRole } from "@/lib/employees";
 import { buildEmployeeGraph } from "./graph";
 import { updateAgentRun } from "@/lib/agentRuns";
 
-const FAILURE_SUMMARY = "I ran into an unexpected problem and couldn't finish this task. Please try again.";
+const FAILURE_SUMMARY =
+  "I ran into an unexpected problem and couldn't finish this task. Please try again.";
 
 /**
  * Resolves the caller's employees and invokes the delegation graph.
@@ -41,14 +42,18 @@ export async function runGraphJob(
 
   try {
     await graph.invoke(
-      { messages: input.messages, pendingDelegationId: input.pendingDelegationId },
+      {
+        messages: input.messages,
+        pendingDelegationId: input.pendingDelegationId,
+      },
       { recursionLimit: 6, configurable: { thread_id: crypto.randomUUID() } },
     );
   } catch (error) {
     console.error("runGraphJob: graph invocation failed", error);
     const completedAt = new Date().toISOString();
     const runIdsToFail = Object.values(ctx.runIdByRole).filter(
-      (runId): runId is string => Boolean(runId) && !ctx.completedRunIds.has(runId),
+      (runId): runId is string =>
+        Boolean(runId) && !ctx.completedRunIds.has(runId),
     );
 
     await Promise.all(
@@ -58,7 +63,10 @@ export async function runGraphJob(
           summary: FAILURE_SUMMARY,
           completed_at: completedAt,
         }).catch((updateError) =>
-          console.error(`runGraphJob: failed to mark run ${runId} as failed`, updateError),
+          console.error(
+            `runGraphJob: failed to mark run ${runId} as failed`,
+            updateError,
+          ),
         ),
       ),
     );

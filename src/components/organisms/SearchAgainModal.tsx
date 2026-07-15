@@ -9,7 +9,7 @@ type Props = {
   onSubmit: (customMessage: string | null) => void;
 };
 
-const SearchAgainModal = ({ open, onClose, onSubmit }: Props) => {
+export const SearchAgainModal = ({ open, onClose, onSubmit }: Props) => {
   const [instructions, setInstructions] = useState("");
 
   const handleClose = () => {
@@ -35,7 +35,8 @@ const SearchAgainModal = ({ open, onClose, onSubmit }: Props) => {
         Search again
       </Heading>
       <Text size="sm" tone="muted" className="mt-2">
-        Want me to focus on something specific this time, or should I use your usual profile?
+        Want me to focus on something specific this time, or should I use your
+        usual profile?
       </Text>
       <Textarea
         rows={3}
@@ -48,12 +49,14 @@ const SearchAgainModal = ({ open, onClose, onSubmit }: Props) => {
         <Button variant="secondary" onClick={handleUsualCriteria}>
           Use usual criteria
         </Button>
-        <Button variant="primary" onClick={handleSearch} disabled={!instructions.trim()}>
+        <Button
+          variant="primary"
+          onClick={handleSearch}
+          disabled={!instructions.trim()}
+        >
           Search
         </Button>
       </div>
     </Modal>
   );
 };
-
-export default SearchAgainModal;

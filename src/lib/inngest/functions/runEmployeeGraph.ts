@@ -18,10 +18,16 @@ export const runEmployeeGraph = inngest.createFunction(
     };
 
     const supabase = createAdminClient();
-    const initialMessages: ModelMessage[] = [{ role: "user", content: message }];
+    const initialMessages: ModelMessage[] = [
+      { role: "user", content: message },
+    ];
 
     await step.run("run-graph", async () => {
-      await runGraphJob(supabase, { userId, initiatingRole, messages: initialMessages });
+      await runGraphJob(supabase, {
+        userId,
+        initiatingRole,
+        messages: initialMessages,
+      });
     });
 
     return { status: "completed" };

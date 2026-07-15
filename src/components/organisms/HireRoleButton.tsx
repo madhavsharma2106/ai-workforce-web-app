@@ -13,7 +13,7 @@ type Props = {
   icon: ReactNode;
 };
 
-const HireRoleButton = ({ role, title, description, icon }: Props) => {
+export const HireRoleButton = ({ role, title, description, icon }: Props) => {
   const router = useRouter();
   const [isHiring, setIsHiring] = useState(false);
 
@@ -54,5 +54,3 @@ const HireRoleButton = ({ role, title, description, icon }: Props) => {
     </button>
   );
 };
-
-export default HireRoleButton;

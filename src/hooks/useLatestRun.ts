@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { getLatestRun } from "@/lib/api/employees";
-import type { AgentRun, AgentRunStep, Lead, PassedCandidate } from "@/lib/types";
+import type {
+  AgentRun,
+  AgentRunStep,
+  Lead,
+  PassedCandidate,
+} from "@/lib/types";
 
 const POLL_INTERVAL_MS = 3000;
 
@@ -18,9 +23,13 @@ const isInProgress = (run: AgentRun | null) =>
 export function useLatestRun(employeeId: string, initial: LatestRunState) {
   const [run, setRun] = useState<AgentRun | null>(initial.run);
   const [leads, setLeads] = useState<Lead[]>(initial.leads);
-  const [researchedCount, setResearchedCount] = useState(initial.researchedCount);
+  const [researchedCount, setResearchedCount] = useState(
+    initial.researchedCount,
+  );
   const [steps, setSteps] = useState<AgentRunStep[]>(initial.steps);
-  const [passedCandidates, setPassedCandidates] = useState<PassedCandidate[]>(initial.passedCandidates);
+  const [passedCandidates, setPassedCandidates] = useState<PassedCandidate[]>(
+    initial.passedCandidates,
+  );
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
@@ -44,5 +53,14 @@ export function useLatestRun(employeeId: string, initial: LatestRunState) {
     return () => clearInterval(interval);
   }, [employeeId, run]);
 
-  return { run, setRun, leads, setLeads, researchedCount, steps, passedCandidates, now };
+  return {
+    run,
+    setRun,
+    leads,
+    setLeads,
+    researchedCount,
+    steps,
+    passedCandidates,
+    now,
+  };
 }

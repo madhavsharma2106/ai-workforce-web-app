@@ -1,4 +1,11 @@
-import { Brain, FileSearch, MessageSquare, Share2, Wrench, type LucideIcon } from "lucide-react";
+import {
+  Brain,
+  FileSearch,
+  MessageSquare,
+  Share2,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import type { AgentRunStepType } from "@/lib/types";
 
 export const AGENT_RUN_STEP_TYPE_ICON: Record<AgentRunStepType, LucideIcon> = {

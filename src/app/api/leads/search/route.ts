@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { ApolloConfigError, ApolloRequestError, searchPeople } from "@/lib/integrations/apollo";
+import { searchPeople } from "@/lib/integrations/apollo";
+import { apiErrorResponse } from "@/lib/api/errors";
 
 /**
  * Raw Apollo connectivity probe — not part of the Lead Sourcer flow (that
@@ -22,12 +23,6 @@ export async function POST(request: Request) {
     const people = await searchPeople({ icp: clientDescription });
     return NextResponse.json({ people, focus: clientDescription });
   } catch (error) {
-    if (error instanceof ApolloConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    if (error instanceof ApolloRequestError) {
-      return NextResponse.json({ error: error.message }, { status: 502 });
-    }
-    throw error;
+    return apiErrorResponse(error);
   }
 }

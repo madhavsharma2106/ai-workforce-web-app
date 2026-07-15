@@ -2,15 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button, Card, Eyebrow, Heading, Text, Textarea } from "@/components/atoms";
+import {
+  Button,
+  Card,
+  Eyebrow,
+  Heading,
+  Text,
+  Textarea,
+} from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import KnowledgeRefreshModal from "@/components/organisms/KnowledgeRefreshModal";
+import { KnowledgeRefreshModal } from "./KnowledgeRefreshModal";
 import { updateInstructions } from "@/lib/api/employees";
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 
 const MISSION_LINE: Partial<Record<EmployeeRole, string>> = {
-  lead_sourcer: "I research and qualify companies that match your ideal customer, every day.",
-  sales_representative: "I draft outreach for the leads you approve, grounded in Emma's research.",
+  lead_sourcer:
+    "I research and qualify companies that match your ideal customer, every day.",
+  sales_representative:
+    "I draft outreach for the leads you approve, grounded in Emma's research.",
 };
 
 type Props = {
@@ -20,8 +29,15 @@ type Props = {
   accountManagerId: string | null;
 };
 
-const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountManagerId }: Props) => {
-  const [instructionsMd, setInstructionsMd] = useState(initialInstructionsMd ?? "");
+export const InstructionsPanel = ({
+  employeeId,
+  role,
+  initialInstructionsMd,
+  accountManagerId,
+}: Props) => {
+  const [instructionsMd, setInstructionsMd] = useState(
+    initialInstructionsMd ?? "",
+  );
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [draft, setDraft] = useState(instructionsMd);
   const [saving, setSaving] = useState(false);
@@ -80,7 +96,10 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
         {accountManagerId ? (
           <>
             {" — "}
-            <Link href={`/employee/${accountManagerId}`} className="underline underline-offset-2">
+            <Link
+              href={`/employee/${accountManagerId}`}
+              className="underline underline-offset-2"
+            >
               see it on Alex&apos;s page
             </Link>
           </>
@@ -93,7 +112,8 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
           <Markdown content={instructionsMd} />
         ) : (
           <Text size="sm" tone="muted">
-            Nothing specific yet — add anything I should keep in mind that&apos;s just for me.
+            Nothing specific yet — add anything I should keep in mind
+            that&apos;s just for me.
           </Text>
         )
       ) : (
@@ -111,7 +131,11 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
             </Text>
           )}
           <div className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => setMode("view")} disabled={saving}>
+            <Button
+              variant="secondary"
+              onClick={() => setMode("view")}
+              disabled={saving}
+            >
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={saving}>
@@ -136,5 +160,3 @@ const InstructionsPanel = ({ employeeId, role, initialInstructionsMd, accountMan
     </Card>
   );
 };
-
-export default InstructionsPanel;

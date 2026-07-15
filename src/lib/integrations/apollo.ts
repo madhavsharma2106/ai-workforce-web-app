@@ -85,7 +85,10 @@ function locationFromOrg(org: Record<string, unknown>): string | null {
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
-function parseApolloPerson(person: Record<string, unknown>, fallbackId: string): ApolloPerson {
+function parseApolloPerson(
+  person: Record<string, unknown>,
+  fallbackId: string,
+): ApolloPerson {
   const org = person.organization as Record<string, unknown> | undefined;
 
   return {
@@ -95,14 +98,17 @@ function parseApolloPerson(person: Record<string, unknown>, fallbackId: string):
     email: (person.email as string) ?? null,
     linkedin_url: (person.linkedin_url as string) ?? null,
     seniority: (person.seniority as string) ?? null,
-    departments: Array.isArray(person.departments) ? (person.departments as string[]) : [],
+    departments: Array.isArray(person.departments)
+      ? (person.departments as string[])
+      : [],
     organization: org
       ? {
           name: String(org.name ?? ""),
           website_url: (org.website_url as string) ?? null,
           primary_domain: (org.primary_domain as string) ?? null,
           industry: (org.industry as string) ?? null,
-          estimated_num_employees: (org.estimated_num_employees as number) ?? null,
+          estimated_num_employees:
+            (org.estimated_num_employees as number) ?? null,
           founded_year: (org.founded_year as number) ?? null,
           location: locationFromOrg(org),
           linkedin_url: (org.linkedin_url as string) ?? null,
@@ -130,7 +136,9 @@ export async function searchPeople(
 
   const people = Array.isArray(data.people) ? data.people : [];
 
-  return people.map((person: Record<string, unknown>) => parseApolloPerson(person, String(person.id)));
+  return people.map((person: Record<string, unknown>) =>
+    parseApolloPerson(person, String(person.id)),
+  );
 }
 
 /**
@@ -139,7 +147,9 @@ export async function searchPeople(
  * results only preview. Costs an Apollo credit per call. Does not reveal the
  * personal email; use `revealEmail` for that separately.
  */
-export async function enrichPerson(personId: string): Promise<ApolloPerson | null> {
+export async function enrichPerson(
+  personId: string,
+): Promise<ApolloPerson | null> {
   const data = await apolloFetch("/people/match", { id: personId });
   const person = data.person as Record<string, unknown> | undefined;
   if (!person) return null;

@@ -21,7 +21,9 @@ export const draftOutreachOnApproval = inngest.createFunction(
     await step.run("delegate-and-draft", async () => {
       const { data: lead } = await supabase
         .from("leads")
-        .select("id, employee_id, run_id, company, website, fit, decision_maker, sources, status, draft")
+        .select(
+          "id, employee_id, run_id, company, website, fit, decision_maker, sources, status, draft",
+        )
         .eq("id", leadId)
         .eq("user_id", userId)
         .maybeSingle();

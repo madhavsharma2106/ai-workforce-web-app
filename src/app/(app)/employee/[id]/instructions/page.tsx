@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireOwnedEmployee, getAccountManager, ROLE_LABELS } from "@/lib/employees";
+import {
+  requireOwnedEmployee,
+  getAccountManager,
+  ROLE_LABELS,
+} from "@/lib/employees";
 import { Breadcrumb } from "@/components/atoms";
-import InstructionsPanel from "@/components/organisms/InstructionsPanel";
+import { InstructionsPanel } from "@/components/organisms";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -22,7 +26,10 @@ export default async function InstructionsPage({ params }: Params) {
       <Breadcrumb
         items={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: ROLE_LABELS[employee.role], href: `/employee/${employee.id}` },
+          {
+            label: ROLE_LABELS[employee.role],
+            href: `/employee/${employee.id}`,
+          },
           { label: "Instructions" },
         ]}
       />

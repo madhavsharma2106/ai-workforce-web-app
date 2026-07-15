@@ -35,7 +35,10 @@ export function createDelegateToEmployeeTool(
     }),
     execute: async (input) => {
       if (!isRoleHired(input.to_role)) {
-        return { handedOff: false, note: `The founder hasn't hired anyone for ${input.to_role} yet.` };
+        return {
+          handedOff: false,
+          note: `The founder hasn't hired anyone for ${input.to_role} yet.`,
+        };
       }
       onDelegate(input);
       return { handedOff: true };

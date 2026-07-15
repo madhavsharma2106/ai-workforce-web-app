@@ -18,7 +18,7 @@ Each role has a tool registry in `src/lib/agents/toolsByRole.ts` (`Record<Employ
 
 ## Delegation — LangGraph.js
 
-Employees hand work to each other through a LangGraph `StateGraph` (`src/lib/agents/graph.ts`), one node per role. A node loads its role's system prompt + tools and calls `runEmployeeTurn` (AI SDK) for its own reasoning/tool-calling — LangGraph only governs what happens *between* employees, not within one employee's turn.
+Employees hand work to each other through a LangGraph `StateGraph` (`src/lib/agents/graph.ts`), one node per role. A node loads its role's system prompt + tools and calls `runEmployeeTurn` (AI SDK) for its own reasoning/tool-calling — LangGraph only governs what happens _between_ employees, not within one employee's turn.
 
 Calling `delegate_to_employee` doesn't fire anything directly; it records a handoff request that the node wrapper turns into LangGraph's `Command({ goto: to_role, ... })`, routing execution to the target node within the same graph run. Cycles are bounded by LangGraph's `recursionLimit`. Each handoff is also logged to a `delegations` row (see [DATABASE.md](DATABASE.md)) as a framework-independent audit trail — LangGraph's own checkpoint history could technically reconstruct this, but it's serialized internal state meant for replay/debugging, not a stable, queryable product record.
 

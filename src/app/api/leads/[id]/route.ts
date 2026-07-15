@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserForApi } from "@/lib/supabase/auth";
-import { updateLeadDraft, updateLeadDraftStatus, updateLeadFeedback, updateLeadStatus } from "@/lib/leads";
+import {
+  updateLeadDraft,
+  updateLeadDraftStatus,
+  updateLeadFeedback,
+  updateLeadStatus,
+} from "@/lib/leads";
 import { listEmployees } from "@/lib/employees";
 import { inngest } from "@/lib/inngest/client";
-import type { ApprovalStatus } from "@/lib/types";
-
-type Params = { params: Promise<{ id: string }> };
+import type { ApprovalStatus, IdRouteParams } from "@/lib/types";
+import { apiErrorResponse } from "@/lib/api/errors";
 
 const STATUSES: ApprovalStatus[] = ["pending", "approved", "rejected"];
 
-export async function PATCH(request: Request, { params }: Params) {
+export async function PATCH(request: Request, { params }: IdRouteParams) {
   const { id } = await params;
   const supabase = await createClient();
   const user = await requireUserForApi(supabase);
@@ -31,50 +35,71 @@ export async function PATCH(request: Request, { params }: Params) {
     return NextResponse.json({ error: "Invalid draftStatus" }, { status: 400 });
   }
 
-  if (status === "approved") {
-    const employees = await listEmployees(supabase, user.id);
-    if (!employees.some((e) => e.role === "sales_representative")) {
-      return NextResponse.json(
-        { error: "Hire Oliver (Sales Representative) before approving leads for outreach." },
-        { status: 400 },
-      );
-    }
-
-    // Conditional update: only actually flips (and fires the handoff) if the
-    // lead was still pending, so a duplicate/retried approve doesn't spawn a
-    // second Oliver run.
-    const { data: changed } = await supabase
-      .from("leads")
-      .update({ status: "approved", updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .eq("status", "pending")
-      .select("id");
-
-    if (changed && changed.length > 0) {
-      try {
-        await inngest.send({ name: "leads/approved", data: { userId: user.id, leadId: id } });
-      } catch (error) {
-        console.error("Failed to send leads/approved to Inngest", error);
+  try {
+    if (status === "approved") {
+      const employees = await listEmployees(supabase, user.id);
+      if (!employees.some((e) => e.role === "sales_representative")) {
         return NextResponse.json(
-          { error: "Approved, but couldn't start outreach drafting — try again." },
-          { status: 502 },
+          {
+            error:
+              "Hire Oliver (Sales Representative) before approving leads for outreach.",
+          },
+          { status: 400 },
         );
       }
+
+      // Conditional update: only actually flips (and fires the handoff) if the
+      // lead was still pending, so a duplicate/retried approve doesn't spawn a
+      // second Oliver run.
+      const { data: changed } = await supabase
+        .from("leads")
+        .update({ status: "approved", updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .select("id");
+
+      if (changed && changed.length > 0) {
+        try {
+          await inngest.send({
+            name: "leads/approved",
+            data: { userId: user.id, leadId: id },
+          });
+        } catch (error) {
+          console.error("Failed to send leads/approved to Inngest", error);
+          return NextResponse.json(
+            {
+              error:
+                "Approved, but couldn't start outreach drafting — try again.",
+            },
+            { status: 502 },
+          );
+        }
+      }
+    } else if (status !== undefined) {
+      await updateLeadStatus(supabase, { id, userId: user.id, status });
     }
-  } else if (status !== undefined) {
-    await updateLeadStatus(supabase, { id, userId: user.id, status });
-  }
 
-  if (draftStatus !== undefined) {
-    await updateLeadDraftStatus(supabase, { id, userId: user.id, status: draftStatus });
-  }
-  if (draft !== undefined) {
-    await updateLeadDraft(supabase, { id, userId: user.id, draft });
-  }
-  if (feedbackReason !== undefined) {
-    await updateLeadFeedback(supabase, { id, userId: user.id, feedbackReason });
-  }
+    if (draftStatus !== undefined) {
+      await updateLeadDraftStatus(supabase, {
+        id,
+        userId: user.id,
+        status: draftStatus,
+      });
+    }
+    if (draft !== undefined) {
+      await updateLeadDraft(supabase, { id, userId: user.id, draft });
+    }
+    if (feedbackReason !== undefined) {
+      await updateLeadFeedback(supabase, {
+        id,
+        userId: user.id,
+        feedbackReason,
+      });
+    }
 
-  return NextResponse.json({ status: "ok" });
+    return NextResponse.json({ status: "ok" });
+  } catch (error) {
+    return apiErrorResponse(error);
+  }
 }

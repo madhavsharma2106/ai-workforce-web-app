@@ -1,15 +1,25 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import type { TaskHistoryItem } from "@/lib/types";
-import { Badge, Card, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
-import { AGENT_RUN_STATUS_LABEL, AGENT_RUN_STATUS_TONE } from "@/lib/agentRunStatus";
+import {
+  Badge,
+  Card,
+  Eyebrow,
+  Heading,
+  LocalDate,
+  Text,
+} from "@/components/atoms";
+import {
+  AGENT_RUN_STATUS_LABEL,
+  AGENT_RUN_STATUS_TONE,
+} from "@/lib/agentRunStatus";
 
 type Props = {
   employeeId: string;
   history: TaskHistoryItem[];
 };
 
-const TaskHistory = ({ employeeId, history }: Props) => (
+export const TaskHistory = ({ employeeId, history }: Props) => (
   <Card as="section" padding="lg" className="space-y-6">
     <div>
       <Eyebrow>History</Eyebrow>
@@ -20,7 +30,7 @@ const TaskHistory = ({ employeeId, history }: Props) => (
 
     {history.length === 0 ? (
       <Text size="sm" tone="muted">
-        No previous tasks yet — I'll show my past runs here.
+        No previous tasks yet — I&apos;ll show my past runs here.
       </Text>
     ) : (
       <div className="divide-y divide-gray-200">
@@ -35,12 +45,14 @@ const TaskHistory = ({ employeeId, history }: Props) => (
                 <LocalDate date={task.created_at} />
               </Text>
               <Text size="sm" tone="muted" className="mt-0.5 truncate">
-                {task.summary ?? `I researched ${task.researchedCount} companies`}
+                {task.summary ??
+                  `I researched ${task.researchedCount} companies`}
               </Text>
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <Text size="sm" tone="muted">
-                {task.leadCounts.approved} approved · {task.leadCounts.rejected} rejected
+                {task.leadCounts.approved} approved · {task.leadCounts.rejected}{" "}
+                rejected
               </Text>
               <Badge tone={AGENT_RUN_STATUS_TONE[task.status]} size="sm">
                 {AGENT_RUN_STATUS_LABEL[task.status]}
@@ -59,5 +71,3 @@ const TaskHistory = ({ employeeId, history }: Props) => (
     )}
   </Card>
 );
-
-export default TaskHistory;

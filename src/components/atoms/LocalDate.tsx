@@ -21,12 +21,21 @@ type Props = {
  * server's time zone, not the visitor's, so the initial render is corrected by an inline
  * script before paint (see node_modules/next/dist/docs/.../preventing-flash-before-hydration.md).
  */
-export function LocalDate({ date, className, options = RUN_TIMESTAMP_OPTIONS }: Props) {
+export function LocalDate({
+  date,
+  className,
+  options = RUN_TIMESTAMP_OPTIONS,
+}: Props) {
   const id = useId();
 
   return (
     <>
-      <time id={id} dateTime={date} suppressHydrationWarning className={className}>
+      <time
+        id={id}
+        dateTime={date}
+        suppressHydrationWarning
+        className={className}
+      >
         {new Date(date).toLocaleString("en-US", options)}
       </time>
       <InlineScript

@@ -9,17 +9,19 @@ type Props = {
   onSearchAgain: () => void;
 };
 
-const RunInProgressCard = ({ run, now, onSearchAgain }: Props) => {
-  const stuck = now !== null && now - new Date(run.created_at).getTime() > STUCK_THRESHOLD_MS;
+export const RunInProgressCard = ({ run, now, onSearchAgain }: Props) => {
+  const stuck =
+    now !== null &&
+    now - new Date(run.created_at).getTime() > STUCK_THRESHOLD_MS;
 
   return (
     <Card as="section" padding="lg">
       <Eyebrow>Emma</Eyebrow>
       <Heading as="h2" size="md" className="mt-1">
-        I'm researching leads…
+        I&apos;m researching leads…
       </Heading>
       <Text size="sm" tone="muted" className="mt-2">
-        I'm searching for companies that match your profile and drafting
+        I&apos;m searching for companies that match your profile and drafting
         outreach — this can take a minute.
       </Text>
       {stuck && (
@@ -35,5 +37,3 @@ const RunInProgressCard = ({ run, now, onSearchAgain }: Props) => {
     </Card>
   );
 };
-
-export default RunInProgressCard;

@@ -1,15 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
 import { getLeadsAwaitingOutreach } from "@/lib/leads";
-import SalesRepresentativeHome from "./SalesRepresentativeHome";
+import { SalesRepresentativeHome } from "./SalesRepresentativeHome";
 
 type Props = {
   employeeId: string;
   userId: string;
 };
 
-export default async function SalesRepresentativeHomeContainer({ employeeId, userId }: Props) {
+export async function SalesRepresentativeHomeContainer({
+  employeeId,
+  userId,
+}: Props) {
   const supabase = await createClient();
   const leads = await getLeadsAwaitingOutreach(supabase, { userId });
 
-  return <SalesRepresentativeHome employeeId={employeeId} initialLeads={leads} />;
+  return (
+    <SalesRepresentativeHome employeeId={employeeId} initialLeads={leads} />
+  );
 }

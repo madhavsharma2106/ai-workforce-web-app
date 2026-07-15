@@ -7,7 +7,7 @@ type Props = {
   candidates: PassedCandidate[];
 };
 
-const PassedCandidatesList: FC<Props> = ({ candidates }) => {
+export const PassedCandidatesList: FC<Props> = ({ candidates }) => {
   if (candidates.length === 0) return null;
 
   return (
@@ -15,7 +15,10 @@ const PassedCandidatesList: FC<Props> = ({ candidates }) => {
       <Eyebrow>Also reviewed, passed on</Eyebrow>
       <div className="divide-y divide-gray-100">
         {candidates.map((candidate) => (
-          <div key={candidate.company} className="flex flex-wrap items-baseline gap-x-2 py-2 text-sm">
+          <div
+            key={candidate.company}
+            className="flex flex-wrap items-baseline gap-x-2 py-2 text-sm"
+          >
             <Text size="sm" weight="medium" className="text-gray-700">
               {candidate.company}
             </Text>
@@ -28,5 +31,3 @@ const PassedCandidatesList: FC<Props> = ({ candidates }) => {
     </Card>
   );
 };
-
-export default PassedCandidatesList;

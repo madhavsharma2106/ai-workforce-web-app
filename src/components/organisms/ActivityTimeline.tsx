@@ -11,13 +11,16 @@ import {
   AGENT_RUN_STEP_TYPE_ICON,
 } from "@/lib/agentRunStepType";
 
-const STEP_TIME_OPTIONS: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
+const STEP_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  hour: "numeric",
+  minute: "2-digit",
+};
 
 type Props = {
   steps: AgentRunStep[];
 };
 
-const ActivityTimeline = ({ steps }: Props) => {
+export const ActivityTimeline = ({ steps }: Props) => {
   const narrated = steps.filter((step) => step.label);
 
   if (narrated.length === 0) {
@@ -31,23 +34,37 @@ const ActivityTimeline = ({ steps }: Props) => {
   return (
     <ol className="space-y-0">
       {narrated.map((step, index) => (
-        <ActivityStep key={step.id} step={step} isLast={index === narrated.length - 1} />
+        <ActivityStep
+          key={step.id}
+          step={step}
+          isLast={index === narrated.length - 1}
+        />
       ))}
     </ol>
   );
 };
 
-const ActivityStep = ({ step, isLast }: { step: AgentRunStep; isLast: boolean }) => {
+const ActivityStep = ({
+  step,
+  isLast,
+}: {
+  step: AgentRunStep;
+  isLast: boolean;
+}) => {
   const [expanded, setExpanded] = useState(false);
   const failed = step.status === "failed";
   const Icon = failed ? AlertTriangle : AGENT_RUN_STEP_TYPE_ICON[step.type];
-  const iconClasses = failed ? AGENT_RUN_STEP_FAILED_CLASSES : AGENT_RUN_STEP_TYPE_CLASSES[step.type];
+  const iconClasses = failed
+    ? AGENT_RUN_STEP_FAILED_CLASSES
+    : AGENT_RUN_STEP_TYPE_CLASSES[step.type];
   const hasDetail = step.input != null || step.output != null;
 
   return (
     <li className="flex gap-3">
       <div className="flex flex-col items-center">
-        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${iconClasses}`}>
+        <span
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${iconClasses}`}
+        >
           <Icon size={14} strokeWidth={2} />
         </span>
         {!isLast && <span className="mt-1 w-px flex-1 bg-gray-200" />}
@@ -57,7 +74,11 @@ const ActivityStep = ({ step, isLast }: { step: AgentRunStep; isLast: boolean })
           <div className="min-w-0">
             <Markdown content={step.label ?? ""} />
           </div>
-          <Text size="xs" tone="muted" className="mt-0.5 shrink-0 whitespace-nowrap">
+          <Text
+            size="xs"
+            tone="muted"
+            className="mt-0.5 shrink-0 whitespace-nowrap"
+          >
             <LocalDate date={step.created_at} options={STEP_TIME_OPTIONS} />
           </Text>
         </div>
@@ -68,7 +89,11 @@ const ActivityStep = ({ step, isLast }: { step: AgentRunStep; isLast: boolean })
               onClick={() => setExpanded((value) => !value)}
               className="flex items-center gap-1 text-xs font-medium text-gray-500 transition hover:text-gray-800"
             >
-              {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+              {expanded ? (
+                <ChevronDown size={12} />
+              ) : (
+                <ChevronRight size={12} />
+              )}
               {expanded ? "Hide details" : "Show details"}
             </button>
             {expanded && (
@@ -96,5 +121,3 @@ const ActivityStep = ({ step, isLast }: { step: AgentRunStep; isLast: boolean })
     </li>
   );
 };
-
-export default ActivityTimeline;

@@ -1,11 +1,25 @@
 import type { AgentRun, AgentRunStep, ApprovalStatus, Lead } from "@/lib/types";
-import { Badge, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
+import {
+  Badge,
+  Card,
+  EmployeeAvatar,
+  Eyebrow,
+  Heading,
+  LocalDate,
+  Text,
+} from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import ActivityCard from "./ActivityCard";
-import { AGENT_RUN_STATUS_LABEL, AGENT_RUN_STATUS_TONE } from "@/lib/agentRunStatus";
+import { ActivityCard } from "./ActivityCard";
+import {
+  AGENT_RUN_STATUS_LABEL,
+  AGENT_RUN_STATUS_TONE,
+} from "@/lib/agentRunStatus";
 import { ROLE_TITLES } from "@/lib/employees";
 
-const LEAD_STATUS_LABEL: Record<ApprovalStatus, { label: string; tone: "neutral" | "accent" | "danger" }> = {
+const LEAD_STATUS_LABEL: Record<
+  ApprovalStatus,
+  { label: string; tone: "neutral" | "accent" | "danger" }
+> = {
   pending: { label: "Pending", tone: "neutral" },
   approved: { label: "Approved", tone: "accent" },
   rejected: { label: "Rejected", tone: "danger" },
@@ -18,7 +32,7 @@ type Props = {
   leads: Lead[];
 };
 
-const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
+export const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
   return (
     <div className="space-y-8">
       <Card as="section" padding="lg">
@@ -65,7 +79,12 @@ const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
         ) : (
           <div className="grid gap-4">
             {leads.map((lead) => (
-              <Card key={lead.id} as="article" padding="md" className="bg-white">
+              <Card
+                key={lead.id}
+                as="article"
+                padding="md"
+                className="bg-white"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <Text size="sm" weight="semibold">
@@ -95,5 +114,3 @@ const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
     </div>
   );
 };
-
-export default TaskDetail;

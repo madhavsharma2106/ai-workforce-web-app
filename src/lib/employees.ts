@@ -4,9 +4,7 @@ import { NextResponse } from "next/server";
 import { requireUser, requireUserForApi } from "@/lib/supabase/auth";
 
 export type EmployeeRole =
-  | "account_manager"
-  | "lead_sourcer"
-  | "sales_representative";
+  "account_manager" | "lead_sourcer" | "sales_representative";
 export type EmployeeStatus = "onboarding" | "active";
 
 export type Employee = {

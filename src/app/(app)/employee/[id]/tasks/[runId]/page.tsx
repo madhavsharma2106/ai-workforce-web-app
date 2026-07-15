@@ -4,7 +4,7 @@ import { requireOwnedEmployee, ROLE_LABELS } from "@/lib/employees";
 import { getAgentRun, getAgentRunSteps } from "@/lib/agentRuns";
 import { getLeadsByRunId } from "@/lib/leads";
 import { Breadcrumb } from "@/components/atoms";
-import TaskDetail from "@/components/organisms/TaskDetail";
+import { TaskDetail } from "@/components/organisms";
 
 type Params = { params: Promise<{ id: string; runId: string }> };
 
@@ -30,11 +30,19 @@ export default async function TaskDetailPage({ params }: Params) {
       <Breadcrumb
         items={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: ROLE_LABELS[employee.role], href: `/employee/${employee.id}` },
+          {
+            label: ROLE_LABELS[employee.role],
+            href: `/employee/${employee.id}`,
+          },
           { label: "Task" },
         ]}
       />
-      <TaskDetail employeeId={employee.id} run={run} steps={steps} leads={leads} />
+      <TaskDetail
+        employeeId={employee.id}
+        run={run}
+        steps={steps}
+        leads={leads}
+      />
     </div>
   );
 }

@@ -1,9 +1,18 @@
 import Link from "next/link";
-import LeadCard from "@/components/organisms/LeadCard";
-import PassedCandidatesList from "@/components/organisms/PassedCandidatesList";
-import ActivityCard from "@/components/organisms/ActivityCard";
+import { LeadCard } from "./LeadCard";
+import { PassedCandidatesList } from "./PassedCandidatesList";
+import { ActivityCard } from "./ActivityCard";
 import type { AgentRun, AgentRunStep, Lead } from "@/lib/types";
-import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, LocalDate, Text } from "@/components/atoms";
+import {
+  Badge,
+  Button,
+  Card,
+  EmployeeAvatar,
+  Eyebrow,
+  Heading,
+  LocalDate,
+  Text,
+} from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
 import { ROLE_TITLES } from "@/lib/employees";
 
@@ -27,7 +36,7 @@ type Props = {
   onFeedbackSubmit: (reason: string) => void;
 };
 
-const RunReviewPanel = ({
+export const RunReviewPanel = ({
   employeeId,
   run,
   leads,
@@ -102,9 +111,15 @@ const RunReviewPanel = ({
     <ActivityCard steps={steps} />
 
     {!oliverHired && (
-      <Card as="section" padding="md" className="border-indigo-200 bg-indigo-50">
+      <Card
+        as="section"
+        padding="md"
+        className="border-indigo-200 bg-indigo-50"
+      >
         <Text size="sm" className="text-indigo-900">
-          <span className="font-medium">Hire Oliver (Sales Representative)</span>{" "}
+          <span className="font-medium">
+            Hire Oliver (Sales Representative)
+          </span>{" "}
           to draft and approve outreach for leads you approve here.{" "}
           <Link href="/dashboard" className="underline underline-offset-2">
             Hire Oliver
@@ -121,7 +136,11 @@ const RunReviewPanel = ({
             Review & approve leads
           </Heading>
         </div>
-        <Button className="px-4!" onClick={onApproveAll} disabled={!oliverHired}>
+        <Button
+          className="px-4!"
+          onClick={onApproveAll}
+          disabled={!oliverHired}
+        >
           Approve all
         </Button>
       </div>
@@ -156,7 +175,7 @@ const RunReviewPanel = ({
           </Text>
         </div>
         <Badge tone="accent" size="sm" className="bg-white! shadow-sm">
-          I'm learning from your feedback
+          I&apos;m learning from your feedback
         </Badge>
       </div>
     </Card>
@@ -164,5 +183,3 @@ const RunReviewPanel = ({
     <PassedCandidatesList candidates={passedCandidates} />
   </>
 );
-
-export default RunReviewPanel;

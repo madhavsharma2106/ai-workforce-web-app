@@ -1,4 +1,7 @@
-import { fetchCompanyText, type CompanyPage } from "@/lib/integrations/companyWebsite";
+import {
+  fetchCompanyText,
+  type CompanyPage,
+} from "@/lib/integrations/companyWebsite";
 import type { OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
 
 const MAX_URLS_PER_TRANSCRIPT = 3;
@@ -24,7 +27,10 @@ export function extractUrls(text: string): string[] {
   return urls;
 }
 
-const cache = new Map<string, { page: CompanyPage | null; expiresAt: number }>();
+const cache = new Map<
+  string,
+  { page: CompanyPage | null; expiresAt: number }
+>();
 
 /** Avoids re-fetching the same URL on every later turn of a chat session. */
 async function fetchCached(url: string): Promise<CompanyPage | null> {
@@ -58,8 +64,13 @@ export async function buildReferencedPageContext(
   );
 
   const sections = results
-    .filter((result): result is { url: string; page: CompanyPage } => result.page !== null)
-    .map(({ url, page }) => `### ${url} — "${page.title || url}"\n${page.text}`);
+    .filter(
+      (result): result is { url: string; page: CompanyPage } =>
+        result.page !== null,
+    )
+    .map(
+      ({ url, page }) => `### ${url} — "${page.title || url}"\n${page.text}`,
+    );
 
   if (sections.length === 0) return "";
 

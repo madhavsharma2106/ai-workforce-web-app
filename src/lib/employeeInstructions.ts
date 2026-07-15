@@ -2,7 +2,10 @@ import { z } from "zod";
 import { getModel } from "@/lib/agents/model";
 import { generateObject } from "@/lib/agents/tracing";
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
-import { buildTranscriptContext, type OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
+import {
+  buildTranscriptContext,
+  type OnboardingTranscriptEntry,
+} from "@/lib/onboardingQuestions";
 
 const instructionsSchema = z.object({
   instructionsMd: z.string(),

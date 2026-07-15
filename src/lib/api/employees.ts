@@ -1,5 +1,13 @@
-import type { NextQuestionResult, OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
-import type { AgentRun, AgentRunStep, Lead, PassedCandidate } from "@/lib/types";
+import type {
+  NextQuestionResult,
+  OnboardingTranscriptEntry,
+} from "@/lib/onboardingQuestions";
+import type {
+  AgentRun,
+  AgentRunStep,
+  Lead,
+  PassedCandidate,
+} from "@/lib/types";
 
 export type LatestRunResponse = {
   run: AgentRun | null;
@@ -9,13 +17,18 @@ export type LatestRunResponse = {
   steps: AgentRunStep[];
 };
 
-export async function getLatestRun(employeeId: string): Promise<LatestRunResponse | null> {
+export async function getLatestRun(
+  employeeId: string,
+): Promise<LatestRunResponse | null> {
   const response = await fetch(`/api/employees/${employeeId}/latest-run`);
   if (!response.ok) return null;
   return response.json();
 }
 
-export async function triggerRun(employeeId: string, message: string): Promise<void> {
+export async function triggerRun(
+  employeeId: string,
+  message: string,
+): Promise<void> {
   await fetch(`/api/employees/${employeeId}/run`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -23,7 +36,9 @@ export async function triggerRun(employeeId: string, message: string): Promise<v
   });
 }
 
-export async function getDrafts(employeeId: string): Promise<{ leads: Lead[] } | null> {
+export async function getDrafts(
+  employeeId: string,
+): Promise<{ leads: Lead[] } | null> {
   const response = await fetch(`/api/employees/${employeeId}/drafts`);
   if (!response.ok) return null;
   return response.json();
@@ -71,11 +86,14 @@ export async function applyKnowledgeRefresh(
   employeeId: string,
   transcript: OnboardingTranscriptEntry[],
 ): Promise<KnowledgeRefreshResult | null> {
-  const response = await fetch(`/api/employees/${employeeId}/apply-knowledge-refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ transcript }),
-  });
+  const response = await fetch(
+    `/api/employees/${employeeId}/apply-knowledge-refresh`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transcript }),
+    },
+  );
   const data = await response.json();
   return response.ok ? (data as KnowledgeRefreshResult) : null;
 }

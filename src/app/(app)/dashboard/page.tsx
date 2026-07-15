@@ -17,7 +17,7 @@ import {
   Heading,
   Text,
 } from "@/components/atoms";
-import HireRoleButton from "@/components/organisms/HireRoleButton";
+import { HireRoleButton } from "@/components/organisms";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -83,8 +83,8 @@ export default async function DashboardPage() {
               Choose a role to hire
             </Heading>
             <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-              Every employee comes with a clear job description and a
-              dashboard where you review their work.
+              Every employee comes with a clear job description and a dashboard
+              where you review their work.
             </Text>
           </div>
 

@@ -9,11 +9,19 @@ type Props<T extends string> = {
   className?: string;
 };
 
-export function Tabs<T extends string>({ tabs, activeKey, onChange, className }: Props<T>) {
+export function Tabs<T extends string>({
+  tabs,
+  activeKey,
+  onChange,
+  className,
+}: Props<T>) {
   return (
     <div
       role="tablist"
-      className={cn("inline-flex gap-1 rounded-md border border-(--border) bg-gray-50 p-1", className)}
+      className={cn(
+        "inline-flex gap-1 rounded-md border border-(--border) bg-gray-50 p-1",
+        className,
+      )}
     >
       {tabs.map((tab) => (
         <button

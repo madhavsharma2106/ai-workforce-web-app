@@ -2,19 +2,20 @@ import { createClient } from "@/lib/supabase/server";
 import { getLatestRunWithLeads, getRunHistory } from "@/lib/leads";
 import { getAgentRunSteps } from "@/lib/agentRuns";
 import { listEmployees } from "@/lib/employees";
-import LeadSourcerHome from "./LeadSourcerHome";
+import { LeadSourcerHome } from "./LeadSourcerHome";
 
 type Props = {
   employeeId: string;
   userId: string;
 };
 
-export default async function LeadSourcerHomeContainer({ employeeId, userId }: Props) {
+export async function LeadSourcerHomeContainer({ employeeId, userId }: Props) {
   const supabase = await createClient();
-  const [{ run, leads, researchedCount, passedCandidates }, employees] = await Promise.all([
-    getLatestRunWithLeads(supabase, { userId, employeeId }),
-    listEmployees(supabase, userId),
-  ]);
+  const [{ run, leads, researchedCount, passedCandidates }, employees] =
+    await Promise.all([
+      getLatestRunWithLeads(supabase, { userId, employeeId }),
+      listEmployees(supabase, userId),
+    ]);
   const [history, steps] = await Promise.all([
     getRunHistory(supabase, { userId, employeeId, excludeRunId: run?.id }),
     run ? getAgentRunSteps(supabase, { runId: run.id }) : Promise.resolve([]),

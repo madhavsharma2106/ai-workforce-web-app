@@ -7,7 +7,7 @@ import { Alert } from "@/components/molecules";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
-const AuthGate = () => {
+export const AuthGate = () => {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -83,5 +83,3 @@ const AuthGate = () => {
     </div>
   );
 };
-
-export default AuthGate;

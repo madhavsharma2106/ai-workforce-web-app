@@ -1,7 +1,10 @@
 import type { ToolSet } from "ai";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { EmployeeRole } from "@/lib/employees";
-import { createDelegateToEmployeeTool, type DelegationRequest } from "./tools/delegationTool";
+import {
+  createDelegateToEmployeeTool,
+  type DelegationRequest,
+} from "./tools/delegationTool";
 import { createSaveLeadTool } from "./tools/saveLeadTool";
 import { createSearchLeadsTool } from "./tools/searchLeadsTool";
 import { createDraftOutreachTool } from "./tools/draftOutreachTool";
@@ -58,7 +61,10 @@ export function getToolsForRole(
   },
 ): ToolSet {
   return {
-    delegate_to_employee: createDelegateToEmployeeTool(ctx.onDelegate, ctx.isRoleHired),
+    delegate_to_employee: createDelegateToEmployeeTool(
+      ctx.onDelegate,
+      ctx.isRoleHired,
+    ),
     ...roleTools[role](ctx),
   };
 }

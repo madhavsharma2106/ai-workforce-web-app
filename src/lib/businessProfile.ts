@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { getModel } from "@/lib/agents/model";
 import { generateObject } from "@/lib/agents/tracing";
-import { buildTranscriptContext, type OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
+import {
+  buildTranscriptContext,
+  type OnboardingTranscriptEntry,
+} from "@/lib/onboardingQuestions";
 
 const profileSchema = z.object({
   businessName: z.string(),
@@ -46,7 +49,11 @@ Write:
  * distinct from fresh-onboarding synthesis above.
  */
 export async function mergeBusinessProfile(input: {
-  existingProfile: { businessName: string; contactName: string; profileMd: string };
+  existingProfile: {
+    businessName: string;
+    contactName: string;
+    profileMd: string;
+  };
   transcript: OnboardingTranscriptEntry[];
 }): Promise<{ businessName: string; contactName: string; profileMd: string }> {
   const { existingProfile, transcript } = input;

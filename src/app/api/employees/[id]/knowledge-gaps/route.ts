@@ -5,36 +5,43 @@ import {
   generateGapFollowup,
   type OnboardingTranscriptEntry,
 } from "@/lib/onboardingQuestions";
+import type { IdRouteParams } from "@/lib/types";
+import { apiErrorResponse } from "@/lib/api/errors";
 
-type Params = { params: Promise<{ id: string }> };
-
-export async function POST(request: Request, { params }: Params) {
+export async function POST(request: Request, { params }: IdRouteParams) {
   const { id } = await params;
   const supabase = await createClient();
   const result = await requireOwnedEmployeeForApi(supabase, id);
   if (result instanceof NextResponse) return result;
   const { user, employee } = result;
 
-  const body = await request.json();
-  const transcript: OnboardingTranscriptEntry[] = body.transcript ?? [];
+  try {
+    const body = await request.json();
+    const transcript: OnboardingTranscriptEntry[] = body.transcript ?? [];
 
-  const { data: businessProfile } = await supabase
-    .from("business_profiles")
-    .select("profile_md")
-    .eq("user_id", user.id)
-    .maybeSingle();
+    const { data: businessProfile } = await supabase
+      .from("business_profiles")
+      .select("profile_md")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  const currentKnowledgeMd =
-    employee.role === "account_manager"
-      ? businessProfile?.profile_md || ""
-      : employee.instructions_md || "";
+    const currentKnowledgeMd =
+      employee.role === "account_manager"
+        ? businessProfile?.profile_md || ""
+        : employee.instructions_md || "";
 
-  const next = await generateGapFollowup({
-    role: employee.role,
-    currentKnowledgeMd,
-    transcript,
-    knownProfile: employee.role === "account_manager" ? null : businessProfile?.profile_md || null,
-  });
+    const next = await generateGapFollowup({
+      role: employee.role,
+      currentKnowledgeMd,
+      transcript,
+      knownProfile:
+        employee.role === "account_manager"
+          ? null
+          : businessProfile?.profile_md || null,
+    });
 
-  return NextResponse.json(next);
+    return NextResponse.json(next);
+  } catch (error) {
+    return apiErrorResponse(error);
+  }
 }

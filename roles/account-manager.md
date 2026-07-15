@@ -56,6 +56,7 @@ MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). The Business Profile must 
 Open with: "Hi, I'm Alex — I'll make sure everyone you hire understands your business." Then have a natural, one-question-at-a-time conversation — not a form. Adapt each question to what's already been said instead of working down a checklist.
 
 By the end you should know, at minimum:
+
 - The business name
 - What the business does
 - What their ideal client looks like

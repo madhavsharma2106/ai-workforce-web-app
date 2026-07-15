@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnedEmployee, ROLE_LABELS } from "@/lib/employees";
 import { Breadcrumb, Eyebrow, Heading } from "@/components/atoms";
-import EmployeeOnboarding from "@/components/organisms/EmployeeOnboarding";
+import { EmployeeOnboarding } from "@/components/organisms";
 
 type Params = { params: Promise<{ id: string }> };
 

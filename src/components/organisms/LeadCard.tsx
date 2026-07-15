@@ -47,19 +47,22 @@ const DEFAULT_FEEDBACK_OPTIONS = [
 const titleCase = (value: string) =>
   value.replace(/[_-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-const withProtocol = (url: string) => (/^https?:\/\//i.test(url) ? url : `https://${url}`);
+const withProtocol = (url: string) =>
+  /^https?:\/\//i.test(url) ? url : `https://${url}`;
 
 function companySnapshot(lead: Lead): string | null {
   const parts = [
     lead.industry ? titleCase(lead.industry) : null,
-    typeof lead.employeeCount === "number" ? `${lead.employeeCount.toLocaleString()} employees` : null,
+    typeof lead.employeeCount === "number"
+      ? `${lead.employeeCount.toLocaleString()} employees`
+      : null,
     lead.location,
     lead.foundedYear ? `Founded ${lead.foundedYear}` : null,
   ].filter((part): part is string => Boolean(part));
   return parts.length > 0 ? parts.join(" • ") : null;
 }
 
-const LeadCard: FC<Props> = ({
+export const LeadCard: FC<Props> = ({
   lead,
   status,
   showDraft = true,
@@ -170,7 +173,9 @@ const LeadCard: FC<Props> = ({
         </Eyebrow>
         <p className="mt-1.5 text-gray-900">{lead.fit}</p>
         {lead.researchSnippet && (
-          <p className="mt-2 text-sm text-gray-600 italic">&ldquo;{lead.researchSnippet}&rdquo;</p>
+          <p className="mt-2 text-sm text-gray-600 italic">
+            &ldquo;{lead.researchSnippet}&rdquo;
+          </p>
         )}
       </div>
 
@@ -251,5 +256,3 @@ const LeadCard: FC<Props> = ({
     </Card>
   );
 };
-
-export default LeadCard;

@@ -1,5 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { AgentRun, ApprovalStatus, Lead, TaskHistoryItem } from "@/lib/types";
+import type {
+  AgentRun,
+  ApprovalStatus,
+  Lead,
+  TaskHistoryItem,
+} from "@/lib/types";
 
 type LeadRow = {
   id: string;
@@ -146,7 +151,8 @@ export async function getLatestRunWithLeads(
     .limit(1)
     .maybeSingle();
 
-  if (!run) return { run: null, leads: [], researchedCount: 0, passedCandidates: [] };
+  if (!run)
+    return { run: null, leads: [], researchedCount: 0, passedCandidates: [] };
 
   const [leads, { data: researchSteps }, passedCandidates] = await Promise.all([
     getLeadsByRunId(supabase, { runId: run.id }),
@@ -158,7 +164,9 @@ export async function getLatestRunWithLeads(
     getPassedCandidates(supabase, { runId: run.id }),
   ]);
 
-  const researchedCount = sumResearchedCount((researchSteps as { output: unknown }[] | null) ?? []);
+  const researchedCount = sumResearchedCount(
+    (researchSteps as { output: unknown }[] | null) ?? [],
+  );
 
   return {
     run: run as AgentRun,
@@ -180,12 +188,19 @@ export async function getPassedCandidates(
     .order("seq", { ascending: true });
 
   const rows = (data as { input: unknown }[] | null) ?? [];
-  return rows.flatMap((row) => (row.input as { passed?: PassedCandidate[] } | null)?.passed ?? []);
+  return rows.flatMap(
+    (row) => (row.input as { passed?: PassedCandidate[] } | null)?.passed ?? [],
+  );
 }
 
 export async function getRunHistory(
   supabase: SupabaseClient,
-  input: { userId: string; employeeId: string; excludeRunId?: string; limit?: number },
+  input: {
+    userId: string;
+    employeeId: string;
+    excludeRunId?: string;
+    limit?: number;
+  },
 ): Promise<TaskHistoryItem[]> {
   let query = supabase
     .from("agent_runs")
@@ -214,24 +229,44 @@ export async function getRunHistory(
       .eq("tool_name", "search_leads"),
   ]);
 
-  const countsByRun = new Map<string, { approved: number; rejected: number; pending: number }>();
-  for (const row of (leadRows as { run_id: string; status: ApprovalStatus }[] | null) ?? []) {
-    const counts = countsByRun.get(row.run_id) ?? { approved: 0, rejected: 0, pending: 0 };
+  const countsByRun = new Map<
+    string,
+    { approved: number; rejected: number; pending: number }
+  >();
+  for (const row of (leadRows as
+    { run_id: string; status: ApprovalStatus }[] | null) ?? []) {
+    const counts = countsByRun.get(row.run_id) ?? {
+      approved: 0,
+      rejected: 0,
+      pending: 0,
+    };
     counts[row.status] += 1;
     countsByRun.set(row.run_id, counts);
   }
 
   const researchedByRun = new Map<string, number>();
-  for (const row of (researchRows as { run_id: string; output: unknown }[] | null) ?? []) {
-    const totalFound = (row.output as { totalFound?: number } | null)?.totalFound ?? 0;
-    researchedByRun.set(row.run_id, (researchedByRun.get(row.run_id) ?? 0) + totalFound);
+  for (const row of (researchRows as
+    { run_id: string; output: unknown }[] | null) ?? []) {
+    const totalFound =
+      (row.output as { totalFound?: number } | null)?.totalFound ?? 0;
+    researchedByRun.set(
+      row.run_id,
+      (researchedByRun.get(row.run_id) ?? 0) + totalFound,
+    );
   }
 
   return runRows.map((run) => {
-    const counts = countsByRun.get(run.id) ?? { approved: 0, rejected: 0, pending: 0 };
+    const counts = countsByRun.get(run.id) ?? {
+      approved: 0,
+      rejected: 0,
+      pending: 0,
+    };
     return {
       ...run,
-      leadCounts: { ...counts, total: counts.approved + counts.rejected + counts.pending },
+      leadCounts: {
+        ...counts,
+        total: counts.approved + counts.rejected + counts.pending,
+      },
       researchedCount: researchedByRun.get(run.id) ?? 0,
     };
   });
@@ -253,17 +288,31 @@ export async function getFeedbackContext(
     .order("created_at", { ascending: false })
     .limit(100);
 
-  const rows = (data as
-    | { company: string; website: string; status: ApprovalStatus; feedback_reason: string | null }[]
-    | null) ?? [];
+  const rows =
+    (data as
+      | {
+          company: string;
+          website: string;
+          status: ApprovalStatus;
+          feedback_reason: string | null;
+        }[]
+      | null) ?? [];
 
   return {
-    approvedCompanies: rows.filter((r) => r.status === "approved").map((r) => r.company),
+    approvedCompanies: rows
+      .filter((r) => r.status === "approved")
+      .map((r) => r.company),
     rejected: rows
       .filter((r) => r.status === "rejected")
       .map((r) => ({ company: r.company, reason: r.feedback_reason })),
     seenDomains: rows
-      .map((r) => r.website.replace(/^https?:\/\//i, "").replace(/^www\./i, "").split("/")[0])
+      .map(
+        (r) =>
+          r.website
+            .replace(/^https?:\/\//i, "")
+            .replace(/^www\./i, "")
+            .split("/")[0],
+      )
       .filter(Boolean),
   };
 }
@@ -282,7 +331,8 @@ export async function getLeadById(
   return data ? toLead(data as LeadRow) : null;
 }
 
-const FALLBACK_DRAFT_ERROR = "I ran into an unexpected problem and couldn't finish this task.";
+const FALLBACK_DRAFT_ERROR =
+  "I ran into an unexpected problem and couldn't finish this task.";
 
 // Correlates a lead to its Oliver drafting run: there's no `lead_id` column
 // on `agent_runs`, so this goes through the `delegations` row created for
@@ -299,7 +349,10 @@ async function getFailedDraftLeadIds(
 
   const failedByLeadId = new Map<string, string>();
   for (const row of (data as
-    | { context: { leadId?: string } | null; agent_runs: { status: string; summary: string | null } | null }[]
+    | {
+        context: { leadId?: string } | null;
+        agent_runs: { status: string; summary: string | null } | null;
+      }[]
     | null) ?? []) {
     if (row.agent_runs?.status !== "failed") continue;
     const leadId = row.context?.leadId;
@@ -327,11 +380,14 @@ export async function getLeadsAwaitingOutreach(
   const stillDrafting = leads.filter((lead) => lead.draft === "");
   if (stillDrafting.length === 0) return leads;
 
-  const failedByLeadId = await getFailedDraftLeadIds(supabase, { userId: input.userId });
+  const failedByLeadId = await getFailedDraftLeadIds(supabase, {
+    userId: input.userId,
+  });
   if (failedByLeadId.size === 0) return leads;
 
   return leads.map((lead) => {
-    const draftError = lead.draft === "" ? failedByLeadId.get(lead.id) : undefined;
+    const draftError =
+      lead.draft === "" ? failedByLeadId.get(lead.id) : undefined;
     return draftError ? { ...lead, draftFailed: true, draftError } : lead;
   });
 }
@@ -359,7 +415,10 @@ export async function updateLeadDraftStatus(
 ): Promise<void> {
   const { error } = await supabase
     .from("leads")
-    .update({ draft_status: input.status, updated_at: new Date().toISOString() })
+    .update({
+      draft_status: input.status,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", input.id)
     .eq("user_id", input.userId);
   if (error) throw error;
@@ -395,7 +454,10 @@ export async function updateLeadFeedback(
 ): Promise<void> {
   const { error } = await supabase
     .from("leads")
-    .update({ feedback_reason: input.feedbackReason, updated_at: new Date().toISOString() })
+    .update({
+      feedback_reason: input.feedbackReason,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", input.id)
     .eq("user_id", input.userId);
   if (error) throw error;
@@ -407,7 +469,11 @@ export async function updateLeadEmail(
 ): Promise<void> {
   const { error } = await supabase
     .from("leads")
-    .update({ email: input.email, email_revealed: true, updated_at: new Date().toISOString() })
+    .update({
+      email: input.email,
+      email_revealed: true,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", input.id)
     .eq("user_id", input.userId);
   if (error) throw error;

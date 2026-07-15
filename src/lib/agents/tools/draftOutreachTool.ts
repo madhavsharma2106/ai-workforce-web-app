@@ -16,7 +16,9 @@ export function createDraftOutreachTool(
     description:
       "Save your personalized outreach email draft for the lead you were handed off. Call this once, after reading the qualification research in your briefing.",
     inputSchema: z.object({
-      company: z.string().describe("The company's name, echoed back for narration only."),
+      company: z
+        .string()
+        .describe("The company's name, echoed back for narration only."),
       draft: z
         .string()
         .describe(

@@ -17,7 +17,9 @@ export type {
 type Props = {
   agentName: string;
   confirmLabel: string;
-  fetchNextQuestion: (transcript: OnboardingTranscriptEntry[]) => Promise<NextQuestionResult>;
+  fetchNextQuestion: (
+    transcript: OnboardingTranscriptEntry[],
+  ) => Promise<NextQuestionResult>;
   onComplete: (transcript: OnboardingTranscriptEntry[]) => void | Promise<void>;
 };
 
@@ -27,7 +29,7 @@ type Message = {
   text: string;
 };
 
-const ConversationalForm = ({
+export const ConversationalForm = ({
   agentName,
   confirmLabel,
   fetchNextQuestion,
@@ -92,7 +94,6 @@ const ConversationalForm = ({
     // differently-worded opening questions instead of deduping to one.
     if (hasLoadedInitial.current) return;
     hasLoadedInitial.current = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadNext([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -257,5 +258,3 @@ const ConversationalForm = ({
     </Card>
   );
 };
-
-export default ConversationalForm;

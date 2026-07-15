@@ -2,24 +2,40 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import LeadCard from "@/components/organisms/LeadCard";
+import { LeadCard } from "./LeadCard";
 import { patchLead, retryDraft, revealLeadEmail } from "@/lib/api/leads";
 import { getDrafts } from "@/lib/api/employees";
 import type { Lead } from "@/lib/types";
-import { Badge, Button, Card, EmployeeAvatar, Eyebrow, Heading, Text } from "@/components/atoms";
+import {
+  Badge,
+  Button,
+  Card,
+  EmployeeAvatar,
+  Eyebrow,
+  Heading,
+  Text,
+} from "@/components/atoms";
 import { Alert } from "@/components/molecules";
 import { ROLE_TITLES } from "@/lib/employees";
 
 const POLL_INTERVAL_MS = 3000;
 
-const FEEDBACK_OPTIONS = ["Wrong tone", "Too long", "Missing personalization", "Other"];
+const FEEDBACK_OPTIONS = [
+  "Wrong tone",
+  "Too long",
+  "Missing personalization",
+  "Other",
+];
 
 type Props = {
   employeeId: string;
   initialLeads: Lead[];
 };
 
-const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
+export const SalesRepresentativeHome = ({
+  employeeId,
+  initialLeads,
+}: Props) => {
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
@@ -47,7 +63,9 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
   }, [employeeId, isDrafting]);
 
   const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
-    setLeads((current) => current.map((lead) => (lead.id === id ? updater(lead) : lead)));
+    setLeads((current) =>
+      current.map((lead) => (lead.id === id ? updater(lead) : lead)),
+    );
   };
 
   const handleRevealEmail = async (id: string) => {
@@ -100,13 +118,25 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
   };
 
   const handleRetryDraft = (id: string) => {
-    updateLead(id, (current) => ({ ...current, draftFailed: false, draftError: undefined }));
-    void retryDraft(id).catch((error) => console.error("Failed to retry draft", error));
+    updateLead(id, (current) => ({
+      ...current,
+      draftFailed: false,
+      draftError: undefined,
+    }));
+    void retryDraft(id).catch((error) =>
+      console.error("Failed to retry draft", error),
+    );
   };
 
-  const drafting = leads.filter((lead) => lead.draft === "" && !lead.draftFailed);
-  const draftFailed = leads.filter((lead) => lead.draft === "" && lead.draftFailed);
-  const awaitingApproval = leads.filter((lead) => lead.draft !== "" && lead.draftStatus === "pending");
+  const drafting = leads.filter(
+    (lead) => lead.draft === "" && !lead.draftFailed,
+  );
+  const draftFailed = leads.filter(
+    (lead) => lead.draft === "" && lead.draftFailed,
+  );
+  const awaitingApproval = leads.filter(
+    (lead) => lead.draft !== "" && lead.draftStatus === "pending",
+  );
   const readyToSend = leads.filter((lead) => lead.draftStatus === "approved");
   const rejected = leads.filter((lead) => lead.draftStatus === "rejected");
 
@@ -129,8 +159,8 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
               </Heading>
               <Text size="sm" tone="muted" className="mt-2 max-w-xl">
                 I draft an email for each lead Emma approves, then wait for your
-                sign-off — sending itself isn&apos;t wired up yet in this preview
-                build.
+                sign-off — sending itself isn&apos;t wired up yet in this
+                preview build.
               </Text>
             </div>
           </div>
@@ -162,7 +192,11 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
           <Eyebrow>Draft failed</Eyebrow>
           <div className="space-y-3">
             {draftFailed.map((lead) => (
-              <Alert key={lead.id} variant="error" className="flex items-center justify-between gap-4">
+              <Alert
+                key={lead.id}
+                variant="error"
+                className="flex items-center justify-between gap-4"
+              >
                 <div>
                   <Text size="sm" weight="medium">
                     {lead.company}
@@ -171,7 +205,11 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
                     {lead.draftError}
                   </Text>
                 </div>
-                <Button variant="secondary" size="sm" onClick={() => handleRetryDraft(lead.id)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleRetryDraft(lead.id)}
+                >
                   Try again
                 </Button>
               </Alert>
@@ -192,7 +230,12 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
       {sections.map(
         (section) =>
           section.items.length > 0 && (
-            <Card key={section.title} as="section" padding="lg" className="space-y-4">
+            <Card
+              key={section.title}
+              as="section"
+              padding="lg"
+              className="space-y-4"
+            >
               <Heading as="h3" size="md">
                 {section.title}
               </Heading>
@@ -227,5 +270,3 @@ const SalesRepresentativeHome = ({ employeeId, initialLeads }: Props) => {
 
   return <main className="space-y-10">{leadsTabContent}</main>;
 };
-
-export default SalesRepresentativeHome;

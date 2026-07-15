@@ -7,7 +7,7 @@ type Props = {
   onSearchAgain: () => void;
 };
 
-const RunFailedCard = ({ run, onSearchAgain }: Props) => (
+export const RunFailedCard = ({ run, onSearchAgain }: Props) => (
   <Card as="section" padding="lg">
     <Eyebrow>Emma</Eyebrow>
     <Heading as="h2" size="md" className="mt-1">
@@ -25,5 +25,3 @@ const RunFailedCard = ({ run, onSearchAgain }: Props) => (
     </Button>
   </Card>
 );
-
-export default RunFailedCard;

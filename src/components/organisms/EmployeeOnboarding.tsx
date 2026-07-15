@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import ConversationalForm, {
+import {
+  ConversationalForm,
   type NextQuestionResult,
   type TranscriptEntry,
-} from "@/components/organisms/ConversationalForm";
+} from "./ConversationalForm";
 import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 
 type Props = {
@@ -18,7 +19,7 @@ const CONFIRM_LABELS: Record<EmployeeRole, string> = {
   sales_representative: "Confirm hire →",
 };
 
-const EmployeeOnboarding = ({ employeeId, role }: Props) => {
+export const EmployeeOnboarding = ({ employeeId, role }: Props) => {
   const router = useRouter();
 
   const fetchNextQuestion = async (
@@ -60,5 +61,3 @@ const EmployeeOnboarding = ({ employeeId, role }: Props) => {
     />
   );
 };
-
-export default EmployeeOnboarding;

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import AuthGate from "@/components/organisms/AuthGate";
+import { AuthGate } from "@/components/organisms";
 
 export default async function LoginPage() {
   const supabase = await createClient();

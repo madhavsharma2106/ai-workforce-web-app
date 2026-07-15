@@ -2,16 +2,22 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import RunFailedCard from "@/components/organisms/RunFailedCard";
-import RunInProgressCard from "@/components/organisms/RunInProgressCard";
-import RunNotStartedCard from "@/components/organisms/RunNotStartedCard";
-import RunReviewPanel from "@/components/organisms/RunReviewPanel";
-import SearchAgainModal from "@/components/organisms/SearchAgainModal";
-import TaskHistory from "@/components/organisms/TaskHistory";
+import { RunFailedCard } from "./RunFailedCard";
+import { RunInProgressCard } from "./RunInProgressCard";
+import { RunNotStartedCard } from "./RunNotStartedCard";
+import { RunReviewPanel } from "./RunReviewPanel";
+import { SearchAgainModal } from "./SearchAgainModal";
+import { TaskHistory } from "./TaskHistory";
 import { useLatestRun } from "@/hooks/useLatestRun";
 import { patchLead, revealLeadEmail } from "@/lib/api/leads";
 import { triggerRun } from "@/lib/api/employees";
-import type { AgentRun, AgentRunStep, Lead, PassedCandidate, TaskHistoryItem } from "@/lib/types";
+import type {
+  AgentRun,
+  AgentRunStep,
+  Lead,
+  PassedCandidate,
+  TaskHistoryItem,
+} from "@/lib/types";
 import { Tabs } from "@/components/atoms";
 
 const SEARCH_AGAIN_MESSAGE = "Run a new lead search.";
@@ -27,7 +33,7 @@ type Props = {
   oliverHired: boolean;
 };
 
-const LeadSourcerHome = ({
+export const LeadSourcerHome = ({
   employeeId,
   initialRun,
   initialLeads,
@@ -37,7 +43,16 @@ const LeadSourcerHome = ({
   initialPassedCandidates,
   oliverHired,
 }: Props) => {
-  const { run, setRun, leads, setLeads, researchedCount, steps, passedCandidates, now } = useLatestRun(employeeId, {
+  const {
+    run,
+    setRun,
+    leads,
+    setLeads,
+    researchedCount,
+    steps,
+    passedCandidates,
+    now,
+  } = useLatestRun(employeeId, {
     run: initialRun,
     leads: initialLeads,
     researchedCount: initialResearchedCount,
@@ -59,10 +74,16 @@ const LeadSourcerHome = ({
   );
 
   const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
-    setLeads((current) => current.map((lead) => (lead.id === id ? updater(lead) : lead)));
+    setLeads((current) =>
+      current.map((lead) => (lead.id === id ? updater(lead) : lead)),
+    );
   };
 
-  const updateAndPatch = (id: string, updater: (lead: Lead) => Lead, body: Record<string, unknown>) => {
+  const updateAndPatch = (
+    id: string,
+    updater: (lead: Lead) => Lead,
+    body: Record<string, unknown>,
+  ) => {
     updateLead(id, updater);
     void patchLead(id, body);
   };
@@ -89,26 +110,34 @@ const LeadSourcerHome = ({
 
   const handleApprove = (id: string) => {
     if (!oliverHired) return;
-    updateAndPatch(id, (current) => ({ ...current, status: "approved" }), { status: "approved" });
+    updateAndPatch(id, (current) => ({ ...current, status: "approved" }), {
+      status: "approved",
+    });
     if (feedbackLeadId === id) setFeedbackLeadId(null);
     void handleRevealEmail(id);
   };
 
   const handleReject = (id: string) => {
-    updateAndPatch(id, (current) => ({ ...current, status: "rejected" }), { status: "rejected" });
+    updateAndPatch(id, (current) => ({ ...current, status: "rejected" }), {
+      status: "rejected",
+    });
     setFeedbackLeadId(id);
   };
 
   const handleApproveAll = () => {
     if (!oliverHired) return;
-    leads.filter((lead) => lead.status === "pending").forEach((lead) => handleApprove(lead.id));
+    leads
+      .filter((lead) => lead.status === "pending")
+      .forEach((lead) => handleApprove(lead.id));
     setFeedbackLeadId(null);
   };
 
   const handleFeedbackSubmit = (reason: string) => {
     if (feedbackLeadId === null) return;
     const id = feedbackLeadId;
-    updateAndPatch(id, (current) => ({ ...current, feedbackReason: reason }), { feedbackReason: reason });
+    updateAndPatch(id, (current) => ({ ...current, feedbackReason: reason }), {
+      feedbackReason: reason,
+    });
     setFeedbackLeadId(null);
   };
 
@@ -139,9 +168,17 @@ const LeadSourcerHome = ({
     switch (run.status) {
       case "queued":
       case "running":
-        return <RunInProgressCard run={run} now={now} onSearchAgain={handleOpenSearchModal} />;
+        return (
+          <RunInProgressCard
+            run={run}
+            now={now}
+            onSearchAgain={handleOpenSearchModal}
+          />
+        );
       case "failed":
-        return <RunFailedCard run={run} onSearchAgain={handleOpenSearchModal} />;
+        return (
+          <RunFailedCard run={run} onSearchAgain={handleOpenSearchModal} />
+        );
       case "waiting_approval":
       case "completed":
         return (
@@ -191,7 +228,9 @@ const LeadSourcerHome = ({
         </Link>
       </div>
       {activeTab === "current" && renderCurrentTask()}
-      {activeTab === "previous" && <TaskHistory employeeId={employeeId} history={initialHistory} />}
+      {activeTab === "previous" && (
+        <TaskHistory employeeId={employeeId} history={initialHistory} />
+      )}
       <SearchAgainModal
         open={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}
@@ -200,5 +239,3 @@ const LeadSourcerHome = ({
     </main>
   );
 };
-
-export default LeadSourcerHome;

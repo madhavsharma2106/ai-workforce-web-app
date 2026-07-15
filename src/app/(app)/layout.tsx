@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/supabase/auth";
-import AppHeader from "@/components/organisms/AppHeader";
+import { AppHeader } from "@/components/organisms";
 
 export default async function AppLayout({
   children,

@@ -11,7 +11,7 @@ type Props = {
   userEmail: string | null;
 };
 
-const AppHeader = ({ userEmail }: Props) => {
+export const AppHeader = ({ userEmail }: Props) => {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -85,5 +85,3 @@ const AppHeader = ({ userEmail }: Props) => {
     </header>
   );
 };
-
-export default AppHeader;

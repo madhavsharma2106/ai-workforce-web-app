@@ -1,4 +1,7 @@
-export async function patchLead(id: string, body: Record<string, unknown>): Promise<void> {
+export async function patchLead(
+  id: string,
+  body: Record<string, unknown>,
+): Promise<void> {
   await fetch(`/api/leads/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -6,7 +9,10 @@ export async function patchLead(id: string, body: Record<string, unknown>): Prom
   });
 }
 
-export async function revealLeadEmail(personId: string, leadId: string): Promise<{ email?: string }> {
+export async function revealLeadEmail(
+  personId: string,
+  leadId: string,
+): Promise<{ email?: string }> {
   const response = await fetch("/api/leads/reveal-email", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

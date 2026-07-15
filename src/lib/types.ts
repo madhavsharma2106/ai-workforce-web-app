@@ -1,3 +1,5 @@
+export type IdRouteParams = { params: Promise<{ id: string }> };
+
 export type ApprovalStatus = "pending" | "approved" | "rejected";
 
 export type Lead = {
@@ -29,11 +31,7 @@ export type Lead = {
 
 export type AgentRunTrigger = "manual" | "delegation";
 export type AgentRunStatus =
-  | "queued"
-  | "running"
-  | "waiting_approval"
-  | "completed"
-  | "failed";
+  "queued" | "running" | "waiting_approval" | "completed" | "failed";
 
 export type AgentRun = {
   id: string;
@@ -49,11 +47,7 @@ export type AgentRun = {
 };
 
 export type AgentRunStepType =
-  | "thinking"
-  | "tool_call"
-  | "tool_result"
-  | "message"
-  | "delegation";
+  "thinking" | "tool_call" | "tool_result" | "message" | "delegation";
 
 export type AgentRunStep = {
   id: string;
@@ -70,13 +64,19 @@ export type AgentRunStep = {
 };
 
 export type TaskHistoryItem = AgentRun & {
-  leadCounts: { approved: number; rejected: number; pending: number; total: number };
+  leadCounts: {
+    approved: number;
+    rejected: number;
+    pending: number;
+    total: number;
+  };
   researchedCount: number;
 };
 
 export type PassedCandidate = { company: string; reason: string };
 
-export type DelegationStatus = "pending" | "accepted" | "completed" | "declined";
+export type DelegationStatus =
+  "pending" | "accepted" | "completed" | "declined";
 
 export type Delegation = {
   id: string;

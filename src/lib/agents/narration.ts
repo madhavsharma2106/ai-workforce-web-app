@@ -20,7 +20,8 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
     },
   },
   save_lead: {
-    before: (input) => `I'm queuing ${input.company as string} for your review.`,
+    before: (input) =>
+      `I'm queuing ${input.company as string} for your review.`,
   },
   note_passed_candidates: {
     before: () => "I'm reviewing the rest of the candidates.",
@@ -36,17 +37,22 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
     after: () => "I drafted a first outreach email for your review.",
   },
   search_leads: {
-    before: (input) => `I'm searching for companies matching "${input.icp as string}".`,
+    before: (input) =>
+      `I'm searching for companies matching "${input.icp as string}".`,
     after: (_input, output) => {
       const result = output as { totalFound: number; candidates: unknown[] };
-      if (result.totalFound === 0) return "I didn't find any matches for that search.";
+      if (result.totalFound === 0)
+        return "I didn't find any matches for that search.";
       const companyWord = result.totalFound === 1 ? "company" : "companies";
       return `I found ${result.totalFound} ${companyWord}, ${result.candidates.length} new since last search.`;
     },
   },
 };
 
-export function narrateBefore(toolName: string, input: Record<string, unknown>): string {
+export function narrateBefore(
+  toolName: string,
+  input: Record<string, unknown>,
+): string {
   return NARRATIONS[toolName]?.before(input) ?? "I did some work here.";
 }
 

@@ -38,9 +38,16 @@ export async function createAgentRun(
 export async function updateAgentRun(
   supabase: SupabaseClient,
   runId: string,
-  update: Partial<{ status: AgentRunStatus; summary: string; completed_at: string }>,
+  update: Partial<{
+    status: AgentRunStatus;
+    summary: string;
+    completed_at: string;
+  }>,
 ): Promise<void> {
-  const { error } = await supabase.from("agent_runs").update(update).eq("id", runId);
+  const { error } = await supabase
+    .from("agent_runs")
+    .update(update)
+    .eq("id", runId);
   if (error) throw error;
 }
 

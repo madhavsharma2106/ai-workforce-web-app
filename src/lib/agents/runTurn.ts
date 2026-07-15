@@ -1,4 +1,8 @@
-import { stepCountIs, type ToolSet, type ToolLoopAgentOnStepFinishCallback } from "ai";
+import {
+  stepCountIs,
+  type ToolSet,
+  type ToolLoopAgentOnStepFinishCallback,
+} from "ai";
 import { getModel } from "./model";
 import { ToolLoopAgent, createLangSmithProviderOptions } from "./tracing";
 
@@ -24,7 +28,11 @@ export function createEmployeeAgent<TOOLS extends ToolSet>(input: {
     stopWhen: stepCountIs(input.maxSteps ?? 8),
     onStepFinish: input.onStepFinish,
     providerOptions: input.metadata
-      ? { langsmith: createLangSmithProviderOptions({ metadata: input.metadata }) }
+      ? {
+          langsmith: createLangSmithProviderOptions({
+            metadata: input.metadata,
+          }),
+        }
       : undefined,
   });
 }

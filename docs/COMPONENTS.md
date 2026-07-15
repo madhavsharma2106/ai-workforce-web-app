@@ -17,25 +17,25 @@ Authenticated routes (`/dashboard`, `/employee/[id]` and its subroutes) live und
 
 ## Atoms (`src/components/atoms/`)
 
-| Component | Props | Notes |
-|---|---|---|
-| `Button` | `variant?: "primary" \| "secondary" \| "danger" \| "accent"`, `size?: "sm" \| "md" \| "lg"`, `fullWidth?: boolean` | `primary` (near-black) is the default and the main CTA color — not `accent`. `accent` (indigo) is reserved for the rare emphasis action (e.g. "Confirm hire"). |
-| `Input` / `Textarea` | native attrs + `className` | Share one base field style. |
-| `Card` | `as?: ElementType` (default `div`), `padding?: "none" \| "sm" \| "md" \| "lg"` (default `lg`) | Owns shape only (`rounded-lg border`). Background/hover/layout stays in the caller's `className`. |
-| `Badge` | `tone?: "neutral" \| "accent" \| "danger"`, `size?: "xs" \| "sm" \| "md"` | Status pills, tags. |
-| `Eyebrow` | `tone?: "accent" \| "accent-faint" \| "muted"`, `tracking?: "wide" \| "widest"` | The small-caps kicker/label pattern from [DESIGN.md](DESIGN.md). |
-| `Heading` | `as?: ElementType` (default `h2`), `size?: "xl" \| "lg" \| "md" \| "sm"` | `font-semibold tracking-tight text-gray-900` headings; pair `as="h1"` with `size="xl"` for page titles. |
-| `Text` | `as?: ElementType` (default `p`), `size?: "xs" \| "sm" \| "md" \| "lg" \| "xl"`, `tone?: "default" \| "muted" \| "subtle" \| "inverted"`, `weight?: "normal" \| "medium" \| "semibold"` | General body/paragraph text. |
-| `EmployeeAvatar` | `seed: string`, `size?: "sm" \| "md" \| "lg"` (32/40/48px) | Wraps `boring-avatars` (`variant="beam"`, `square`), seeded on `employee.id` for a deterministic, unique-per-employee avatar. Colors constrained to this app's grays + accent instead of the library's default palette — see `EmployeeAvatar.tsx`. |
-| `Breadcrumb` | `items: { label: string; href?: string }[]` | Crumbs without `href` render as the current (non-linked) page. Used on `/employee/[id]` and its `onboarding`/`chat` subroutes to orient the user back to `/dashboard`. |
+| Component            | Props                                                                                                                                                                                   | Notes                                                                                                                                                                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`             | `variant?: "primary" \| "secondary" \| "danger" \| "accent"`, `size?: "sm" \| "md" \| "lg"`, `fullWidth?: boolean`                                                                      | `primary` (near-black) is the default and the main CTA color — not `accent`. `accent` (indigo) is reserved for the rare emphasis action (e.g. "Confirm hire").                                                                                     |
+| `Input` / `Textarea` | native attrs + `className`                                                                                                                                                              | Share one base field style.                                                                                                                                                                                                                        |
+| `Card`               | `as?: ElementType` (default `div`), `padding?: "none" \| "sm" \| "md" \| "lg"` (default `lg`)                                                                                           | Owns shape only (`rounded-lg border`). Background/hover/layout stays in the caller's `className`.                                                                                                                                                  |
+| `Badge`              | `tone?: "neutral" \| "accent" \| "danger"`, `size?: "xs" \| "sm" \| "md"`                                                                                                               | Status pills, tags.                                                                                                                                                                                                                                |
+| `Eyebrow`            | `tone?: "accent" \| "accent-faint" \| "muted"`, `tracking?: "wide" \| "widest"`                                                                                                         | The small-caps kicker/label pattern from [DESIGN.md](DESIGN.md).                                                                                                                                                                                   |
+| `Heading`            | `as?: ElementType` (default `h2`), `size?: "xl" \| "lg" \| "md" \| "sm"`                                                                                                                | `font-semibold tracking-tight text-gray-900` headings; pair `as="h1"` with `size="xl"` for page titles.                                                                                                                                            |
+| `Text`               | `as?: ElementType` (default `p`), `size?: "xs" \| "sm" \| "md" \| "lg" \| "xl"`, `tone?: "default" \| "muted" \| "subtle" \| "inverted"`, `weight?: "normal" \| "medium" \| "semibold"` | General body/paragraph text.                                                                                                                                                                                                                       |
+| `EmployeeAvatar`     | `seed: string`, `size?: "sm" \| "md" \| "lg"` (32/40/48px)                                                                                                                              | Wraps `boring-avatars` (`variant="beam"`, `square`), seeded on `employee.id` for a deterministic, unique-per-employee avatar. Colors constrained to this app's grays + accent instead of the library's default palette — see `EmployeeAvatar.tsx`. |
+| `Breadcrumb`         | `items: { label: string; href?: string }[]`                                                                                                                                             | Crumbs without `href` render as the current (non-linked) page. Used on `/employee/[id]` and its `onboarding`/`chat` subroutes to orient the user back to `/dashboard`.                                                                             |
 
 `cn(...)` (in `atoms/cn.ts`) is a tiny classname-joiner (`filter(Boolean).join(" ")`) — no `clsx`/`tailwind-merge` dependency.
 
 ## Molecules (`src/components/molecules/`)
 
-| Component | Built from | Used for |
-|---|---|---|
-| `Alert` | `variant?: "info" \| "error"` | Inline banners (search-in-progress, error messages, "check your email"). |
+| Component | Built from                    | Used for                                                                 |
+| --------- | ----------------------------- | ------------------------------------------------------------------------ |
+| `Alert`   | `variant?: "info" \| "error"` | Inline banners (search-in-progress, error messages, "check your email"). |
 
 Only `Alert` exists today. A `Field` molecule (label + input) was considered during the initial extraction but dropped — at the time there was only one real call site (`LeadCard`'s draft-email textarea), and a molecule with a single consumer is premature abstraction. Revisit if a second genuine label+field duplicate shows up.
 
@@ -51,4 +51,4 @@ Tailwind's generated CSS order isn't guaranteed to follow JSX `className` order,
 
 - **New variant on an existing atom**: only add one backed by a real call site in the app — don't pre-populate options nobody uses yet.
 - **New atom**: only when a class-string pattern is duplicated 2+ times across files (grep before assuming).
-- **New molecule**: only when 2+ real call sites compose the *same* atoms in the *same* shape.
+- **New molecule**: only when 2+ real call sites compose the _same_ atoms in the _same_ shape.

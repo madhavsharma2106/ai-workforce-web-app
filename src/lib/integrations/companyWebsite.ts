@@ -15,7 +15,10 @@ const ENTITY_MAP: Record<string, string> = {
 };
 
 function decodeEntities(input: string): string {
-  return input.replace(/&(amp|nbsp|quot|#39|lt|gt);/g, (match) => ENTITY_MAP[match] ?? match);
+  return input.replace(
+    /&(amp|nbsp|quot|#39|lt|gt);/g,
+    (match) => ENTITY_MAP[match] ?? match,
+  );
 }
 
 function extractTitle(html: string): string {
@@ -56,7 +59,13 @@ function isBlockedHost(hostname: string): boolean {
     if (a === 169 && b === 254) return true;
     if (a === 0) return true;
   }
-  if (host === "::1" || host.startsWith("fe80:") || host.startsWith("fc") || host.startsWith("fd")) return true;
+  if (
+    host === "::1" ||
+    host.startsWith("fe80:") ||
+    host.startsWith("fc") ||
+    host.startsWith("fd")
+  )
+    return true;
   return false;
 }
 
@@ -66,7 +75,9 @@ function isBlockedHost(hostname: string): boolean {
  * error, or a blocked host) rather than throwing — callers must treat null
  * as "no research available" and avoid inventing specifics about the page.
  */
-export async function fetchCompanyText(url: string): Promise<CompanyPage | null> {
+export async function fetchCompanyText(
+  url: string,
+): Promise<CompanyPage | null> {
   const normalized = normalizeUrl(url);
   let parsed: URL;
   try {

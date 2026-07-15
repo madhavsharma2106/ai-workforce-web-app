@@ -1,11 +1,16 @@
 "use client";
 
 import { Heading, Modal, Text } from "@/components/atoms";
-import ConversationalForm, {
+import {
+  ConversationalForm,
   type NextQuestionResult,
   type TranscriptEntry,
-} from "@/components/organisms/ConversationalForm";
-import { applyKnowledgeRefresh, fetchKnowledgeGapQuestion, type KnowledgeRefreshResult } from "@/lib/api/employees";
+} from "./ConversationalForm";
+import {
+  applyKnowledgeRefresh,
+  fetchKnowledgeGapQuestion,
+  type KnowledgeRefreshResult,
+} from "@/lib/api/employees";
 import type { EmployeeRole } from "@/lib/employees";
 
 export type { KnowledgeRefreshResult };
@@ -19,7 +24,7 @@ type Props = {
   onApplied: (result: KnowledgeRefreshResult) => void;
 };
 
-const KnowledgeRefreshModal = ({
+export const KnowledgeRefreshModal = ({
   open,
   onClose,
   employeeId,
@@ -28,7 +33,8 @@ const KnowledgeRefreshModal = ({
 }: Props) => {
   const fetchNextQuestion = async (
     transcript: TranscriptEntry[],
-  ): Promise<NextQuestionResult> => fetchKnowledgeGapQuestion(employeeId, transcript);
+  ): Promise<NextQuestionResult> =>
+    fetchKnowledgeGapQuestion(employeeId, transcript);
 
   const handleComplete = async (transcript: TranscriptEntry[]) => {
     const result = await applyKnowledgeRefresh(employeeId, transcript);
@@ -46,7 +52,8 @@ const KnowledgeRefreshModal = ({
             {agentName} is checking for gaps
           </Heading>
           <Text size="sm" tone="muted" className="mt-1">
-            Reviewing what&apos;s already on file and asking about anything missing.
+            Reviewing what&apos;s already on file and asking about anything
+            missing.
           </Text>
         </div>
         <ConversationalForm
@@ -59,5 +66,3 @@ const KnowledgeRefreshModal = ({
     </Modal>
   );
 };
-
-export default KnowledgeRefreshModal;

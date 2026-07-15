@@ -1,5 +1,8 @@
 import * as ai from "ai";
-import { wrapAISDK, createLangSmithProviderOptions } from "langsmith/experimental/vercel";
+import {
+  wrapAISDK,
+  createLangSmithProviderOptions,
+} from "langsmith/experimental/vercel";
 
 /**
  * Wraps the AI SDK once so every ToolLoopAgent/generateObject call is traced
