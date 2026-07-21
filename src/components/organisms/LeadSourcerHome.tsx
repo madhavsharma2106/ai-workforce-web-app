@@ -171,6 +171,7 @@ export const LeadSourcerHome = ({
         return (
           <RunInProgressCard
             run={run}
+            steps={steps}
             now={now}
             onSearchAgain={handleOpenSearchModal}
           />

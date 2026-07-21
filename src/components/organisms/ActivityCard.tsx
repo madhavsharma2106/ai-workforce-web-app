@@ -8,10 +8,18 @@ import { ActivityTimeline } from "./ActivityTimeline";
 
 type Props = {
   steps: AgentRunStep[];
+  eyebrow?: string;
+  title?: string;
+  defaultExpanded?: boolean;
 };
 
-export const ActivityCard = ({ steps }: Props) => {
-  const [expanded, setExpanded] = useState(false);
+export const ActivityCard = ({
+  steps,
+  eyebrow = "What happened",
+  title = "What I did",
+  defaultExpanded = false,
+}: Props) => {
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
     <Card
@@ -26,9 +34,9 @@ export const ActivityCard = ({ steps }: Props) => {
         aria-expanded={expanded}
       >
         <div>
-          <Eyebrow>What happened</Eyebrow>
+          <Eyebrow>{eyebrow}</Eyebrow>
           <Heading as="h2" size="md" className="mt-1">
-            What I did
+            {title}
           </Heading>
         </div>
         {expanded ? (
