@@ -20,16 +20,26 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
     },
   },
   save_lead: {
-    before: (input) =>
-      `I'm queuing ${input.company as string} for your review.`,
+    before: (input) => {
+      const company = input.company as string;
+      const fit = input.fit as string;
+      return `I'm queuing ${company} for your review: ${fit}`;
+    },
   },
   note_passed_candidates: {
     before: () => "I'm reviewing the rest of the candidates.",
-    after: (_input, output) => {
+    after: (input, output) => {
       const result = output as { noted: number };
-      return result.noted === 0
-        ? "Every candidate from this search was qualified."
-        : `I passed on ${result.noted} other ${result.noted === 1 ? "candidate" : "candidates"}.`;
+      if (result.noted === 0)
+        return "Every candidate from this search was qualified.";
+      const passed =
+        (input.passed as { company: string; reason: string }[] | undefined) ??
+        [];
+      const word = result.noted === 1 ? "candidate" : "candidates";
+      const reasons = passed
+        .map((c) => `- **${c.company}**: ${c.reason}`)
+        .join("\n");
+      return `I passed on ${result.noted} other ${word}:\n\n${reasons}`;
     },
   },
   draft_outreach_email: {
