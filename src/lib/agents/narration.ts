@@ -50,6 +50,18 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
     before: () => "I'm drafting a reply to what they said.",
     after: () => "I drafted a reply for your review.",
   },
+  ask_account_manager: {
+    before: (input) => `I'm checking with Alex: "${input.question as string}"`,
+    after: (_input, output) => {
+      const result = output as {
+        answered: boolean;
+        answer?: string;
+        note?: string;
+      };
+      if (!result.answered) return result.note ?? "Alex isn't hired yet.";
+      return `Alex says: ${result.answer}`;
+    },
+  },
   search_leads: {
     before: (input) =>
       `I'm searching for companies matching "${input.icp as string}".`,

@@ -17,7 +17,7 @@ Drafts approved by the founder (leading indicator, live today); replies received
 - Emma's (Lead Sourcer) qualified leads, once the founder approves one — a drafting run starts automatically (see [docs/AGENTS.md](../docs/AGENTS.md))
 - Founder's approval/edit decisions on drafts — approving a draft now sends it
 - Incoming replies to sent emails — polled every ~5 hours from the founder's mailbox; a genuine (non-automated) reply starts a reply-drafting run automatically
-- Company Knowledge from the Account Manager (case studies, objection handling) — future integration, not built yet
+- Company Knowledge from the Account Manager (case studies, objection handling) — via the `ask_account_manager` tool
 
 ## Outputs
 
@@ -35,6 +35,7 @@ Drafts approved by the founder (leading indicator, live today); replies received
 
 - `draft_outreach_email` — call once per handoff, using the qualification research provided, to draft a personalized outreach email for founder review.
 - `draft_reply_email` — call once per reply-handoff, using the prospect's actual message provided in the briefing, to draft a personalized response for founder review. Never exposed in the same run as `draft_outreach_email`.
+- `ask_account_manager` — ask Alex a specific question when you need something the Business Profile above doesn't cover — e.g. which case study or proof point fits this prospect, or how to handle a specific objection.
 
 ## Quality Bar
 
@@ -58,7 +59,6 @@ MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). In practice: outreach draf
 
 Not yet built:
 
-- Asking the Account Manager for context when needed (e.g. which case study to reference)
 - Distinguishing "surface to founder for judgment, no draft" from "draft a response" — today every genuine (non-automated) reply gets a drafted response; the founder's reject option stands in for "this doesn't need a reply"
 
 ## Experience

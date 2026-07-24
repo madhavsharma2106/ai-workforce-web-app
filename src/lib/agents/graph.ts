@@ -121,6 +121,7 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
       runId,
       leadId: ctx.leadId,
       jobKind: ctx.jobKind,
+      accountManagerEmployeeId: ctx.employeeIdByRole.account_manager,
     });
 
     const agent = createEmployeeAgent({

@@ -10,6 +10,7 @@ import { createSearchLeadsTool } from "./tools/searchLeadsTool";
 import { createDraftOutreachTool } from "./tools/draftOutreachTool";
 import { createDraftReplyTool } from "./tools/draftReplyTool";
 import { createNotePassedCandidatesTool } from "./tools/notePassedCandidatesTool";
+import { createAskAccountManagerTool } from "./tools/askAccountManagerTool";
 
 /**
  * Context a role-specific tool factory needs. `supabase`/`userId`/`employeeId`/`runId`
@@ -23,6 +24,7 @@ type RoleCtx = {
   runId: string;
   leadId?: string;
   jobKind?: "outreach" | "reply";
+  accountManagerEmployeeId?: string;
 };
 
 const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
@@ -38,9 +40,19 @@ const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
       runId: ctx.runId,
     }),
     note_passed_candidates: createNotePassedCandidatesTool(),
+    ask_account_manager: createAskAccountManagerTool(ctx.supabase, {
+      userId: ctx.userId,
+      accountManagerEmployeeId: ctx.accountManagerEmployeeId,
+      leadId: ctx.leadId,
+    }),
   }),
   sales_representative: (ctx): ToolSet => {
     if (!ctx.leadId) return {};
+    const askAccountManager = createAskAccountManagerTool(ctx.supabase, {
+      userId: ctx.userId,
+      accountManagerEmployeeId: ctx.accountManagerEmployeeId,
+      leadId: ctx.leadId,
+    });
     // Only one of these is ever exposed per run — never both. Both tools
     // write to the same lead row (draft vs. reply_draft), so surfacing both
     // whenever leadId is set would let the model call the wrong one for the
@@ -53,6 +65,7 @@ const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
           runId: ctx.runId,
           leadId: ctx.leadId,
         }),
+        ask_account_manager: askAccountManager,
       };
     }
     return {
@@ -61,6 +74,7 @@ const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
         runId: ctx.runId,
         leadId: ctx.leadId,
       }),
+      ask_account_manager: askAccountManager,
     };
   },
 };
