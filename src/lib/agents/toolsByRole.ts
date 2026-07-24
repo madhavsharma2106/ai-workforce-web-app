@@ -8,6 +8,7 @@ import {
 import { createSaveLeadTool } from "./tools/saveLeadTool";
 import { createSearchLeadsTool } from "./tools/searchLeadsTool";
 import { createDraftOutreachTool } from "./tools/draftOutreachTool";
+import { createDraftReplyTool } from "./tools/draftReplyTool";
 import { createNotePassedCandidatesTool } from "./tools/notePassedCandidatesTool";
 
 /**
@@ -21,6 +22,7 @@ type RoleCtx = {
   employeeId: string;
   runId: string;
   leadId?: string;
+  jobKind?: "outreach" | "reply";
 };
 
 const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
@@ -39,6 +41,20 @@ const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
   }),
   sales_representative: (ctx): ToolSet => {
     if (!ctx.leadId) return {};
+    // Only one of these is ever exposed per run — never both. Both tools
+    // write to the same lead row (draft vs. reply_draft), so surfacing both
+    // whenever leadId is set would let the model call the wrong one for the
+    // job it was actually briefed on (e.g. overwrite the outreach draft
+    // mid-reply-run) since there's nothing else constraining its choice.
+    if (ctx.jobKind === "reply") {
+      return {
+        draft_reply_email: createDraftReplyTool(ctx.supabase, {
+          userId: ctx.userId,
+          runId: ctx.runId,
+          leadId: ctx.leadId,
+        }),
+      };
+    }
     return {
       draft_outreach_email: createDraftOutreachTool(ctx.supabase, {
         userId: ctx.userId,

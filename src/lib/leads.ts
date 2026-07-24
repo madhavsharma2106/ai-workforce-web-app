@@ -28,6 +28,13 @@ type LeadRow = {
   draft_save_status: DraftSaveStatus;
   draft_save_error: string | null;
   draft_saved_at: string | null;
+  conversation_id: string | null;
+  last_reply_snippet: string | null;
+  reply_draft: string;
+  reply_status: ApprovalStatus | null;
+  reply_send_status: SendStatus;
+  reply_send_error: string | null;
+  reply_sent_at: string | null;
   feedback_reason: string | null;
   research_snippet: string | null;
   industry: string | null;
@@ -61,6 +68,12 @@ function toLead(row: LeadRow): Lead {
     draftSaveStatus: row.draft_save_status,
     draftSaveError: row.draft_save_error ?? undefined,
     draftSavedAt: row.draft_saved_at ?? undefined,
+    lastReplySnippet: row.last_reply_snippet ?? undefined,
+    replyDraft: row.reply_draft,
+    replyStatus: row.reply_status ?? undefined,
+    replySendStatus: row.reply_send_status,
+    replySendError: row.reply_send_error ?? undefined,
+    replySentAt: row.reply_sent_at ?? undefined,
     feedbackReason: row.feedback_reason ?? undefined,
     researchSnippet: row.research_snippet ?? undefined,
     industry: row.industry ?? undefined,
@@ -425,6 +438,49 @@ export async function saveDraftEmail(
       draft: input.draft,
       draft_status: "pending",
       draft_run_id: input.runId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.id)
+    .eq("user_id", input.userId);
+  if (error) throw error;
+}
+
+export async function saveReplyDraft(
+  supabase: SupabaseClient,
+  input: {
+    id: string;
+    userId: string;
+    replyDraft: string;
+    runId: string;
+  },
+): Promise<void> {
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      reply_draft: input.replyDraft,
+      reply_status: "pending",
+      reply_run_id: input.runId,
+      // Reset from any prior reply cycle on this same thread — otherwise
+      // sendReplyOnApproval's idempotency check ("already sent") would
+      // incorrectly block sending this new reply, since that flag would
+      // still read "sent" from the last cycle.
+      reply_send_status: "not_sent",
+      reply_send_error: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.id)
+    .eq("user_id", input.userId);
+  if (error) throw error;
+}
+
+export async function updateLeadReplyStatus(
+  supabase: SupabaseClient,
+  input: { id: string; userId: string; status: ApprovalStatus },
+): Promise<void> {
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      reply_status: input.status,
       updated_at: new Date().toISOString(),
     })
     .eq("id", input.id)

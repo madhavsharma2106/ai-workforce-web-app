@@ -61,9 +61,13 @@ export const SalesRepresentativeHome = ({
     () => leads.some((lead) => lead.draftSaveStatus === "saving"),
     [leads],
   );
+  const isSendingReply = useMemo(
+    () => leads.some((lead) => lead.replySendStatus === "sending"),
+    [leads],
+  );
 
   useEffect(() => {
-    if (!isDrafting && !isSending && !isSavingDraft) return;
+    if (!isDrafting && !isSending && !isSavingDraft && !isSendingReply) return;
 
     const interval = setInterval(async () => {
       try {
@@ -76,7 +80,7 @@ export const SalesRepresentativeHome = ({
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [employeeId, isDrafting, isSending, isSavingDraft]);
+  }, [employeeId, isDrafting, isSending, isSavingDraft, isSendingReply]);
 
   const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
     setLeads((current) =>
@@ -118,6 +122,20 @@ export const SalesRepresentativeHome = ({
     void patchLead(id, { draftStatus: "rejected" });
     setFeedbackLeadId(id);
     setEditingLeadId(null);
+  };
+
+  const handleApproveReply = (id: string) => {
+    updateLead(id, (current) => ({
+      ...current,
+      replyStatus: "approved",
+      replySendStatus: "sending",
+    }));
+    void patchLead(id, { replyStatus: "approved" });
+  };
+
+  const handleRejectReply = (id: string) => {
+    updateLead(id, (current) => ({ ...current, replyStatus: "rejected" }));
+    void patchLead(id, { replyStatus: "rejected" });
   };
 
   const handleToggleEdit = (id: string) => {
@@ -215,7 +233,8 @@ export const SalesRepresentativeHome = ({
               </Heading>
               <Text size="sm" tone="muted" className="mt-2 max-w-xl">
                 I draft an email for each lead Emma approves, then send it from
-                your own mailbox as soon as you say the word.
+                your own mailbox as soon as you say the word — and when a
+                prospect replies, I&apos;ll draft the response too.
               </Text>
             </div>
           </div>
@@ -339,19 +358,41 @@ export const SalesRepresentativeHome = ({
         <Card as="section" padding="lg" className="space-y-4">
           <Eyebrow>Sent</Eyebrow>
           <div className="space-y-3">
-            {sent.map((lead) => (
-              <div
-                key={lead.id}
-                className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5"
-              >
-                <Text size="sm" weight="medium">
-                  {lead.company}
-                </Text>
-                <Badge tone="accent" size="sm">
-                  Sent
-                </Badge>
-              </div>
-            ))}
+            {sent.map((lead) =>
+              lead.replyStatus ? (
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  status="approved"
+                  showDraft={false}
+                  approvedMessage="Sent."
+                  feedbackActive={false}
+                  onApprove={() => {}}
+                  onReject={() => {}}
+                  onFeedbackSubmit={() => {}}
+                  onRevealEmail={() => {}}
+                  isRevealingEmail={false}
+                  replyStatus={lead.replyStatus}
+                  replySnippet={lead.lastReplySnippet}
+                  replyDraftText={lead.replyDraft}
+                  onApproveReply={() => handleApproveReply(lead.id)}
+                  onRejectReply={() => handleRejectReply(lead.id)}
+                  approveReplyDisabled={!mailboxConnected}
+                />
+              ) : (
+                <div
+                  key={lead.id}
+                  className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5"
+                >
+                  <Text size="sm" weight="medium">
+                    {lead.company}
+                  </Text>
+                  <Badge tone="accent" size="sm">
+                    Sent
+                  </Badge>
+                </div>
+              ),
+            )}
           </div>
         </Card>
       )}

@@ -1,10 +1,17 @@
-import type { EmailMessage, EmailProvider } from "./types";
+import type {
+  EmailMessage,
+  EmailProvider,
+  InboundMessage,
+  SentMailResult,
+} from "./types";
 
 const GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0";
-// Mail.ReadWrite is needed for saveDraft (POST /me/messages creates/writes a
-// message resource, distinct from Mail.Send which only covers /sendMail).
-// Anyone who connected before this scope was added must reconnect — Graph
-// won't silently upgrade an existing refresh token's granted scope.
+// Mail.ReadWrite is needed for saveDraft and sendMail's create-then-send
+// (POST /me/messages creates/writes a message resource, distinct from
+// Mail.Send which only covers /sendMail), and also covers reading the
+// inbox for reply monitoring. Anyone who connected before this scope was
+// added must reconnect — Graph won't silently upgrade an existing refresh
+// token's granted scope.
 const SCOPES =
   "Mail.Send Mail.ReadWrite offline_access openid profile email User.Read";
 
@@ -145,33 +152,61 @@ async function refreshIfNeeded(credentials: unknown): Promise<unknown | null> {
   return refreshAccessToken(creds.refreshToken);
 }
 
+/**
+ * Create-then-send instead of the simpler POST /me/sendMail: that endpoint
+ * returns 202 with an empty body, giving no way to learn the sent message's
+ * conversationId. Creating the message first (same call saveDraft already
+ * makes) returns the created resource's id/conversationId, then a separate
+ * /send call on that id delivers it — same end result (one email, saved to
+ * Sent Items by default), but now we have a conversationId to poll replies
+ * against later.
+ */
 async function sendMail(
   credentials: unknown,
   message: EmailMessage,
-): Promise<void> {
+): Promise<SentMailResult> {
   const creds = credentials as OutlookCredentials;
-  const response = await fetch(`${GRAPH_BASE_URL}/me/sendMail`, {
+  const createResponse = await fetch(`${GRAPH_BASE_URL}/me/messages`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${creds.accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      message: {
-        subject: message.subject,
-        body: { contentType: "Text", content: message.body },
-        toRecipients: [{ emailAddress: { address: message.to } }],
-      },
-      saveToSentItems: true,
+      subject: message.subject,
+      body: { contentType: "Text", content: message.body },
+      toRecipients: [{ emailAddress: { address: message.to } }],
     }),
   });
 
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
+  if (!createResponse.ok) {
+    const detail = await createResponse.text().catch(() => "");
     throw new OutlookRequestError(
-      `Microsoft Graph sendMail failed with status ${response.status}: ${detail}`,
+      `Microsoft Graph message creation failed with status ${createResponse.status}: ${detail}`,
     );
   }
+
+  const created = (await createResponse.json()) as {
+    id: string;
+    conversationId?: string;
+  };
+
+  const sendResponse = await fetch(
+    `${GRAPH_BASE_URL}/me/messages/${created.id}/send`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${creds.accessToken}` },
+    },
+  );
+
+  if (!sendResponse.ok) {
+    const detail = await sendResponse.text().catch(() => "");
+    throw new OutlookRequestError(
+      `Microsoft Graph send failed with status ${sendResponse.status}: ${detail}`,
+    );
+  }
+
+  return { conversationId: created.conversationId };
 }
 
 async function saveDraft(
@@ -203,8 +238,110 @@ async function saveDraft(
   }
 }
 
+const AUTOMATED_SUBJECT_PATTERN =
+  /^(automatic reply|auto[- ]?reply|out of office|undeliverable)/i;
+
+/** Detects OOO/bounce/auto-responder messages so callers don't draft a response to them (and risk a reply-to-autoreply loop). */
+function isAutomatedMessage(
+  subject: string,
+  headers: { name: string; value: string }[],
+): boolean {
+  const autoSubmitted = headers.find(
+    (h) => h.name.toLowerCase() === "auto-submitted",
+  );
+  if (autoSubmitted && autoSubmitted.value.toLowerCase() !== "no") return true;
+  return AUTOMATED_SUBJECT_PATTERN.test(subject.trim());
+}
+
+async function listInboxMessagesSince(
+  credentials: unknown,
+  input: { since: string },
+): Promise<InboundMessage[]> {
+  const creds = credentials as OutlookCredentials;
+  const params = new URLSearchParams({
+    $filter: `receivedDateTime ge ${input.since}`,
+    $select:
+      "id,conversationId,from,receivedDateTime,subject,body,internetMessageHeaders",
+    $top: "50",
+  });
+  const response = await fetch(
+    `${GRAPH_BASE_URL}/me/mailFolders('inbox')/messages?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${creds.accessToken}`,
+        // Plain text bodies, mirroring the contentType we send outbound —
+        // avoids needing to strip HTML before handing this to the model.
+        Prefer: 'outlook.body-content-type="text"',
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new OutlookRequestError(
+      `Microsoft Graph inbox listing failed with status ${response.status}: ${detail}`,
+    );
+  }
+
+  const data = (await response.json()) as {
+    value: {
+      id: string;
+      conversationId: string;
+      from?: { emailAddress?: { address?: string } };
+      receivedDateTime: string;
+      subject?: string;
+      body?: { content?: string };
+      internetMessageHeaders?: { name: string; value: string }[];
+    }[];
+  };
+
+  return data.value.map((message) => {
+    const subject = message.subject ?? "";
+    const headers = message.internetMessageHeaders ?? [];
+    return {
+      id: message.id,
+      conversationId: message.conversationId,
+      from: message.from?.emailAddress?.address ?? "",
+      receivedAt: message.receivedDateTime,
+      subject,
+      body: message.body?.content ?? "",
+      isAutomated: isAutomatedMessage(subject, headers),
+    };
+  });
+}
+
+async function sendReply(
+  credentials: unknown,
+  input: { messageId: string; body: string },
+): Promise<void> {
+  const creds = credentials as OutlookCredentials;
+  // /reply preserves subject/threading headers automatically — unlike
+  // sendMail, this can't be used to start a new thread, only to respond on
+  // an existing message id.
+  const response = await fetch(
+    `${GRAPH_BASE_URL}/me/messages/${input.messageId}/reply`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${creds.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ comment: input.body }),
+    },
+  );
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new OutlookRequestError(
+      `Microsoft Graph reply failed with status ${response.status}: ${detail}`,
+    );
+  }
+}
+
 export const outlookProvider: EmailProvider = {
   sendMail,
   saveDraft,
+  listInboxMessagesSince,
+  sendReply,
   refreshIfNeeded,
 };

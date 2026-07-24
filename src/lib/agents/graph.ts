@@ -53,6 +53,11 @@ export type GraphContext = {
   // Fixed for the whole job (one lead per Oliver-drafting job) — context
   // level, not graph state, since it never changes mid-run.
   leadId?: string;
+  // Disambiguates which of Oliver's two lead-scoped tools is exposed for
+  // this run (draft_outreach_email vs. draft_reply_email) — see
+  // toolsByRole.ts. Defaults to "outreach" when unset (every job before
+  // reply monitoring existed was implicitly an outreach job).
+  jobKind?: "outreach" | "reply";
 };
 
 // KNOWN GAP: if a role is revisited within one graph run (e.g. A -> B -> A
@@ -115,6 +120,7 @@ function makeEmployeeNode(role: EmployeeRole, ctx: GraphContext) {
       employeeId,
       runId,
       leadId: ctx.leadId,
+      jobKind: ctx.jobKind,
     });
 
     const agent = createEmployeeAgent({
@@ -246,6 +252,7 @@ export function buildEmployeeGraph(input: {
   employeeIdByRole: Partial<Record<EmployeeRole, string>>;
   initiatingRole: EmployeeRole;
   leadId?: string;
+  jobKind?: "outreach" | "reply";
 }) {
   const ctx: GraphContext = {
     ...input,

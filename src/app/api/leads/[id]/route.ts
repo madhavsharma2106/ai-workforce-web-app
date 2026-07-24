@@ -5,6 +5,7 @@ import {
   updateLeadDraft,
   updateLeadDraftStatus,
   updateLeadFeedback,
+  updateLeadReplyStatus,
   updateLeadStatus,
   updateLeadSubject,
 } from "@/lib/leads";
@@ -22,19 +23,24 @@ export async function PATCH(request: Request, { params }: IdRouteParams) {
   if (user instanceof NextResponse) return user;
 
   const body = await request.json().catch(() => ({}));
-  const { status, draftStatus, draft, subject, feedbackReason } = body as {
-    status?: ApprovalStatus;
-    draftStatus?: ApprovalStatus;
-    draft?: string;
-    subject?: string;
-    feedbackReason?: string;
-  };
+  const { status, draftStatus, replyStatus, draft, subject, feedbackReason } =
+    body as {
+      status?: ApprovalStatus;
+      draftStatus?: ApprovalStatus;
+      replyStatus?: ApprovalStatus;
+      draft?: string;
+      subject?: string;
+      feedbackReason?: string;
+    };
 
   if (status !== undefined && !STATUSES.includes(status)) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
   if (draftStatus !== undefined && !STATUSES.includes(draftStatus)) {
     return NextResponse.json({ error: "Invalid draftStatus" }, { status: 400 });
+  }
+  if (replyStatus !== undefined && !STATUSES.includes(replyStatus)) {
+    return NextResponse.json({ error: "Invalid replyStatus" }, { status: 400 });
   }
 
   try {
@@ -115,6 +121,48 @@ export async function PATCH(request: Request, { params }: IdRouteParams) {
         } catch (error) {
           console.error(
             "Failed to send leads/send-requested to Inngest",
+            error,
+          );
+          return NextResponse.json(
+            { error: "Approved, but couldn't start sending — try again." },
+            { status: 502 },
+          );
+        }
+      }
+    }
+    if (replyStatus !== undefined) {
+      if (replyStatus === "approved") {
+        const { data: mailbox } = await supabase
+          .from("mailbox_connections")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!mailbox) {
+          return NextResponse.json(
+            {
+              error:
+                "Connect your mailbox in Settings before sending — Oliver can't send yet.",
+            },
+            { status: 400 },
+          );
+        }
+      }
+
+      await updateLeadReplyStatus(supabase, {
+        id,
+        userId: user.id,
+        status: replyStatus,
+      });
+
+      if (replyStatus === "approved") {
+        try {
+          await inngest.send({
+            name: "leads/reply-send-requested",
+            data: { userId: user.id, leadId: id },
+          });
+        } catch (error) {
+          console.error(
+            "Failed to send leads/reply-send-requested to Inngest",
             error,
           );
           return NextResponse.json(

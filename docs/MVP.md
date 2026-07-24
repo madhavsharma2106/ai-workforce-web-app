@@ -17,7 +17,7 @@ Validate that founders will trust an AI employee to generate outbound pipeline e
 - Approval queue
 - Feedback learning
 
-> **Status:** this is the target MVP scope, not a record of what's built. See [AGENTS.md](AGENTS.md) ("Current status") and [INTEGRATIONS.md](INTEGRATIONS.md) for what actually exists today — as of now, sending approved emails, reply monitoring, and feedback learning are not yet built (no Outlook/Graph integration exists).
+> **Status:** this is the target MVP scope, not a record of what's built. See [AGENTS.md](AGENTS.md) ("Current status") and [INTEGRATIONS.md](INTEGRATIONS.md) for what actually exists today — as of now, feedback learning is not yet built; sending approved emails and reply monitoring are.
 
 ## Not Included
 

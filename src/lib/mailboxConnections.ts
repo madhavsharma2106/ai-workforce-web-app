@@ -4,6 +4,8 @@ import { getEmailProvider } from "@/lib/integrations/email/registry";
 import type {
   EmailMessage,
   EmailProvider,
+  InboundMessage,
+  SentMailResult,
 } from "@/lib/integrations/email/types";
 
 export type MailboxConnection = {
@@ -146,9 +148,9 @@ export async function sendViaConnection(
   supabase: SupabaseClient,
   userId: string,
   message: EmailMessage,
-): Promise<void> {
+): Promise<SentMailResult> {
   const { provider, credentials } = await loadConnection(supabase, userId);
-  await provider.sendMail(credentials, message);
+  return provider.sendMail(credentials, message);
 }
 
 export async function saveDraftViaConnection(
@@ -161,4 +163,28 @@ export async function saveDraftViaConnection(
     throw new Error("This mailbox provider doesn't support saving drafts.");
   }
   await provider.saveDraft(credentials, message);
+}
+
+export async function listInboxRepliesViaConnection(
+  supabase: SupabaseClient,
+  userId: string,
+  input: { since: string },
+): Promise<InboundMessage[]> {
+  const { provider, credentials } = await loadConnection(supabase, userId);
+  if (!provider.listInboxMessagesSince) {
+    throw new Error("This mailbox provider doesn't support reading the inbox.");
+  }
+  return provider.listInboxMessagesSince(credentials, input);
+}
+
+export async function sendReplyViaConnection(
+  supabase: SupabaseClient,
+  userId: string,
+  input: { messageId: string; body: string },
+): Promise<void> {
+  const { provider, credentials } = await loadConnection(supabase, userId);
+  if (!provider.sendReply) {
+    throw new Error("This mailbox provider doesn't support sending replies.");
+  }
+  await provider.sendReply(credentials, input);
 }

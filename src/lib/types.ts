@@ -26,6 +26,12 @@ export type Lead = {
   draftSaveStatus: DraftSaveStatus;
   draftSaveError?: string;
   draftSavedAt?: string;
+  lastReplySnippet?: string;
+  replyDraft: string;
+  replyStatus?: ApprovalStatus;
+  replySendStatus: SendStatus;
+  replySendError?: string;
+  replySentAt?: string;
   feedbackReason?: string;
   researchSnippet?: string;
   industry?: string;

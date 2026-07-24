@@ -39,7 +39,7 @@ export const sendOutreachOnApproval = inngest.createFunction(
         .eq("id", leadId);
 
       try {
-        await sendViaConnection(supabase, userId, {
+        const { conversationId } = await sendViaConnection(supabase, userId, {
           to: lead.email,
           subject: lead.subject,
           body: lead.draft,
@@ -50,6 +50,7 @@ export const sendOutreachOnApproval = inngest.createFunction(
             send_status: "sent",
             sent_at: new Date().toISOString(),
             send_error: null,
+            conversation_id: conversationId ?? null,
           })
           .eq("id", leadId);
       } catch (error) {

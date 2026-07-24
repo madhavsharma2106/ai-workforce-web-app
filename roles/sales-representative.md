@@ -10,13 +10,13 @@ Draft outreach for Emma's qualified leads and turn approved drafts into real con
 
 ## Success Metric
 
-Drafts approved by the founder (leading indicator, live today); replies received from sent outreach (lagging indicator, once reply monitoring is live).
+Drafts approved by the founder (leading indicator, live today); replies received from sent outreach, and reply drafts approved by the founder (lagging indicator, live today).
 
 ## Inputs
 
 - Emma's (Lead Sourcer) qualified leads, once the founder approves one — a drafting run starts automatically (see [docs/AGENTS.md](../docs/AGENTS.md))
 - Founder's approval/edit decisions on drafts — approving a draft now sends it
-- Incoming replies to sent emails — future integration, not built yet
+- Incoming replies to sent emails — polled every ~5 hours from the founder's mailbox; a genuine (non-automated) reply starts a reply-drafting run automatically
 - Company Knowledge from the Account Manager (case studies, objection handling) — future integration, not built yet
 
 ## Outputs
@@ -24,17 +24,17 @@ Drafts approved by the founder (leading indicator, live today); replies received
 - Drafted outreach emails, pending founder approval
 - Emails sent from the founder's own mailbox (only after approval — "Send as you")
 - Drafts pushed into the founder's own mailbox Drafts folder ("Save to Drafts"), for them to review/edit/send manually from their own Outlook/webmail — an alternative to sending through the app, available any time before or after approval
-- Drafted follow-up emails
-- Drafted responses to interested prospects
-- Conversations surfaced to the founder that need their judgment
+- Drafted responses to prospect replies, pending founder approval
+- Replies sent from the founder's own mailbox (only after approval), threaded on the original conversation
 
 ## Integrations
 
-- Microsoft Graph (Outlook/Microsoft 365) — sending from the founder's own mailbox, via a one-time OAuth connection made from `/settings`. See [docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md). Reply monitoring is not built yet.
+- Microsoft Graph (Outlook/Microsoft 365) — sending from the founder's own mailbox, polling the inbox for replies, and sending threaded replies, via a one-time OAuth connection made from `/settings`. See [docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md).
 
 ## Tools
 
 - `draft_outreach_email` — call once per handoff, using the qualification research provided, to draft a personalized outreach email for founder review.
+- `draft_reply_email` — call once per reply-handoff, using the prospect's actual message provided in the briefing, to draft a personalized response for founder review. Never exposed in the same run as `draft_outreach_email`.
 
 ## Quality Bar
 
@@ -50,14 +50,16 @@ MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). In practice: outreach draf
 - Draft a personalized outreach email grounded in Emma's research
 - Wait for founder approval on the draft
 - Send the approved email from the founder's own mailbox
+- Notice when a prospect replies (checked periodically, not instantly)
+- Draft a response grounded in what the prospect actually said
+- Wait for founder approval on the reply
+- Send the approved reply, threaded on the original conversation
+- Keep watching the thread for further replies, so the pipeline keeps moving
 
-Once reply monitoring is built:
+Not yet built:
 
-- Monitor replies
-- Draft follow-ups and responses to interested prospects
-- Ask the Account Manager for context when needed (e.g. which case study to reference)
-- Surface conversations that need the founder's judgment
-- Keep the pipeline moving
+- Asking the Account Manager for context when needed (e.g. which case study to reference)
+- Distinguishing "surface to founder for judgment, no draft" from "draft a response" — today every genuine (non-automated) reply gets a drafted response; the founder's reject option stands in for "this doesn't need a reply"
 
 ## Experience
 

@@ -8,12 +8,15 @@ const FAILURE_SUMMARY =
   "I ran into an unexpected problem and couldn't finish this task. Please try again.";
 
 /**
- * Resolves the caller's employees and invokes the delegation graph.
- * Shared by both entry points into a graph run: the free-text "run again"
- * debug path (`employee/run.requested`) and the founder-triggered
- * lead-approval handoff (`leads/approved`), which additionally seeds
- * `leadId` and `pendingDelegationId` so the target node can bind its tool
- * to a specific lead and link back to an already-inserted delegation row.
+ * Resolves the caller's employees and invokes the delegation graph. Shared
+ * by every entry point into a graph run: the free-text "run again" debug
+ * path (`employee/run.requested`), the founder-triggered lead-approval
+ * handoff (`leads/approved`), and the reply-detected handoff
+ * (`leads/reply-received`) — the latter two additionally seed `leadId` and
+ * `pendingDelegationId` so the target node can bind its tool to a specific
+ * lead and link back to an already-inserted delegation row. `jobKind`
+ * disambiguates which of Oliver's two lead-scoped tools (draft outreach vs.
+ * draft reply) should be exposed for this run — see toolsByRole.ts.
  */
 export async function runGraphJob(
   supabase: SupabaseClient,
@@ -22,6 +25,7 @@ export async function runGraphJob(
     initiatingRole: EmployeeRole;
     messages: ModelMessage[];
     leadId?: string;
+    jobKind?: "outreach" | "reply";
     pendingDelegationId?: string;
   },
 ): Promise<void> {
@@ -38,6 +42,7 @@ export async function runGraphJob(
     employeeIdByRole,
     initiatingRole: input.initiatingRole,
     leadId: input.leadId,
+    jobKind: input.jobKind,
   });
 
   try {

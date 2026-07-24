@@ -40,6 +40,13 @@ type Props = {
   saveDraftDisabled?: boolean;
   draftSaveStatus?: DraftSaveStatus;
   draftSaveError?: string;
+  /** Only passed by Oliver's flow, and only rendered when a reply is awaiting founder action (replyStatus is set). */
+  replyStatus?: ApprovalStatus;
+  replySnippet?: string;
+  replyDraftText?: string;
+  onApproveReply?: () => void;
+  onRejectReply?: () => void;
+  approveReplyDisabled?: boolean;
 };
 
 const statusLabel: Record<
@@ -103,6 +110,12 @@ export const LeadCard: FC<Props> = ({
   saveDraftDisabled = false,
   draftSaveStatus = "not_saved",
   draftSaveError,
+  replyStatus,
+  replySnippet,
+  replyDraftText,
+  onApproveReply,
+  onRejectReply,
+  approveReplyDisabled = false,
 }) => {
   const statusMeta = statusLabel[status];
   const emailLocked = Boolean(lead.personId) && !lead.emailRevealed;
@@ -273,6 +286,46 @@ export const LeadCard: FC<Props> = ({
         {status === "approved" && (
           <div className="rounded-md bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
             {approvedMessage}
+          </div>
+        )}
+
+        {replyStatus && (
+          <div className="space-y-2 rounded-md border border-indigo-100 bg-indigo-50/40 p-3 text-sm">
+            <Eyebrow tone="muted" tracking="wide">
+              They replied
+            </Eyebrow>
+            {replySnippet && (
+              <p className="text-sm text-gray-600 italic">
+                &ldquo;{replySnippet}&rdquo;
+              </p>
+            )}
+            <Eyebrow tone="muted" tracking="wide">
+              Oliver&apos;s draft reply
+            </Eyebrow>
+            <p className="whitespace-pre-wrap leading-relaxed text-gray-900">
+              {replyDraftText}
+            </p>
+            {replyStatus === "pending" && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button
+                  onClick={onApproveReply}
+                  disabled={approveReplyDisabled}
+                >
+                  Send reply
+                </Button>
+                <Button variant="danger" onClick={onRejectReply}>
+                  Reject
+                </Button>
+              </div>
+            )}
+            {replyStatus === "approved" && (
+              <p className="text-xs text-indigo-700">Sending your reply…</p>
+            )}
+            {replyStatus === "rejected" && (
+              <p className="text-xs text-gray-500">
+                Reply dismissed — I&apos;ll keep watching this thread.
+              </p>
+            )}
           </div>
         )}
 
