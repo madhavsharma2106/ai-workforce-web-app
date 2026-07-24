@@ -1,6 +1,7 @@
 import type { ToolSet } from "ai";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { EmployeeRole } from "@/lib/employees";
+import { getWebSearchTool } from "./model";
 import {
   createDelegateToEmployeeTool,
   type DelegationRequest,
@@ -66,6 +67,7 @@ const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
           leadId: ctx.leadId,
         }),
         ask_account_manager: askAccountManager,
+        web_search: getWebSearchTool(),
       };
     }
     return {
@@ -75,6 +77,7 @@ const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
         leadId: ctx.leadId,
       }),
       ask_account_manager: askAccountManager,
+      web_search: getWebSearchTool(),
     };
   },
 };

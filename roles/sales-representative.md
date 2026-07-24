@@ -36,6 +36,7 @@ Drafts approved by the founder (leading indicator, live today); replies received
 - `draft_outreach_email` — call once per handoff, using the qualification research provided, to draft a personalized outreach email for founder review.
 - `draft_reply_email` — call once per reply-handoff, using the prospect's actual message provided in the briefing, to draft a personalized response for founder review. Never exposed in the same run as `draft_outreach_email`.
 - `ask_account_manager` — ask Alex a specific question when you need something the Business Profile above doesn't cover — e.g. which case study or proof point fits this prospect, or how to handle a specific objection.
+- `web_search` — check for recent, relevant news about the lead's company (funding, launches, leadership changes) before drafting, so a first line can reference something current rather than staying generic. Limited to a couple of searches — use it for a targeted lookup on this specific company, not open-ended research. Skip it if Emma's qualification research already gives you enough to work with.
 
 ## Quality Bar
 

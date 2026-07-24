@@ -62,6 +62,16 @@ export const NARRATIONS: Record<string, NarrationEntry> = {
       return `Alex says: ${result.answer}`;
     },
   },
+  web_search: {
+    before: (input) =>
+      `I'm checking for recent news: "${input.query as string}"`,
+    after: (_input, output) => {
+      const results = output as { url: string; title: string | null }[];
+      if (results.length === 0) return "Nothing recent turned up.";
+      const word = results.length === 1 ? "result" : "results";
+      return `I found ${results.length} recent ${word} to draw on.`;
+    },
+  },
   search_leads: {
     before: (input) =>
       `I'm searching for companies matching "${input.icp as string}".`,
