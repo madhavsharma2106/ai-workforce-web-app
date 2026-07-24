@@ -26,3 +26,11 @@ export async function revealLeadEmail(
 export async function retryDraft(id: string): Promise<void> {
   await fetch(`/api/leads/${id}/retry-draft`, { method: "POST" });
 }
+
+export async function retrySend(id: string): Promise<void> {
+  await fetch(`/api/leads/${id}/retry-send`, { method: "POST" });
+}
+
+export async function saveDraftToMailbox(id: string): Promise<void> {
+  await fetch(`/api/leads/${id}/save-draft`, { method: "POST" });
+}

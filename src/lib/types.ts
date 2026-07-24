@@ -1,6 +1,8 @@
 export type IdRouteParams = { params: Promise<{ id: string }> };
 
 export type ApprovalStatus = "pending" | "approved" | "rejected";
+export type SendStatus = "not_sent" | "sending" | "sent" | "failed";
+export type DraftSaveStatus = "not_saved" | "saving" | "saved" | "failed";
 
 export type Lead = {
   id: string;
@@ -9,6 +11,7 @@ export type Lead = {
   fit: string;
   decisionMaker: string;
   email: string;
+  subject: string;
   draft: string;
   sources: string;
   personId?: string;
@@ -17,6 +20,12 @@ export type Lead = {
   draftStatus: ApprovalStatus;
   draftFailed?: boolean;
   draftError?: string;
+  sendStatus: SendStatus;
+  sendError?: string;
+  sentAt?: string;
+  draftSaveStatus: DraftSaveStatus;
+  draftSaveError?: string;
+  draftSavedAt?: string;
   feedbackReason?: string;
   researchSnippet?: string;
   industry?: string;

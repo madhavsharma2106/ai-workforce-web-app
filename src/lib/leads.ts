@@ -2,7 +2,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   AgentRun,
   ApprovalStatus,
+  DraftSaveStatus,
   Lead,
+  SendStatus,
   TaskHistoryItem,
 } from "@/lib/types";
 
@@ -13,12 +15,19 @@ type LeadRow = {
   fit: string;
   decision_maker: string;
   email: string;
+  subject: string;
   draft: string;
   sources: string;
   person_id: string | null;
   email_revealed: boolean;
   status: ApprovalStatus;
   draft_status: ApprovalStatus;
+  send_status: SendStatus;
+  send_error: string | null;
+  sent_at: string | null;
+  draft_save_status: DraftSaveStatus;
+  draft_save_error: string | null;
+  draft_saved_at: string | null;
   feedback_reason: string | null;
   research_snippet: string | null;
   industry: string | null;
@@ -39,12 +48,19 @@ function toLead(row: LeadRow): Lead {
     fit: row.fit,
     decisionMaker: row.decision_maker,
     email: row.email,
+    subject: row.subject,
     draft: row.draft,
     sources: row.sources,
     personId: row.person_id ?? undefined,
     emailRevealed: row.email_revealed,
     status: row.status,
     draftStatus: row.draft_status,
+    sendStatus: row.send_status,
+    sendError: row.send_error ?? undefined,
+    sentAt: row.sent_at ?? undefined,
+    draftSaveStatus: row.draft_save_status,
+    draftSaveError: row.draft_save_error ?? undefined,
+    draftSavedAt: row.draft_saved_at ?? undefined,
     feedbackReason: row.feedback_reason ?? undefined,
     researchSnippet: row.research_snippet ?? undefined,
     industry: row.industry ?? undefined,
@@ -394,11 +410,18 @@ export async function getLeadsAwaitingOutreach(
 
 export async function saveDraftEmail(
   supabase: SupabaseClient,
-  input: { id: string; userId: string; draft: string; runId: string },
+  input: {
+    id: string;
+    userId: string;
+    subject: string;
+    draft: string;
+    runId: string;
+  },
 ): Promise<void> {
   const { error } = await supabase
     .from("leads")
     .update({
+      subject: input.subject,
       draft: input.draft,
       draft_status: "pending",
       draft_run_id: input.runId,
@@ -443,6 +466,18 @@ export async function updateLeadDraft(
   const { error } = await supabase
     .from("leads")
     .update({ draft: input.draft, updated_at: new Date().toISOString() })
+    .eq("id", input.id)
+    .eq("user_id", input.userId);
+  if (error) throw error;
+}
+
+export async function updateLeadSubject(
+  supabase: SupabaseClient,
+  input: { id: string; userId: string; subject: string },
+): Promise<void> {
+  const { error } = await supabase
+    .from("leads")
+    .update({ subject: input.subject, updated_at: new Date().toISOString() })
     .eq("id", input.id)
     .eq("user_id", input.userId);
   if (error) throw error;

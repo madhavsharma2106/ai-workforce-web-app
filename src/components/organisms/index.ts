@@ -25,5 +25,7 @@ export { RunReviewPanel } from "./RunReviewPanel";
 export { SalesRepresentativeHome } from "./SalesRepresentativeHome";
 export { SalesRepresentativeHomeContainer } from "./SalesRepresentativeHomeContainer";
 export { SearchAgainModal } from "./SearchAgainModal";
+export { SettingsHome } from "./SettingsHome";
+export { SettingsHomeContainer } from "./SettingsHomeContainer";
 export { TaskDetail } from "./TaskDetail";
 export { TaskHistory } from "./TaskHistory";

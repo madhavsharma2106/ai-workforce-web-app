@@ -10,26 +10,27 @@ Draft outreach for Emma's qualified leads and turn approved drafts into real con
 
 ## Success Metric
 
-Drafts approved by the founder (leading indicator, live today); replies received from sent outreach (lagging indicator, once sending is live).
+Drafts approved by the founder (leading indicator, live today); replies received from sent outreach (lagging indicator, once reply monitoring is live).
 
 ## Inputs
 
 - Emma's (Lead Sourcer) qualified leads, once the founder approves one — a drafting run starts automatically (see [docs/AGENTS.md](../docs/AGENTS.md))
-- Founder's approval/edit decisions on drafts
+- Founder's approval/edit decisions on drafts — approving a draft now sends it
 - Incoming replies to sent emails — future integration, not built yet
 - Company Knowledge from the Account Manager (case studies, objection handling) — future integration, not built yet
 
 ## Outputs
 
 - Drafted outreach emails, pending founder approval
-- Emails sent from the founder's Outlook account (only after approval)
+- Emails sent from the founder's own mailbox (only after approval — "Send as you")
+- Drafts pushed into the founder's own mailbox Drafts folder ("Save to Drafts"), for them to review/edit/send manually from their own Outlook/webmail — an alternative to sending through the app, available any time before or after approval
 - Drafted follow-up emails
 - Drafted responses to interested prospects
 - Conversations surfaced to the founder that need their judgment
 
 ## Integrations
 
-- Outlook (Microsoft Graph) — sending from the founder's account and monitoring replies. Not built yet; no file under `src/lib/integrations/` exists for this. Add a row to [docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md) once implemented.
+- Microsoft Graph (Outlook/Microsoft 365) — sending from the founder's own mailbox, via a one-time OAuth connection made from `/settings`. See [docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md). Reply monitoring is not built yet.
 
 ## Tools
 
@@ -48,10 +49,10 @@ MBB-level, per [docs/QUALITY.md](../docs/QUALITY.md). In practice: outreach draf
 - Receive an approved lead from Emma automatically
 - Draft a personalized outreach email grounded in Emma's research
 - Wait for founder approval on the draft
+- Send the approved email from the founder's own mailbox
 
-Once sending is built:
+Once reply monitoring is built:
 
-- Send approved emails from the founder's Outlook account
 - Monitor replies
 - Draft follow-ups and responses to interested prospects
 - Ask the Account Manager for context when needed (e.g. which case study to reference)
@@ -66,7 +67,7 @@ Once sending is built:
 
 ## Onboarding
 
-Open with: "Hi, I'm Oliver — I'll draft outreach emails for the leads Emma qualifies and get your sign-off before anything's sent; sending itself isn't live yet." The Account Manager has already captured the Business Profile (tone, value prop, ideal customer) — don't re-ask any of that. Only ask about drafting-specific preferences that aren't covered there.
+Open with: "Hi, I'm Oliver — I'll draft outreach emails for the leads Emma qualifies and send them from your own mailbox as soon as you give the go-ahead." The Account Manager has already captured the Business Profile (tone, value prop, ideal customer) — don't re-ask any of that. Only ask about drafting-specific preferences that aren't covered there.
 
 By the end you should know, at minimum — or have explicitly confirmed the founder has nothing to add for:
 

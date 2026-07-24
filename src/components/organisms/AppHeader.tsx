@@ -70,6 +70,14 @@ export const AppHeader = ({ userEmail }: Props) => {
                   </Text>
                 </div>
               )}
+              <Link
+                href="/settings"
+                role="menuitem"
+                onClick={() => setMenuOpen(false)}
+                className="block w-full px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-50"
+              >
+                Settings
+              </Link>
               <button
                 type="button"
                 role="menuitem"

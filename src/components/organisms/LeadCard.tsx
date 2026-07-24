@@ -1,6 +1,13 @@
 import type { FC } from "react";
-import type { Lead } from "@/lib/types";
-import { Badge, Button, Card, Eyebrow, Textarea } from "@/components/atoms";
+import type { DraftSaveStatus, Lead } from "@/lib/types";
+import {
+  Badge,
+  Button,
+  Card,
+  Eyebrow,
+  Input,
+  Textarea,
+} from "@/components/atoms";
 
 export type { Lead };
 
@@ -10,21 +17,29 @@ type Props = {
   lead: Lead;
   status: ApprovalStatus;
   showDraft?: boolean;
+  subjectText?: string;
   draftText?: string;
   isEditing?: boolean;
   feedbackActive: boolean;
   feedbackReason?: string;
   feedbackOptions?: string[];
+  approveLabel?: string;
   approvedMessage?: string;
   rejectedNote?: string;
   approveDisabled?: boolean;
   onApprove: () => void;
   onReject: () => void;
   onToggleEdit?: () => void;
+  onSubjectChange?: (value: string) => void;
   onDraftChange?: (value: string) => void;
   onFeedbackSubmit: (reason: string) => void;
   onRevealEmail: () => void;
   isRevealingEmail: boolean;
+  /** Only passed by Oliver's flow — renders a "Save to Drafts" button independent of send/approval. */
+  onSaveDraft?: () => void;
+  saveDraftDisabled?: boolean;
+  draftSaveStatus?: DraftSaveStatus;
+  draftSaveError?: string;
 };
 
 const statusLabel: Record<
@@ -66,21 +81,28 @@ export const LeadCard: FC<Props> = ({
   lead,
   status,
   showDraft = true,
+  subjectText,
   draftText,
   isEditing = false,
   feedbackActive,
   feedbackReason,
   feedbackOptions = DEFAULT_FEEDBACK_OPTIONS,
+  approveLabel = "Approve",
   approvedMessage = "Approved for sending.",
   rejectedNote = "I'll remember this for next time.",
   approveDisabled = false,
   onApprove,
   onReject,
   onToggleEdit,
+  onSubjectChange,
   onDraftChange,
   onFeedbackSubmit,
   onRevealEmail,
   isRevealingEmail,
+  onSaveDraft,
+  saveDraftDisabled = false,
+  draftSaveStatus = "not_saved",
+  draftSaveError,
 }) => {
   const statusMeta = statusLabel[status];
   const emailLocked = Boolean(lead.personId) && !lead.emailRevealed;
@@ -186,6 +208,15 @@ export const LeadCard: FC<Props> = ({
               Draft email
             </Eyebrow>
             {isEditing ? (
+              <Input
+                value={subjectText}
+                placeholder="Subject"
+                onChange={(event) => onSubjectChange?.(event.target.value)}
+              />
+            ) : (
+              <p className="font-medium text-gray-900">{subjectText}</p>
+            )}
+            {isEditing ? (
               <Textarea
                 rows={5}
                 value={draftText}
@@ -202,8 +233,17 @@ export const LeadCard: FC<Props> = ({
           {status !== "approved" && (
             <div className="flex flex-wrap gap-2">
               <Button onClick={onApprove} disabled={approveDisabled}>
-                Approve
+                {approveLabel}
               </Button>
+              {onSaveDraft && (
+                <Button
+                  variant="secondary"
+                  onClick={onSaveDraft}
+                  disabled={saveDraftDisabled || draftSaveStatus === "saving"}
+                >
+                  {draftSaveStatus === "saving" ? "Saving…" : "Save to Drafts"}
+                </Button>
+              )}
               <Button variant="danger" onClick={onReject}>
                 Reject
               </Button>
@@ -215,6 +255,20 @@ export const LeadCard: FC<Props> = ({
             </div>
           )}
         </div>
+
+        {onSaveDraft && draftSaveStatus === "saved" && (
+          <p className="text-xs text-emerald-600">
+            Saved to your Drafts folder.
+          </p>
+        )}
+        {onSaveDraft && draftSaveStatus === "failed" && (
+          <p className="text-xs text-red-600">
+            {draftSaveError ?? "Couldn't save to Drafts."}{" "}
+            <button type="button" className="underline" onClick={onSaveDraft}>
+              Try again
+            </button>
+          </p>
+        )}
 
         {status === "approved" && (
           <div className="rounded-md bg-indigo-50 px-3 py-2 text-sm text-indigo-700">

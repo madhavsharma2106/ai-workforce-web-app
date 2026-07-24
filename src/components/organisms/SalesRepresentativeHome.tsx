@@ -3,7 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LeadCard } from "./LeadCard";
-import { patchLead, retryDraft, revealLeadEmail } from "@/lib/api/leads";
+import {
+  patchLead,
+  retryDraft,
+  retrySend,
+  revealLeadEmail,
+  saveDraftToMailbox,
+} from "@/lib/api/leads";
 import { getDrafts } from "@/lib/api/employees";
 import type { Lead } from "@/lib/types";
 import {
@@ -30,11 +36,13 @@ const FEEDBACK_OPTIONS = [
 type Props = {
   employeeId: string;
   initialLeads: Lead[];
+  mailboxConnected: boolean;
 };
 
 export const SalesRepresentativeHome = ({
   employeeId,
   initialLeads,
+  mailboxConnected,
 }: Props) => {
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
@@ -45,9 +53,17 @@ export const SalesRepresentativeHome = ({
     () => leads.some((lead) => lead.draft === "" && !lead.draftFailed),
     [leads],
   );
+  const isSending = useMemo(
+    () => leads.some((lead) => lead.sendStatus === "sending"),
+    [leads],
+  );
+  const isSavingDraft = useMemo(
+    () => leads.some((lead) => lead.draftSaveStatus === "saving"),
+    [leads],
+  );
 
   useEffect(() => {
-    if (!isDrafting) return;
+    if (!isDrafting && !isSending && !isSavingDraft) return;
 
     const interval = setInterval(async () => {
       try {
@@ -60,7 +76,7 @@ export const SalesRepresentativeHome = ({
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [employeeId, isDrafting]);
+  }, [employeeId, isDrafting, isSending, isSavingDraft]);
 
   const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
     setLeads((current) =>
@@ -88,7 +104,11 @@ export const SalesRepresentativeHome = ({
   };
 
   const handleApprove = (id: string) => {
-    updateLead(id, (current) => ({ ...current, draftStatus: "approved" }));
+    updateLead(id, (current) => ({
+      ...current,
+      draftStatus: "approved",
+      sendStatus: "sending",
+    }));
     void patchLead(id, { draftStatus: "approved" });
     if (feedbackLeadId === id) setFeedbackLeadId(null);
   };
@@ -102,6 +122,11 @@ export const SalesRepresentativeHome = ({
 
   const handleToggleEdit = (id: string) => {
     setEditingLeadId((current) => (current === id ? null : id));
+  };
+
+  const handleSubjectChange = (id: string, value: string) => {
+    updateLead(id, (current) => ({ ...current, subject: value }));
+    void patchLead(id, { subject: value });
   };
 
   const handleDraftChange = (id: string, value: string) => {
@@ -128,6 +153,28 @@ export const SalesRepresentativeHome = ({
     );
   };
 
+  const handleRetrySend = (id: string) => {
+    updateLead(id, (current) => ({
+      ...current,
+      sendStatus: "sending",
+      sendError: undefined,
+    }));
+    void retrySend(id).catch((error) =>
+      console.error("Failed to retry send", error),
+    );
+  };
+
+  const handleSaveDraft = (id: string) => {
+    updateLead(id, (current) => ({
+      ...current,
+      draftSaveStatus: "saving",
+      draftSaveError: undefined,
+    }));
+    void saveDraftToMailbox(id).catch((error) =>
+      console.error("Failed to save draft to mailbox", error),
+    );
+  };
+
   const drafting = leads.filter(
     (lead) => lead.draft === "" && !lead.draftFailed,
   );
@@ -137,12 +184,21 @@ export const SalesRepresentativeHome = ({
   const awaitingApproval = leads.filter(
     (lead) => lead.draft !== "" && lead.draftStatus === "pending",
   );
-  const readyToSend = leads.filter((lead) => lead.draftStatus === "approved");
+  const sending = leads.filter(
+    (lead) =>
+      lead.draftStatus === "approved" &&
+      (lead.sendStatus === "not_sent" || lead.sendStatus === "sending"),
+  );
+  const sendFailed = leads.filter(
+    (lead) => lead.draftStatus === "approved" && lead.sendStatus === "failed",
+  );
+  const sent = leads.filter(
+    (lead) => lead.draftStatus === "approved" && lead.sendStatus === "sent",
+  );
   const rejected = leads.filter((lead) => lead.draftStatus === "rejected");
 
   const sections: { title: string; items: Lead[] }[] = [
     { title: "Awaiting your approval", items: awaitingApproval },
-    { title: "Ready to send", items: readyToSend },
     { title: "Rejected", items: rejected },
   ];
 
@@ -158,9 +214,8 @@ export const SalesRepresentativeHome = ({
                 Hi, I&apos;m Oliver
               </Heading>
               <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-                I draft an email for each lead Emma approves, then wait for your
-                sign-off — sending itself isn&apos;t wired up yet in this
-                preview build.
+                I draft an email for each lead Emma approves, then send it from
+                your own mailbox as soon as you say the word.
               </Text>
             </div>
           </div>
@@ -172,6 +227,23 @@ export const SalesRepresentativeHome = ({
           </Link>
         </div>
       </Card>
+
+      {!mailboxConnected && (
+        <Alert
+          variant="error"
+          className="flex items-center justify-between gap-4"
+        >
+          <Text size="sm">
+            Connect your mailbox in Settings before I can send.
+          </Text>
+          <Link
+            href="/settings"
+            className="shrink-0 text-sm font-medium underline decoration-dotted underline-offset-2"
+          >
+            Go to Settings
+          </Link>
+        </Alert>
+      )}
 
       {drafting.length > 0 && (
         <Card as="section" padding="lg">
@@ -218,6 +290,72 @@ export const SalesRepresentativeHome = ({
         </Card>
       )}
 
+      {sending.length > 0 && (
+        <Card as="section" padding="lg">
+          <div className="flex items-center justify-between">
+            <Eyebrow>Sending</Eyebrow>
+            <Badge tone="accent" size="md">
+              {sending.length} in progress
+            </Badge>
+          </div>
+          <Text size="sm" tone="muted" className="mt-2">
+            {sending.map((lead) => lead.company).join(", ")}
+          </Text>
+        </Card>
+      )}
+
+      {sendFailed.length > 0 && (
+        <Card as="section" padding="lg" className="space-y-4">
+          <Eyebrow>Couldn&apos;t send</Eyebrow>
+          <div className="space-y-3">
+            {sendFailed.map((lead) => (
+              <Alert
+                key={lead.id}
+                variant="error"
+                className="flex items-center justify-between gap-4"
+              >
+                <div>
+                  <Text size="sm" weight="medium">
+                    {lead.company}
+                  </Text>
+                  <Text size="sm" tone="muted" className="mt-0.5">
+                    {lead.sendError}
+                  </Text>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleRetrySend(lead.id)}
+                >
+                  Try again
+                </Button>
+              </Alert>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {sent.length > 0 && (
+        <Card as="section" padding="lg" className="space-y-4">
+          <Eyebrow>Sent</Eyebrow>
+          <div className="space-y-3">
+            {sent.map((lead) => (
+              <div
+                key={lead.id}
+                className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5"
+              >
+                <Text size="sm" weight="medium">
+                  {lead.company}
+                </Text>
+                <Badge tone="accent" size="sm">
+                  Sent
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
       {leads.length === 0 && (
         <Card as="section" padding="lg">
           <Text size="sm" tone="muted">
@@ -246,19 +384,28 @@ export const SalesRepresentativeHome = ({
                     lead={lead}
                     status={lead.draftStatus}
                     showDraft
+                    subjectText={lead.subject}
                     draftText={lead.draft}
                     isEditing={editingLeadId === lead.id}
                     feedbackActive={feedbackLeadId === lead.id}
                     feedbackReason={lead.feedbackReason}
                     feedbackOptions={FEEDBACK_OPTIONS}
-                    approvedMessage="Draft approved — ready to send."
+                    approveLabel="Send as you"
+                    approveDisabled={!mailboxConnected}
                     onApprove={() => handleApprove(lead.id)}
                     onReject={() => handleReject(lead.id)}
                     onToggleEdit={() => handleToggleEdit(lead.id)}
+                    onSubjectChange={(value) =>
+                      handleSubjectChange(lead.id, value)
+                    }
                     onDraftChange={(value) => handleDraftChange(lead.id, value)}
                     onFeedbackSubmit={handleFeedbackSubmit}
                     onRevealEmail={() => handleRevealEmail(lead.id)}
                     isRevealingEmail={revealingLeadId === lead.id}
+                    onSaveDraft={() => handleSaveDraft(lead.id)}
+                    saveDraftDisabled={!mailboxConnected}
+                    draftSaveStatus={lead.draftSaveStatus}
+                    draftSaveError={lead.draftSaveError}
                   />
                 ))}
               </div>

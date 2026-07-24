@@ -6,6 +6,7 @@ import {
   updateLeadDraftStatus,
   updateLeadFeedback,
   updateLeadStatus,
+  updateLeadSubject,
 } from "@/lib/leads";
 import { listEmployees } from "@/lib/employees";
 import { inngest } from "@/lib/inngest/client";
@@ -21,10 +22,11 @@ export async function PATCH(request: Request, { params }: IdRouteParams) {
   if (user instanceof NextResponse) return user;
 
   const body = await request.json().catch(() => ({}));
-  const { status, draftStatus, draft, feedbackReason } = body as {
+  const { status, draftStatus, draft, subject, feedbackReason } = body as {
     status?: ApprovalStatus;
     draftStatus?: ApprovalStatus;
     draft?: string;
+    subject?: string;
     feedbackReason?: string;
   };
 
@@ -81,14 +83,52 @@ export async function PATCH(request: Request, { params }: IdRouteParams) {
     }
 
     if (draftStatus !== undefined) {
+      if (draftStatus === "approved") {
+        const { data: mailbox } = await supabase
+          .from("mailbox_connections")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!mailbox) {
+          return NextResponse.json(
+            {
+              error:
+                "Connect your mailbox in Settings before sending — Oliver can't send yet.",
+            },
+            { status: 400 },
+          );
+        }
+      }
+
       await updateLeadDraftStatus(supabase, {
         id,
         userId: user.id,
         status: draftStatus,
       });
+
+      if (draftStatus === "approved") {
+        try {
+          await inngest.send({
+            name: "leads/send-requested",
+            data: { userId: user.id, leadId: id },
+          });
+        } catch (error) {
+          console.error(
+            "Failed to send leads/send-requested to Inngest",
+            error,
+          );
+          return NextResponse.json(
+            { error: "Approved, but couldn't start sending — try again." },
+            { status: 502 },
+          );
+        }
+      }
     }
     if (draft !== undefined) {
       await updateLeadDraft(supabase, { id, userId: user.id, draft });
+    }
+    if (subject !== undefined) {
+      await updateLeadSubject(supabase, { id, userId: user.id, subject });
     }
     if (feedbackReason !== undefined) {
       await updateLeadFeedback(supabase, {
