@@ -49,7 +49,7 @@ export default async function DashboardPage() {
                 : `/employee/${employee.id}`;
             return (
               <Link key={employee.id} href={href}>
-                <Card padding="lg" className="transition hover:border-gray-400">
+                <Card padding="lg" className="transition hover:opacity-80">
                   <div className="flex items-center gap-3">
                     <EmployeeAvatar seed={employee.id} size="md" />
                     <div>

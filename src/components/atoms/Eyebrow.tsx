@@ -1,13 +1,14 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "./cn";
 
-type Tone = "accent" | "accent-faint" | "muted";
+type Tone = "accent" | "accent-faint" | "muted" | "inverted";
 type Tracking = "wide" | "widest";
 
 const toneClasses: Record<Tone, string> = {
   accent: "text-(--muted-faint)",
   "accent-faint": "text-(--muted-faint-2)",
   muted: "text-(--muted-faint)",
+  inverted: "text-white/70",
 };
 
 const trackingClasses: Record<Tracking, string> = {

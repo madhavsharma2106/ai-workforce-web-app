@@ -37,12 +37,12 @@ export const HireRoleButton = ({ role, title, description, icon }: Props) => {
       type="button"
       onClick={handleHire}
       disabled={isHiring}
-      className="rounded-lg border border-gray-900 bg-gray-900 p-6 text-left text-white transition hover:bg-gray-700 disabled:opacity-60"
+      className="rounded-[20px] bg-(--accent) p-6 text-left text-white transition hover:bg-(--accent-hover) disabled:opacity-60"
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white/10">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15">
         {icon}
       </div>
-      <Eyebrow tone="accent-faint" className="mt-4">
+      <Eyebrow tone="inverted" className="mt-4">
         {isHiring ? "Hiring…" : "Available now"}
       </Eyebrow>
       <Text size="lg" weight="semibold" className="mt-3 text-white!">
