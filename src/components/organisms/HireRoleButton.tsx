@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Eyebrow, Text } from "@/components/atoms";
+import { Badge, Text } from "@/components/atoms";
 import type { EmployeeRole } from "@/lib/employees";
 
 type Props = {
@@ -37,20 +37,24 @@ export const HireRoleButton = ({ role, title, description, icon }: Props) => {
       type="button"
       onClick={handleHire}
       disabled={isHiring}
-      className="rounded-[20px] bg-(--accent) p-6 text-left text-white transition hover:bg-(--accent-hover) disabled:opacity-60"
+      className="h-full rounded-[20px] bg-(--surface) p-7 text-left transition hover:opacity-80 disabled:opacity-60"
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15">
-        {icon}
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-(--accent-soft-text)">
+          {icon}
+        </div>
+        <div className="min-w-0">
+          <Text size="md" weight="semibold">
+            {title}
+          </Text>
+          <Text size="sm" tone="muted" className="mt-0.5 truncate">
+            {description}
+          </Text>
+        </div>
+        <Badge tone="accent" size="sm" className="ml-auto shrink-0">
+          {isHiring ? "Hiring…" : "Open"}
+        </Badge>
       </div>
-      <Eyebrow tone="inverted" className="mt-4">
-        {isHiring ? "Hiring…" : "Available now"}
-      </Eyebrow>
-      <Text size="lg" weight="semibold" className="mt-3 text-white!">
-        {title}
-      </Text>
-      <Text size="sm" tone="inverted" className="mt-1.5">
-        {description}
-      </Text>
     </button>
   );
 };

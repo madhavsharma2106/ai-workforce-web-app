@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Target, Users } from "lucide-react";
+import type { ReactNode } from "react";
+import { Briefcase, Target, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/supabase/auth";
 import {
@@ -8,16 +9,32 @@ import {
   listEmployees,
   ROLE_LABELS,
   ROLE_TITLES,
+  type Employee,
+  type EmployeeRole,
 } from "@/lib/employees";
-import {
-  Badge,
-  Card,
-  EmployeeAvatar,
-  Eyebrow,
-  Heading,
-  Text,
-} from "@/components/atoms";
+import { Badge, Card, EmployeeAvatar, Heading, Text } from "@/components/atoms";
 import { HireRoleButton } from "@/components/organisms";
+
+const ROLE_ORDER: EmployeeRole[] = [
+  "account_manager",
+  "lead_sourcer",
+  "sales_representative",
+];
+
+const ROLE_ICON: Record<EmployeeRole, ReactNode> = {
+  account_manager: <Briefcase size={20} />,
+  lead_sourcer: <Target size={20} />,
+  sales_representative: <Users size={20} />,
+};
+
+const ROLE_DESCRIPTION: Record<EmployeeRole, string> = {
+  account_manager:
+    "Learns your business so every other employee produces more relevant work.",
+  lead_sourcer:
+    "Researches prospects and drafts personalized outreach emails for your approval.",
+  sales_representative:
+    "Sends approved outreach and drafts follow-ups — once Emma hands off qualified leads.",
+};
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -30,9 +47,8 @@ export default async function DashboardPage() {
     redirect(`/employee/${employee.id}/onboarding`);
   }
 
-  const leadSourcer = employees.find((e) => e.role === "lead_sourcer");
-  const salesRepresentative = employees.find(
-    (e) => e.role === "sales_representative",
+  const employeeByRole = new Map<EmployeeRole, Employee>(
+    employees.map((employee) => [employee.role, employee]),
   );
 
   return (
@@ -41,15 +57,33 @@ export default async function DashboardPage() {
         <Heading as="h1" size="lg">
           Welcome to your office.
         </Heading>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {employees.map((employee) => {
+        <div className="grid gap-4 sm:grid-cols-3">
+          {ROLE_ORDER.map((role) => {
+            const employee = employeeByRole.get(role);
+
+            if (!employee) {
+              return (
+                <HireRoleButton
+                  key={role}
+                  role={role}
+                  title={ROLE_TITLES[role]}
+                  description={ROLE_DESCRIPTION[role]}
+                  icon={ROLE_ICON[role]}
+                />
+              );
+            }
+
             const href =
               employee.status === "onboarding"
                 ? `/employee/${employee.id}/onboarding`
                 : `/employee/${employee.id}`;
+
             return (
               <Link key={employee.id} href={href}>
-                <Card padding="lg" className="transition hover:opacity-80">
+                <Card
+                  padding="lg"
+                  className="h-full transition hover:opacity-80"
+                >
                   <div className="flex items-center gap-3">
                     <EmployeeAvatar seed={employee.id} size="md" />
                     <div>
@@ -74,41 +108,6 @@ export default async function DashboardPage() {
           })}
         </div>
       </section>
-
-      {(!leadSourcer || !salesRepresentative) && (
-        <section className="space-y-4">
-          <div>
-            <Eyebrow>Hire</Eyebrow>
-            <Heading as="h2" size="lg" className="mt-1">
-              Choose a role to hire
-            </Heading>
-            <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-              Every employee comes with a clear job description and a dashboard
-              where you review their work.
-            </Text>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            {!leadSourcer && (
-              <HireRoleButton
-                role="lead_sourcer"
-                title="Lead Sourcer"
-                description="Researches prospects and drafts personalized outreach emails for your approval."
-                icon={<Target size={20} className="text-white" />}
-              />
-            )}
-
-            {!salesRepresentative && (
-              <HireRoleButton
-                role="sales_representative"
-                title="Sales Representative"
-                description="Sends approved outreach and drafts follow-ups — once Emma hands off qualified leads."
-                icon={<Users size={20} className="text-white" />}
-              />
-            )}
-          </div>
-        </section>
-      )}
     </div>
   );
 }
