@@ -46,10 +46,10 @@ Write "instructionsMd": a short, concrete markdown note (a few bullet points, "#
 }
 
 /**
- * Folds a gap-followup conversation into the founder's existing Instructions
+ * Folds a follow-up conversation into the founder's existing Instructions
  * note for one employee — keeps still-valid points, updates ones the new
  * answers supersede, adds anything new. Used by the Instructions tab's
- * "Check for gaps" action, as distinct from fresh-onboarding synthesis above.
+ * "Talk to {agent}" action, as distinct from fresh-onboarding synthesis above.
  */
 export async function mergeEmployeeInstructions(input: {
   role: EmployeeRole;

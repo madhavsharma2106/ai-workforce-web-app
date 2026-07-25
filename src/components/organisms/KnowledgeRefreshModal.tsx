@@ -49,11 +49,11 @@ export const KnowledgeRefreshModal = ({
       <div className="space-y-4">
         <div>
           <Heading as="h3" size="sm">
-            {agentName} is checking for gaps
+            Catching up with {agentName}
           </Heading>
           <Text size="sm" tone="muted" className="mt-1">
-            Reviewing what&apos;s already on file and asking about anything
-            missing.
+            Picking up where we left off — I&apos;ll ask about anything that
+            would help me get to know your business better.
           </Text>
         </div>
         <ConversationalForm

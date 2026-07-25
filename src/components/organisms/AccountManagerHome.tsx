@@ -125,7 +125,7 @@ export const AccountManagerHome = ({
           {mode === "view" && (
             <div className="flex gap-2">
               <Button variant="secondary" onClick={() => setGapCheckOpen(true)}>
-                Check for gaps
+                Talk to Alex
               </Button>
               <Button variant="secondary" onClick={startEdit}>
                 Update profile

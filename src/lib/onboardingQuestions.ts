@@ -155,7 +155,7 @@ export async function generateGapFollowup(input: {
   if (transcript.length >= GAP_MAX_QUESTIONS) {
     return {
       done: true,
-      message: "That's plenty for now — thanks for the updates.",
+      message: "That's plenty for now — thanks for keeping me in the loop.",
     };
   }
 
@@ -200,7 +200,8 @@ This is a returning conversation, not a first meeting — the founder already kn
   } catch {
     return {
       done: true,
-      message: "Couldn't check for gaps right now — try again later.",
+      message:
+        "Couldn't continue the conversation right now — try again later.",
     };
   }
 }

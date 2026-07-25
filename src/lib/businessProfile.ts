@@ -43,9 +43,9 @@ Write:
 }
 
 /**
- * Folds a gap-followup conversation into the existing Business Profile —
+ * Folds a follow-up conversation into the existing Business Profile —
  * keeps still-valid content, updates or replaces anything the new answers
- * supersede, adds anything new. Used by Alex's "Check for gaps" action, as
+ * supersede, adds anything new. Used by Alex's "Talk to Alex" action, as
  * distinct from fresh-onboarding synthesis above.
  */
 export async function mergeBusinessProfile(input: {

@@ -67,7 +67,7 @@ export async function fetchKnowledgeGapQuestion(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ transcript }),
   });
-  if (!response.ok) throw new Error("Failed to check for gaps.");
+  if (!response.ok) throw new Error("Failed to continue the conversation.");
   return response.json();
 }
 

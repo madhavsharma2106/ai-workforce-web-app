@@ -76,7 +76,7 @@ export const InstructionsPanel = ({
         {mode === "view" && (
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => setGapCheckOpen(true)}>
-              Check for gaps
+              Talk to {ROLE_LABELS[role]}
             </Button>
             <Button variant="secondary" onClick={startEdit}>
               Update instructions

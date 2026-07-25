@@ -8,9 +8,9 @@ import type { IdRouteParams } from "@/lib/types";
 import { apiErrorResponse } from "@/lib/api/errors";
 
 /**
- * Applies a "Check for gaps" conversation to the employee's existing
- * knowledge in place — unlike complete-onboarding, this never touches
- * employee status or redirects; the employee is already active.
+ * Applies a "Talk to {agent}" follow-up conversation to the employee's
+ * existing knowledge in place — unlike complete-onboarding, this never
+ * touches employee status or redirects; the employee is already active.
  */
 export async function POST(request: Request, { params }: IdRouteParams) {
   const { id } = await params;
