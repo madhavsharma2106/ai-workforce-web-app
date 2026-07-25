@@ -38,7 +38,7 @@ export async function triggerRun(
 
 export async function getDrafts(
   employeeId: string,
-): Promise<{ leads: Lead[] } | null> {
+): Promise<{ leads: Lead[]; steps: AgentRunStep[] } | null> {
   const response = await fetch(`/api/employees/${employeeId}/drafts`);
   if (!response.ok) return null;
   return response.json();

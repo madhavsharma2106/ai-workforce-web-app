@@ -31,7 +31,7 @@ export const SearchAgainModal = ({ open, onClose, onSubmit }: Props) => {
 
   return (
     <Modal open={open} onClose={handleClose}>
-      <Heading as="h2" size="sm">
+      <Heading as="h2" size="md">
         Search again
       </Heading>
       <Text size="sm" tone="muted" className="mt-2">

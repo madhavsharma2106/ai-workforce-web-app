@@ -56,68 +56,60 @@ export const RunReviewPanel = ({
   onFeedbackSubmit,
 }: Props) => (
   <>
-    <Card as="section" padding="lg">
-      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-4">
-          <EmployeeAvatar seed={employeeId} size="lg" />
-          <div>
-            <Eyebrow>
-              {ROLE_TITLES.lead_sourcer} · <LocalDate date={run.created_at} />
-            </Eyebrow>
-            <Heading as="h2" size="md" className="mt-1">
-              {pendingCount > 0
-                ? `I found ${pendingCount} ${pendingCount === 1 ? "lead" : "leads"} for you to review`
-                : "I'm all caught up"}
-            </Heading>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge tone="accent" size="md">
-            {pendingCount > 0 ? "Waiting for approval" : "All caught up"}
-          </Badge>
-          <Button variant="secondary" size="sm" onClick={onSearchAgain}>
-            Search again
-          </Button>
+    <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <div className="flex items-center gap-4">
+        <EmployeeAvatar seed={employeeId} size="lg" />
+        <div>
+          <Heading as="h2" size="xl" italic>
+            {pendingCount > 0
+              ? `I found ${pendingCount} ${pendingCount === 1 ? "lead" : "leads"} for you to review`
+              : "I'm all caught up"}
+          </Heading>
+          <Text size="sm" tone="muted" className="mt-1">
+            {ROLE_TITLES.lead_sourcer} · <LocalDate date={run.created_at} />
+          </Text>
         </div>
       </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Badge tone="accent" size="md">
+          {pendingCount > 0 ? "Waiting for approval" : "All caught up"}
+        </Badge>
+        <Button variant="secondary" size="sm" onClick={onSearchAgain}>
+          Search again
+        </Button>
+      </div>
+    </div>
 
-      <div className="grid gap-px overflow-hidden rounded-md border border-gray-200 bg-gray-200 sm:grid-cols-3">
-        {[
-          { label: "Researched", value: `${researchedCount} companies` },
-          { label: "Qualified", value: `${leads.length} leads` },
-          { label: "In queue", value: `${pendingCount} for review` },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-white p-5">
-            <Text size="xs" tone="muted" weight="medium">
-              {stat.label}
-            </Text>
-            <Text size="xl" weight="semibold" className="mt-2 font-mono">
-              {stat.value}
-            </Text>
-          </div>
-        ))}
-      </div>
-    </Card>
+    <div className="grid gap-3.5 sm:grid-cols-3">
+      {[
+        { label: "Researched", value: `${researchedCount} companies` },
+        { label: "Qualified", value: `${leads.length} leads` },
+        { label: "In queue", value: `${pendingCount} for review` },
+      ].map((stat) => (
+        <Card key={stat.label} padding="md">
+          <Eyebrow>{stat.label}</Eyebrow>
+          <Heading as="p" size="md" className="mt-1.5">
+            {stat.value}
+          </Heading>
+        </Card>
+      ))}
+    </div>
 
     {run.summary && (
-      <Card as="article" padding="lg">
-        <Eyebrow>Update from Emma</Eyebrow>
-        <blockquote className="mt-4 border-l-2 border-gray-900 pl-4">
-          <Markdown content={run.summary} />
-        </blockquote>
+      <Card as="article" padding="lg" className="space-y-3.5">
+        <Heading as="h3" size="sm">
+          Today&apos;s report
+        </Heading>
+        <Markdown content={run.summary} />
       </Card>
     )}
 
     <ActivityCard steps={steps} />
 
     {!oliverHired && (
-      <Card
-        as="section"
-        padding="md"
-        className="border-indigo-200 bg-indigo-50"
-      >
-        <Text size="sm" className="text-indigo-900">
-          <span className="font-medium">
+      <Card as="section" padding="md">
+        <Text size="sm" tone="subtle">
+          <span className="font-bold text-(--heading)">
             Hire Oliver (Sales Representative)
           </span>{" "}
           to draft and approve outreach for leads you approve here.{" "}
@@ -128,19 +120,17 @@ export const RunReviewPanel = ({
       </Card>
     )}
 
-    <Card as="section" padding="lg" className="space-y-6">
+    <div className="space-y-4">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <Eyebrow>Review</Eyebrow>
-          <Heading as="h3" size="md" className="mt-1">
-            Review & approve leads
+          <Heading as="h3" size="sm">
+            Ready to grow
           </Heading>
+          <Text size="sm" tone="muted" className="mt-1">
+            Review before I hand these to Oliver to draft outreach.
+          </Text>
         </div>
-        <Button
-          className="px-4!"
-          onClick={onApproveAll}
-          disabled={!oliverHired}
-        >
+        <Button onClick={onApproveAll} disabled={!oliverHired}>
           Approve all
         </Button>
       </div>
@@ -152,6 +142,8 @@ export const RunReviewPanel = ({
             lead={lead}
             status={lead.status}
             showDraft={false}
+            approveLabel="Nurture this"
+            rejectLabel="Let go"
             approvedMessage="Approved — I've handed this off to Oliver for outreach."
             approveDisabled={!oliverHired}
             feedbackActive={feedbackLeadId === lead.id}
@@ -165,7 +157,7 @@ export const RunReviewPanel = ({
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-gray-50 p-5">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-(--inset) p-5">
         <div>
           <Text size="sm" weight="medium">
             Approval progress
@@ -174,11 +166,11 @@ export const RunReviewPanel = ({
             {approvedCount} approved • {pendingCount} pending
           </Text>
         </div>
-        <Badge tone="accent" size="sm" className="bg-white! shadow-sm">
+        <Badge tone="accent" size="sm">
           I&apos;m learning from your feedback
         </Badge>
       </div>
-    </Card>
+    </div>
 
     <PassedCandidatesList candidates={passedCandidates} />
   </>

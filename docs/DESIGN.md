@@ -1,40 +1,44 @@
-# Design System
+# Design System — "Greenhouse"
 
 Visual language for every screen and component going forward.
 
 ## Philosophy
 
-Minimal and neutral, in the spirit of Linear, Vercel, and Notion.
+Calm and living, in the spirit of tending a garden rather than operating a dashboard — matching the product's "employees, not agents" positioning (`VISION.md`, `UX.md`).
 
-The interface should feel calm and get out of the way of the work. Color, weight, and motion are used sparingly, only to draw attention to what matters.
+Sage/cream surfaces, organic "blob" shapes, a single leaf-green accent, and a serif+sans pairing stand in for the neutral SaaS palette this replaces.
 
 ## Color
 
-- Neutral gray scale (`gray-*`) for text, borders, and surfaces.
-- White backgrounds. Use `gray-50` only for subtle secondary surfaces (nested panels, footers).
-- One accent color: indigo (`indigo-600` / `indigo-50`). Used for links, active/status states, and small emphasis — never for large fills.
-- Primary actions use `gray-900` (near-black), not the accent color.
+- Page background: `#eef1e8` (sage/cream, not white). Surfaces (cards) are white `#ffffff`; nested content within a card (inset panels, inputs) uses `#f5f7f0`.
+- One accent color: leaf green (`#5b7a45`, hover `#4d6a39`). Used for primary actions, active states, and progress — never a second hue.
+- Status/fit tiers are distinguished by pale tints of the same green (`#e4ecd8` text `#4c6b3a`, and a secondary tint `#eef2df` text `#6b7d3a`) plus label text, not by new colors. Danger states (reject/failed) are the one exception, using literal `red-*` classes — see [COMPONENTS.md](COMPONENTS.md).
+- Text: headings `#2b3524`, body `#4c5a42`/`#33402f`, muted `#7c8a70`, faint muted `#93a086`/`#a3ae97`/`#5f6e54`.
 - No gradients. No multi-color palettes.
 
 ## Typography
 
-- Sans-serif throughout (Inter). No serif headlines.
-- Headlines: `font-semibold`, tight `tracking-tight`.
-- Eyebrow labels (small caps-style tags above headings): `text-xs font-medium uppercase tracking-widest text-indigo-600`.
-- Monospace (JetBrains Mono) is reserved for literal/technical values — stats, URLs, numbers — not prose.
+- Serif: **Lora** — greetings and employee-voice headlines ("I found 2 leads for you to review") are italic; card/section headings are regular weight, not bold. Sizes: 28px (greeting), 24px (page titles), 19px/17px (card/section headings).
+- Sans: **Nunito Sans** — body copy and UI. Sizes: 14px (body), 13-13.5px (secondary/status text), 12-12.5px (fine print), 11-11.5px (uppercase eyebrow labels, tracking 0.06-0.1em).
+- No monospace — literal values (stats, counts) are set in Lora at their heading size, not a mono face.
 
 ## Shape & Elevation
 
-- Small radius: `rounded-md` / `rounded-lg` for cards and inputs, `rounded-full` only for pills (status badges, tags).
-- Borders over shadows. Prefer a `border border-gray-200` card to a `shadow-*` card. Use shadow only for true overlays (dropdowns, floating elements).
-- Grouped stat/feature grids use a shared `gray-200` gap (`gap-px bg-gray-200` with white cells) instead of individual bordered boxes.
+- Cards: `rounded-[20px]`, no border, generous padding (24-28px). Depth comes only from layering the sage page background against white/pale-sage surfaces — no borders, no drop shadows anywhere.
+- Inset panels/inputs: `rounded-xl`/`rounded-2xl` (12-16px), filled with the inset tone, no border.
+- Buttons/badges: fully rounded (`rounded-full`).
+- Avatars: organic "blob" radius (`50% 40% 55% 45% / 45% 55% 40% 60%` small, `58% 42% 53% 47% / 48% 55% 45% 52%` hero), clipping a `boring-avatars` pattern seeded per employee and recolored to the Greenhouse palette (see `EmployeeAvatar`).
 
 ## Dark Mode
 
 Deferred. Components should not hardcode assumptions that block adding it later, but building it out is not in scope yet.
 
+## Voice
+
+Employees speak first-person about their own work ("I found 2 leads today"); the product speaks third-person about them elsewhere (roster cards, generic badges). Matter-of-fact and concrete — the calm of the palette should be legible in the copy too, not just the color.
+
 ## Applying This
 
-When adding a new screen or component, use the shared primitives in `src/components/atoms/` and `src/components/molecules/` (see [COMPONENTS.md](COMPONENTS.md)) rather than hand-writing new colors, radii, or shadow styles. If a pattern isn't covered by an existing primitive yet, match the conventions in [`src/app/page.tsx`](../src/app/page.tsx) and [`src/components/organisms/LeadCard.tsx`](../src/components/organisms/LeadCard.tsx).
+When adding a new screen or component, use the shared primitives in `src/components/atoms/` and `src/components/molecules/` (see [COMPONENTS.md](COMPONENTS.md)) rather than hand-writing new colors, radii, or shadow styles. If a pattern isn't covered by an existing primitive yet, match the conventions in [`src/components/organisms/RunReviewPanel.tsx`](../src/components/organisms/RunReviewPanel.tsx) and [`src/components/organisms/LeadCard.tsx`](../src/components/organisms/LeadCard.tsx) — the fullest implementation of this system so far.
 
 This keeps every future screen looking like it belongs to the same product.

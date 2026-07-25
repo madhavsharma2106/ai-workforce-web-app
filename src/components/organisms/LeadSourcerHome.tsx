@@ -211,7 +211,7 @@ export const LeadSourcerHome = ({
   };
 
   return (
-    <main className="space-y-10">
+    <main className="mx-auto max-w-190 space-y-9">
       <div className="flex items-center justify-between gap-4">
         <Tabs
           tabs={[
@@ -223,14 +223,23 @@ export const LeadSourcerHome = ({
         />
         <Link
           href={`/employee/${employeeId}/instructions`}
-          className="rounded-md border border-(--border) px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+          className="rounded-full bg-(--secondary-bg) px-4 py-1.5 text-[13px] font-bold text-(--muted-faint-3) transition hover:bg-(--secondary-hover)"
         >
           Instructions
         </Link>
       </div>
       {activeTab === "current" && renderCurrentTask()}
       {activeTab === "previous" && (
-        <TaskHistory employeeId={employeeId} history={initialHistory} />
+        <TaskHistory
+          employeeId={employeeId}
+          history={initialHistory}
+          renderMeta={(task) =>
+            `${task.leadCounts.approved} approved · ${task.leadCounts.rejected} rejected`
+          }
+          emptySummary={(task) =>
+            `I researched ${task.researchedCount} companies`
+          }
+        />
       )}
       <SearchAgainModal
         open={searchModalOpen}

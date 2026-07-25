@@ -3,7 +3,7 @@ import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { cn } from "./cn";
 
 const baseFieldClasses =
-  "w-full rounded-md border border-(--border) bg-white p-2.5 text-sm text-gray-900 outline-none transition focus:border-gray-400";
+  "w-full rounded-xl border-none bg-(--inset) p-3.5 text-[13px] text-(--body-strong) outline-none transition";
 
 export const Input = forwardRef<
   HTMLInputElement,

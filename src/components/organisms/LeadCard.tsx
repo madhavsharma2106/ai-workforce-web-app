@@ -4,8 +4,10 @@ import {
   Badge,
   Button,
   Card,
+  EmployeeAvatar,
   Eyebrow,
   Input,
+  Text,
   Textarea,
 } from "@/components/atoms";
 
@@ -24,6 +26,7 @@ type Props = {
   feedbackReason?: string;
   feedbackOptions?: string[];
   approveLabel?: string;
+  rejectLabel?: string;
   approvedMessage?: string;
   rejectedNote?: string;
   approveDisabled?: boolean;
@@ -95,6 +98,7 @@ export const LeadCard: FC<Props> = ({
   feedbackReason,
   feedbackOptions = DEFAULT_FEEDBACK_OPTIONS,
   approveLabel = "Approve",
+  rejectLabel = "Reject",
   approvedMessage = "Approved for sending.",
   rejectedNote = "I'll remember this for next time.",
   approveDisabled = false,
@@ -122,39 +126,37 @@ export const LeadCard: FC<Props> = ({
   const snapshot = companySnapshot(lead);
 
   return (
-    <Card
-      as="article"
-      padding="md"
-      className="bg-white transition hover:border-gray-300"
-    >
+    <Card as="article" padding="md">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex-1 space-y-2">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gray-900 text-sm font-medium text-white">
-              {lead.company.charAt(0)}
-            </div>
-            <p className="flex items-center gap-2 text-sm font-medium text-gray-900">
+            <EmployeeAvatar seed={lead.company} size="sm" />
+            <p className="flex items-center gap-2 font-serif text-[19px] text-(--heading)">
               {lead.company}
               {lead.companyLinkedinUrl && (
                 <a
                   href={withProtocol(lead.companyLinkedinUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-normal text-indigo-600 underline decoration-dotted underline-offset-2 hover:text-indigo-700"
+                  className="text-xs font-sans font-normal text-(--accent) underline decoration-dotted underline-offset-2 hover:text-(--accent-hover)"
                 >
                   LinkedIn
                 </a>
               )}
             </p>
           </div>
-          {snapshot && <p className="text-sm text-gray-600">{snapshot}</p>}
+          {snapshot && (
+            <Text size="sm" tone="subtle">
+              {snapshot}
+            </Text>
+          )}
           {lead.website && (
             <p className="text-xs">
               <a
                 href={withProtocol(lead.website)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-gray-400 underline decoration-dotted underline-offset-2 hover:text-gray-600"
+                className="text-(--muted-faint) underline decoration-dotted underline-offset-2 hover:text-(--muted-faint-3)"
               >
                 {lead.website}
               </a>
@@ -162,13 +164,18 @@ export const LeadCard: FC<Props> = ({
           )}
         </div>
 
-        <Badge tone={statusMeta.tone}>{statusMeta.label}</Badge>
+        <Badge tone={statusMeta.tone} size="sm">
+          {statusMeta.label}
+        </Badge>
       </div>
 
-      <div className="my-3 border-t border-gray-100" />
+      <Text size="sm" tone="subtle" className="mt-3.5">
+        {lead.fit}
+      </Text>
 
-      <div className="space-y-0.5 text-sm">
-        <p className="font-medium text-gray-800">
+      <div className="mt-4">
+        <Eyebrow>Decision maker</Eyebrow>
+        <p className="mt-1 text-sm font-bold text-(--heading)">
           {lead.decisionMaker}
           {lead.contactLinkedinUrl && (
             <>
@@ -177,20 +184,20 @@ export const LeadCard: FC<Props> = ({
                 href={withProtocol(lead.contactLinkedinUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-normal text-indigo-600 underline decoration-dotted underline-offset-2 hover:text-indigo-700"
+                className="text-xs font-normal text-(--accent) underline decoration-dotted underline-offset-2 hover:text-(--accent-hover)"
               >
                 LinkedIn
               </a>
             </>
           )}
         </p>
-        <p className="text-gray-500">
+        <p className="mt-0.5 text-xs text-(--muted-faint)">
           {emailLocked ? (
             <button
               type="button"
               onClick={onRevealEmail}
               disabled={isRevealingEmail}
-              className="text-indigo-600 underline decoration-dotted underline-offset-2 transition hover:text-indigo-700 disabled:opacity-60"
+              className="text-(--accent) underline decoration-dotted underline-offset-2 transition hover:text-(--accent-hover) disabled:opacity-60"
             >
               {isRevealingEmail ? "Revealing…" : "Reveal email"}
             </button>
@@ -200,26 +207,19 @@ export const LeadCard: FC<Props> = ({
         </p>
       </div>
 
-      <div className="my-3 border-t border-gray-100" />
-
-      <div className="rounded-md bg-gray-50 px-3 py-2.5 text-sm">
-        <Eyebrow tone="muted" tracking="wide">
-          Why this is a good fit
-        </Eyebrow>
-        <p className="mt-1.5 text-gray-900">{lead.fit}</p>
-        {lead.researchSnippet && (
-          <p className="mt-2 text-sm text-gray-600 italic">
-            &ldquo;{lead.researchSnippet}&rdquo;
-          </p>
-        )}
-      </div>
+      {lead.researchSnippet && (
+        <div className="mt-4 rounded-2xl bg-(--inset) px-4 py-3.5">
+          <Eyebrow>Research</Eyebrow>
+          <Text size="sm" tone="subtle" className="mt-1">
+            {lead.researchSnippet}
+          </Text>
+        </div>
+      )}
 
       <div className="mt-4 space-y-3">
         {showDraft && (
-          <div className="space-y-2 rounded-md border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
-            <Eyebrow tone="muted" tracking="wide">
-              Draft email
-            </Eyebrow>
+          <div className="space-y-2 rounded-2xl bg-(--inset) p-3.5">
+            <Eyebrow>Draft email</Eyebrow>
             {isEditing ? (
               <Input
                 value={subjectText}
@@ -227,7 +227,9 @@ export const LeadCard: FC<Props> = ({
                 onChange={(event) => onSubjectChange?.(event.target.value)}
               />
             ) : (
-              <p className="font-medium text-gray-900">{subjectText}</p>
+              <p className="text-sm font-bold text-(--heading)">
+                {subjectText}
+              </p>
             )}
             {isEditing ? (
               <Textarea
@@ -236,17 +238,25 @@ export const LeadCard: FC<Props> = ({
                 onChange={(event) => onDraftChange?.(event.target.value)}
               />
             ) : (
-              <p className="whitespace-pre-wrap leading-relaxed">{draftText}</p>
+              <Text
+                size="sm"
+                tone="subtle"
+                className="whitespace-pre-wrap leading-relaxed"
+              >
+                {draftText}
+              </Text>
             )}
           </div>
         )}
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-gray-400">Sources: {lead.sources}</p>
+          <Text size="xs" className="text-(--muted-faint-2)">
+            Source: {lead.sources}
+          </Text>
           {status !== "approved" && (
             <div className="flex flex-wrap gap-2">
-              <Button onClick={onApprove} disabled={approveDisabled}>
-                {approveLabel}
+              <Button variant="secondary" onClick={onReject}>
+                {rejectLabel}
               </Button>
               {onSaveDraft && (
                 <Button
@@ -257,8 +267,8 @@ export const LeadCard: FC<Props> = ({
                   {draftSaveStatus === "saving" ? "Saving…" : "Save to Drafts"}
                 </Button>
               )}
-              <Button variant="danger" onClick={onReject}>
-                Reject
+              <Button onClick={onApprove} disabled={approveDisabled}>
+                {approveLabel}
               </Button>
               {showDraft && (
                 <Button variant="secondary" onClick={onToggleEdit}>
@@ -270,41 +280,37 @@ export const LeadCard: FC<Props> = ({
         </div>
 
         {onSaveDraft && draftSaveStatus === "saved" && (
-          <p className="text-xs text-emerald-600">
+          <Text size="xs" className="text-(--accent-hover)">
             Saved to your Drafts folder.
-          </p>
+          </Text>
         )}
         {onSaveDraft && draftSaveStatus === "failed" && (
-          <p className="text-xs text-red-600">
+          <Text size="xs" className="text-red-600">
             {draftSaveError ?? "Couldn't save to Drafts."}{" "}
             <button type="button" className="underline" onClick={onSaveDraft}>
               Try again
             </button>
-          </p>
+          </Text>
         )}
 
         {status === "approved" && (
-          <div className="rounded-md bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
+          <div className="rounded-2xl bg-(--accent-soft) px-4 py-3 text-sm text-(--accent-soft-text)">
             {approvedMessage}
           </div>
         )}
 
         {replyStatus && (
-          <div className="space-y-2 rounded-md border border-indigo-100 bg-indigo-50/40 p-3 text-sm">
-            <Eyebrow tone="muted" tracking="wide">
-              They replied
-            </Eyebrow>
+          <div className="space-y-2 rounded-2xl bg-(--inset) p-3.5">
+            <Eyebrow>They replied</Eyebrow>
             {replySnippet && (
-              <p className="text-sm text-gray-600 italic">
+              <Text size="sm" tone="subtle" className="italic">
                 &ldquo;{replySnippet}&rdquo;
-              </p>
+              </Text>
             )}
-            <Eyebrow tone="muted" tracking="wide">
-              Oliver&apos;s draft reply
-            </Eyebrow>
-            <p className="whitespace-pre-wrap leading-relaxed text-gray-900">
+            <Eyebrow>Oliver&apos;s draft reply</Eyebrow>
+            <Text size="sm" className="whitespace-pre-wrap leading-relaxed">
               {replyDraftText}
-            </p>
+            </Text>
             {replyStatus === "pending" && (
               <div className="flex flex-wrap gap-2 pt-1">
                 <Button
@@ -313,27 +319,29 @@ export const LeadCard: FC<Props> = ({
                 >
                   Send reply
                 </Button>
-                <Button variant="danger" onClick={onRejectReply}>
+                <Button variant="secondary" onClick={onRejectReply}>
                   Reject
                 </Button>
               </div>
             )}
             {replyStatus === "approved" && (
-              <p className="text-xs text-indigo-700">Sending your reply…</p>
+              <Text size="xs" className="text-(--accent-hover)">
+                Sending your reply…
+              </Text>
             )}
             {replyStatus === "rejected" && (
-              <p className="text-xs text-gray-500">
+              <Text size="xs" tone="muted">
                 Reply dismissed — I&apos;ll keep watching this thread.
-              </p>
+              </Text>
             )}
           </div>
         )}
 
         {feedbackActive && (
-          <div className="rounded-md border border-gray-200 bg-white p-3 text-sm">
-            <p className="font-medium text-gray-900">
+          <div className="rounded-2xl bg-(--inset) p-3.5">
+            <Text size="sm" weight="medium">
               Why was this not a good lead?
-            </p>
+            </Text>
             <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
               {feedbackOptions.map((option) => (
                 <Button
@@ -351,12 +359,12 @@ export const LeadCard: FC<Props> = ({
         )}
 
         {status === "rejected" && feedbackReason && (
-          <div className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
-            <span className="font-medium text-gray-900">
+          <div className="rounded-2xl bg-(--inset) px-4 py-3 text-sm text-(--body)">
+            <span className="font-bold text-(--heading)">
               Feedback recorded —{" "}
             </span>
             {feedbackReason}
-            <p className="mt-1 text-xs text-gray-400">{rejectedNote}</p>
+            <p className="mt-1 text-xs text-(--muted-faint)">{rejectedNote}</p>
           </div>
         )}
       </div>

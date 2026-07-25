@@ -40,9 +40,9 @@ export const ActivityCard = ({
           </Heading>
         </div>
         {expanded ? (
-          <ChevronDown size={18} className="text-gray-400" />
+          <ChevronDown size={18} className="text-(--muted-faint)" />
         ) : (
-          <ChevronRight size={18} className="text-gray-400" />
+          <ChevronRight size={18} className="text-(--muted-faint)" />
         )}
       </button>
       {expanded && <ActivityTimeline steps={steps} />}

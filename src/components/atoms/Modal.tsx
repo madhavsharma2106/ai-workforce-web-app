@@ -24,13 +24,13 @@ export function Modal({ open, onClose, children }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--heading)/40 p-4"
       onClick={onClose}
     >
       <Card
         as="div"
         padding="lg"
-        className="w-full max-w-md bg-white shadow-lg"
+        className="w-full max-w-md"
         onClick={(event) => event.stopPropagation()}
       >
         {children}

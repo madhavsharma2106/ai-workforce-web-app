@@ -5,9 +5,9 @@ type Padding = "none" | "sm" | "md" | "lg";
 
 const paddingClasses: Record<Padding, string> = {
   none: "",
-  sm: "p-4",
-  md: "p-5",
-  lg: "p-6",
+  sm: "p-5",
+  md: "p-6",
+  lg: "p-7",
 };
 
 type Props = HTMLAttributes<HTMLElement> & {
@@ -26,7 +26,7 @@ export function Card({
   return (
     <Component
       className={cn(
-        "rounded-lg border border-(--border)",
+        "rounded-[20px] bg-(--surface)",
         paddingClasses[padding],
         className,
       )}

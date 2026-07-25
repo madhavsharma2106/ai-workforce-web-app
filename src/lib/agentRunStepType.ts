@@ -17,11 +17,11 @@ export const AGENT_RUN_STEP_TYPE_ICON: Record<AgentRunStepType, LucideIcon> = {
 };
 
 export const AGENT_RUN_STEP_TYPE_CLASSES: Record<AgentRunStepType, string> = {
-  thinking: "bg-gray-100 text-gray-500",
-  tool_call: "bg-(--accent-soft) text-(--accent-hover)",
-  tool_result: "bg-(--accent-soft) text-(--accent-hover)",
-  message: "bg-gray-900 text-white",
-  delegation: "bg-amber-50 text-amber-600",
+  thinking: "bg-(--inset) text-(--muted-faint)",
+  tool_call: "bg-(--accent-soft) text-(--accent-soft-text)",
+  tool_result: "bg-(--accent-soft) text-(--accent-soft-text)",
+  message: "bg-(--accent) text-white",
+  delegation: "bg-(--accent-soft-2) text-(--accent-soft-2-text)",
 };
 
 export const AGENT_RUN_STEP_FAILED_CLASSES = "bg-red-50 text-red-600";

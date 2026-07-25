@@ -91,6 +91,11 @@ export const AccountManagerHome = ({
       })
     : null;
 
+  const headline =
+    profile.profileMd.trim().length < 40
+      ? "I don't know much about your business yet"
+      : `I'm up to date on ${profile.businessName ? profile.businessName : "your business"}`;
+
   return (
     <main className="space-y-10">
       <Card as="section" padding="lg">
@@ -98,8 +103,8 @@ export const AccountManagerHome = ({
           <EmployeeAvatar seed={employeeId} size="lg" />
           <div>
             <Eyebrow>{ROLE_TITLES.account_manager}</Eyebrow>
-            <Heading as="h2" size="md" className="mt-1">
-              Hi, I&apos;m Alex
+            <Heading as="h2" size="xl" italic className="mt-1">
+              {headline}
             </Heading>
             <Text size="sm" tone="muted" className="mt-2 max-w-xl">
               I keep{" "}

@@ -112,6 +112,55 @@ export async function getAgentRunSteps(
   return (data as AgentRunStep[] | null) ?? [];
 }
 
+/**
+ * Steps across every currently in-flight run for an employee, merged into
+ * one chronological feed. Unlike Emma (one active search at a time), an
+ * employee like Oliver can have several concurrent per-item runs, so there's
+ * no single `runId` to key off of the way `getAgentRunSteps` does.
+ */
+export async function getActiveRunSteps(
+  supabase: SupabaseClient,
+  input: { userId: string; employeeId: string },
+): Promise<AgentRunStep[]> {
+  const { data: runs } = await supabase
+    .from("agent_runs")
+    .select("id")
+    .eq("user_id", input.userId)
+    .eq("employee_id", input.employeeId)
+    .in("status", ["queued", "running"]);
+
+  const runIds = ((runs as { id: string }[] | null) ?? []).map((r) => r.id);
+  if (runIds.length === 0) return [];
+
+  const { data: steps } = await supabase
+    .from("agent_run_steps")
+    .select("*")
+    .in("run_id", runIds)
+    .order("created_at", { ascending: true })
+    .order("seq", { ascending: true });
+
+  return (steps as AgentRunStep[] | null) ?? [];
+}
+
+/**
+ * Past runs for an employee, without Emma-specific lead-count enrichment
+ * (see `getRunHistory` in `src/lib/leads.ts`) — just the run rows themselves.
+ */
+export async function getEmployeeRunHistory(
+  supabase: SupabaseClient,
+  input: { userId: string; employeeId: string; limit?: number },
+): Promise<AgentRun[]> {
+  const { data } = await supabase
+    .from("agent_runs")
+    .select("*")
+    .eq("user_id", input.userId)
+    .eq("employee_id", input.employeeId)
+    .order("created_at", { ascending: false })
+    .limit(input.limit ?? 10);
+
+  return (data as AgentRun[] | null) ?? [];
+}
+
 export async function insertDelegation(
   supabase: SupabaseClient,
   input: {

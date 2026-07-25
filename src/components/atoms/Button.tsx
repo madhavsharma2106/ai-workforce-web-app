@@ -6,16 +6,17 @@ type Variant = "primary" | "secondary" | "danger" | "accent";
 type Size = "sm" | "md" | "lg";
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-gray-900 text-white hover:bg-gray-700",
-  secondary: "border border-(--border) text-gray-600 hover:bg-gray-50",
-  danger: "border border-(--border) text-red-600 hover:bg-red-50",
+  primary: "bg-(--accent) text-white hover:bg-(--accent-hover)",
+  secondary:
+    "bg-(--secondary-bg) text-(--muted-faint-3) hover:bg-(--secondary-hover)",
+  danger: "bg-(--secondary-bg) text-red-600 hover:bg-red-50",
   accent: "bg-(--accent) text-white hover:bg-(--accent-hover)",
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: "px-3.5 py-1.5 text-sm",
-  md: "px-3.5 py-2 text-sm",
-  lg: "px-4 py-2.5 text-sm",
+  sm: "px-4 py-2 text-xs",
+  md: "px-[22px] py-[11px] text-[13.5px]",
+  lg: "px-6 py-3 text-sm",
 };
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -40,7 +41,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(
       ref={ref}
       type={type}
       className={cn(
-        "rounded-md font-medium transition disabled:opacity-60",
+        "rounded-full font-bold transition disabled:bg-(--disabled-bg) disabled:text-(--disabled-text) disabled:hover:bg-(--disabled-bg)",
         variantClasses[variant],
         sizeClasses[size],
         fullWidth && "w-full",

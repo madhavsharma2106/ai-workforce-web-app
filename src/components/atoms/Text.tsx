@@ -14,16 +14,16 @@ const sizeClasses: Record<Size, string> = {
 };
 
 const toneClasses: Record<Tone, string> = {
-  default: "text-gray-900",
-  muted: "text-gray-500",
-  subtle: "text-gray-600",
-  inverted: "text-gray-300",
+  default: "text-(--body-strong)",
+  muted: "text-(--muted)",
+  subtle: "text-(--body)",
+  inverted: "text-white/80",
 };
 
 const weightClasses: Record<Weight, string> = {
   normal: "font-normal",
   medium: "font-medium",
-  semibold: "font-semibold",
+  semibold: "font-bold",
 };
 
 type Props = HTMLAttributes<HTMLParagraphElement> & {

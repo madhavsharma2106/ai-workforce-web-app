@@ -1,25 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --accent-soft: #eef2ff;
-  --muted: #6b7280;
-  --border: #e5e7eb;
-  --surface: #fafafa;
+  /* Surfaces */
+  --background: #eef1e8;
+  --foreground: #33402f;
+  --surface: #ffffff;
+  --inset: #f5f7f0;
+  --border: #dde3d2;
+
+  /* Accent — one leaf-green hue across the whole system */
+  --accent: #5b7a45;
+  --accent-hover: #4d6a39;
+  --accent-soft: #e4ecd8;
+  --accent-soft-2: #eef2df;
+  --accent-soft-2-text: #6b7d3a;
+  --accent-soft-text: #4c6b3a;
+
+  /* Text */
+  --heading: #2b3524;
+  --body: #4c5a42;
+  --body-strong: #33402f;
+  --muted: #7c8a70;
+  --muted-faint: #93a086;
+  --muted-faint-2: #a3ae97;
+  --muted-faint-3: #5f6e54;
+
+  /* Buttons */
+  --secondary-bg: #f2f4ee;
+  --secondary-hover: #e8ebe1;
+  --disabled-bg: #eef1e8;
+  --disabled-text: #b7c0ab;
+
+  /* Misc */
+  --avatar-neutral: #c9d2bd;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+  --font-sans: var(--font-nunito-sans);
+  --font-serif: var(--font-lora);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans, sans-serif);
+}
+
+::selection {
+  background: var(--accent-soft);
 }

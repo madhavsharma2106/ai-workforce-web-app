@@ -35,13 +35,10 @@ export const AppHeader = ({ userEmail }: Props) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <header className="sticky top-0 z-50 bg-(--background)/80 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-10 py-5">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-900 text-sm font-semibold text-white">
-            W
-          </div>
-          <Text size="sm" weight="semibold" className="tracking-tight">
+          <Text as="span" className="font-serif text-lg text-(--heading)">
             Workforce
           </Text>
         </Link>
@@ -52,19 +49,19 @@ export const AppHeader = ({ userEmail }: Props) => {
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-haspopup="menu"
-            className="flex items-center gap-2 rounded-md px-1.5 py-1 transition hover:bg-gray-100"
+            className="flex items-center gap-2 rounded-full px-1.5 py-1 transition hover:bg-(--secondary-bg)"
           >
             <EmployeeAvatar seed={userEmail ?? "you"} size="sm" />
-            <ChevronDown size={16} className="text-gray-400" />
+            <ChevronDown size={16} className="text-(--muted-faint)" />
           </button>
 
           {menuOpen && (
             <div
               role="menu"
-              className="absolute right-0 mt-2 w-56 rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+              className="absolute right-0 mt-2 w-56 rounded-2xl bg-(--surface) py-1"
             >
               {userEmail && (
-                <div className="border-b border-gray-100 px-3 py-2">
+                <div className="px-3.5 py-2.5">
                   <Text size="sm" tone="muted" className="truncate">
                     {userEmail}
                   </Text>
@@ -74,7 +71,7 @@ export const AppHeader = ({ userEmail }: Props) => {
                 href="/settings"
                 role="menuitem"
                 onClick={() => setMenuOpen(false)}
-                className="block w-full px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-50"
+                className="block w-full px-3.5 py-2.5 text-left text-sm text-(--body) transition hover:bg-(--secondary-bg)"
               >
                 Settings
               </Link>
@@ -82,7 +79,7 @@ export const AppHeader = ({ userEmail }: Props) => {
                 type="button"
                 role="menuitem"
                 onClick={handleSignOut}
-                className="w-full px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-50"
+                className="w-full px-3.5 py-2.5 text-left text-sm text-(--body) transition hover:bg-(--secondary-bg)"
               >
                 Sign out
               </button>

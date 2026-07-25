@@ -41,7 +41,7 @@ export function Markdown({ content }: Props) {
           </Text>
         ),
         strong: ({ children }) => (
-          <strong className="font-semibold text-gray-900">{children}</strong>
+          <strong className="font-semibold text-(--heading)">{children}</strong>
         ),
       }}
     >

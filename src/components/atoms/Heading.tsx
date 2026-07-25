@@ -4,27 +4,31 @@ import { cn } from "./cn";
 type Size = "xl" | "lg" | "md" | "sm";
 
 const sizeClasses: Record<Size, string> = {
-  xl: "text-5xl leading-[1.1] sm:text-6xl",
-  lg: "text-3xl",
-  md: "text-2xl",
-  sm: "text-lg",
+  xl: "text-[28px] leading-[1.2] sm:text-[34px]",
+  lg: "text-2xl",
+  md: "text-[19px]",
+  sm: "text-[17px]",
 };
 
 type Props = HTMLAttributes<HTMLHeadingElement> & {
   as?: ElementType;
   size?: Size;
+  /** The Emma-voice greeting/headline treatment — italic serif, reserved for an employee speaking first-person about their own work. */
+  italic?: boolean;
 };
 
 export function Heading({
   as: Component = "h2",
   size = "md",
+  italic = false,
   className,
   ...props
 }: Props) {
   return (
     <Component
       className={cn(
-        "font-semibold tracking-tight text-gray-900",
+        "font-serif text-(--heading)",
+        italic && "italic",
         sizeClasses[size],
         className,
       )}

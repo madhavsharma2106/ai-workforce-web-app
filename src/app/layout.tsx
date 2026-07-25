@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Lora, Nunito_Sans } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-sans",
+const nunitoSans = Nunito_Sans({
+  variable: "--font-nunito-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const jetBrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
+const lora = Lora({
+  variable: "--font-lora",
   subsets: ["latin"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,10 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetBrainsMono.variable} h-full antialiased`}
+      className={`${nunitoSans.variable} ${lora.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white text-slate-900">
-        <NextTopLoader color="#4f46e5" showSpinner={false} />
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <NextTopLoader color="#5b7a45" showSpinner={false} />
         {children}
       </body>
     </html>

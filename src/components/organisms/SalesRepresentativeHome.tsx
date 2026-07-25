@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LeadCard } from "./LeadCard";
+import { ActivityCard } from "./ActivityCard";
+import { TaskHistory } from "./TaskHistory";
 import {
   patchLead,
   retryDraft,
@@ -11,7 +13,7 @@ import {
   saveDraftToMailbox,
 } from "@/lib/api/leads";
 import { getDrafts } from "@/lib/api/employees";
-import type { Lead } from "@/lib/types";
+import type { AgentRun, AgentRunStep, Lead } from "@/lib/types";
 import {
   Badge,
   Button,
@@ -19,6 +21,7 @@ import {
   EmployeeAvatar,
   Eyebrow,
   Heading,
+  Tabs,
   Text,
 } from "@/components/atoms";
 import { Alert } from "@/components/molecules";
@@ -37,17 +40,23 @@ type Props = {
   employeeId: string;
   initialLeads: Lead[];
   mailboxConnected: boolean;
+  initialSteps: AgentRunStep[];
+  history: AgentRun[];
 };
 
 export const SalesRepresentativeHome = ({
   employeeId,
   initialLeads,
   mailboxConnected,
+  initialSteps,
+  history,
 }: Props) => {
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  const [steps, setSteps] = useState<AgentRunStep[]>(initialSteps);
   const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
   const [feedbackLeadId, setFeedbackLeadId] = useState<string | null>(null);
   const [revealingLeadId, setRevealingLeadId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"current" | "previous">("current");
 
   const isDrafting = useMemo(
     () => leads.some((lead) => lead.draft === "" && !lead.draftFailed),
@@ -74,6 +83,7 @@ export const SalesRepresentativeHome = ({
         const data = await getDrafts(employeeId);
         if (!data) return;
         setLeads(data.leads);
+        setSteps(data.steps);
       } catch (error) {
         console.error("Failed to poll drafts", error);
       }
@@ -214,38 +224,70 @@ export const SalesRepresentativeHome = ({
     (lead) => lead.draftStatus === "approved" && lead.sendStatus === "sent",
   );
   const rejected = leads.filter((lead) => lead.draftStatus === "rejected");
+  const replied = leads.filter((lead) => Boolean(lead.lastReplySnippet));
 
   const sections: { title: string; items: Lead[] }[] = [
     { title: "Awaiting your approval", items: awaitingApproval },
     { title: "Rejected", items: rejected },
   ];
 
+  const headline = (() => {
+    if (drafting.length > 0) {
+      return `I'm drafting outreach for ${drafting.length} ${drafting.length === 1 ? "company" : "companies"}…`;
+    }
+    if (sending.length > 0) {
+      return `I'm sending ${sending.length} ${sending.length === 1 ? "email" : "emails"}…`;
+    }
+    if (awaitingApproval.length > 0) {
+      return `I've got ${awaitingApproval.length} ${awaitingApproval.length === 1 ? "draft" : "drafts"} ready for your review`;
+    }
+    if (draftFailed.length > 0 || sendFailed.length > 0) {
+      const failedCount = draftFailed.length + sendFailed.length;
+      return `I ran into a problem with ${failedCount} ${failedCount === 1 ? "draft" : "drafts"}`;
+    }
+    return "I'm all caught up";
+  })();
+
+  const stats = [
+    {
+      label: "Drafted",
+      value: `${leads.filter((lead) => lead.draft !== "").length} emails`,
+    },
+    { label: "Sent", value: `${sent.length} sent` },
+    { label: "Replied", value: `${replied.length} replies` },
+  ];
+
   const leadsTabContent = (
     <>
-      <Card as="section" padding="lg">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <EmployeeAvatar seed={employeeId} size="lg" />
-            <div>
-              <Eyebrow>{ROLE_TITLES.sales_representative}</Eyebrow>
-              <Heading as="h2" size="md" className="mt-1">
-                Hi, I&apos;m Oliver
-              </Heading>
-              <Text size="sm" tone="muted" className="mt-2 max-w-xl">
-                I draft an email for each lead Emma approves, then send it from
-                your own mailbox as soon as you say the word — and when a
-                prospect replies, I&apos;ll draft the response too.
-              </Text>
-            </div>
-          </div>
-          <Link
-            href={`/employee/${employeeId}/instructions`}
-            className="shrink-0 rounded-md border border-(--border) px-3.5 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-          >
-            Instructions
-          </Link>
+      <div className="flex items-center gap-4">
+        <EmployeeAvatar seed={employeeId} size="lg" />
+        <div>
+          <Eyebrow>{ROLE_TITLES.sales_representative}</Eyebrow>
+          <Heading as="h2" size="xl" italic className="mt-1">
+            {headline}
+          </Heading>
         </div>
-      </Card>
+      </div>
+
+      <div className="grid gap-3.5 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <Card key={stat.label} padding="md">
+            <Eyebrow>{stat.label}</Eyebrow>
+            <Heading as="p" size="md" className="mt-1.5">
+              {stat.value}
+            </Heading>
+          </Card>
+        ))}
+      </div>
+
+      {(drafting.length > 0 || sending.length > 0) && (
+        <ActivityCard
+          steps={steps}
+          eyebrow="Live activity"
+          title="What I'm doing"
+          defaultExpanded
+        />
+      )}
 
       {!mailboxConnected && (
         <Alert
@@ -456,5 +498,30 @@ export const SalesRepresentativeHome = ({
     </>
   );
 
-  return <main className="space-y-10">{leadsTabContent}</main>;
+  return (
+    <main className="mx-auto max-w-190 space-y-9">
+      <div className="flex items-center justify-between gap-4">
+        <Tabs
+          tabs={[
+            { key: "current", label: "Current task" },
+            { key: "previous", label: "Previous tasks" },
+          ]}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+        />
+        <Link
+          href={`/employee/${employeeId}/instructions`}
+          className="rounded-full bg-(--secondary-bg) px-4 py-1.5 text-[13px] font-bold text-(--muted-faint-3) transition hover:bg-(--secondary-hover)"
+        >
+          Instructions
+        </Link>
+      </div>
+      {activeTab === "current" && (
+        <div className="space-y-10">{leadsTabContent}</div>
+      )}
+      {activeTab === "previous" && (
+        <TaskHistory employeeId={employeeId} history={history} />
+      )}
+    </main>
+  );
 };

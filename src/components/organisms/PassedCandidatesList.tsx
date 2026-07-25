@@ -13,13 +13,13 @@ export const PassedCandidatesList: FC<Props> = ({ candidates }) => {
   return (
     <Card as="section" padding="lg" className="space-y-3">
       <Eyebrow>Also reviewed, passed on</Eyebrow>
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-(--border)">
         {candidates.map((candidate) => (
           <div
             key={candidate.company}
             className="flex flex-wrap items-baseline gap-x-2 py-2 text-sm"
           >
-            <Text size="sm" weight="medium" className="text-gray-700">
+            <Text size="sm" weight="medium" tone="subtle">
               {candidate.company}
             </Text>
             <Text size="sm" tone="muted">

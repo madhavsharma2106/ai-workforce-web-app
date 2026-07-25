@@ -3,7 +3,6 @@ import {
   Badge,
   Card,
   EmployeeAvatar,
-  Eyebrow,
   Heading,
   LocalDate,
   Text,
@@ -34,44 +33,39 @@ type Props = {
 
 export const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
   return (
-    <div className="space-y-8">
-      <Card as="section" padding="lg">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-4">
-            <EmployeeAvatar seed={employeeId} size="lg" />
-            <div>
-              <Eyebrow>
-                {ROLE_TITLES.lead_sourcer} · <LocalDate date={run.created_at} />
-              </Eyebrow>
-              <Heading as="h1" size="md" className="mt-1">
-                Task recap
-              </Heading>
-            </div>
+    <div className="mx-auto max-w-190 space-y-9">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-4">
+          <EmployeeAvatar seed={employeeId} size="lg" />
+          <div>
+            <Heading as="h1" size="xl" italic>
+              Task recap
+            </Heading>
+            <Text size="sm" tone="muted" className="mt-1">
+              {ROLE_TITLES.lead_sourcer} · <LocalDate date={run.created_at} />
+            </Text>
           </div>
-          <Badge tone={AGENT_RUN_STATUS_TONE[run.status]} size="md">
-            {AGENT_RUN_STATUS_LABEL[run.status]}
-          </Badge>
         </div>
-      </Card>
+        <Badge tone={AGENT_RUN_STATUS_TONE[run.status]} size="md">
+          {AGENT_RUN_STATUS_LABEL[run.status]}
+        </Badge>
+      </div>
 
       {run.summary && (
-        <Card as="article" padding="lg">
-          <Eyebrow>Update from Emma</Eyebrow>
-          <blockquote className="mt-4 border-l-2 border-gray-900 pl-4">
-            <Markdown content={run.summary} />
-          </blockquote>
+        <Card as="article" padding="lg" className="space-y-3.5">
+          <Heading as="h3" size="sm">
+            Update from Emma
+          </Heading>
+          <Markdown content={run.summary} />
         </Card>
       )}
 
       <ActivityCard steps={steps} />
 
-      <Card as="section" padding="lg" className="space-y-6">
-        <div>
-          <Eyebrow>Outcome</Eyebrow>
-          <Heading as="h2" size="md" className="mt-1">
-            Leads from this task
-          </Heading>
-        </div>
+      <Card as="section" padding="lg" className="space-y-5">
+        <Heading as="h2" size="sm">
+          Leads from this task
+        </Heading>
         {leads.length === 0 ? (
           <Text size="sm" tone="muted">
             No leads came out of this task.
@@ -83,14 +77,14 @@ export const TaskDetail = ({ employeeId, run, steps, leads }: Props) => {
                 key={lead.id}
                 as="article"
                 padding="md"
-                className="bg-white"
+                className="bg-(--inset)"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <Text size="sm" weight="semibold">
                       {lead.company}
                     </Text>
-                    <Text size="xs" tone="muted" className="font-mono">
+                    <Text size="xs" className="text-(--muted-faint)">
                       {lead.website}
                     </Text>
                   </div>

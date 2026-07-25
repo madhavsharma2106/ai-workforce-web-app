@@ -67,7 +67,7 @@ const ActivityStep = ({
         >
           <Icon size={14} strokeWidth={2} />
         </span>
-        {!isLast && <span className="mt-1 w-px flex-1 bg-gray-200" />}
+        {!isLast && <span className="mt-1 w-px flex-1 bg-(--border)" />}
       </div>
       <div className="min-w-0 flex-1 pb-4">
         <div className="flex items-start justify-between gap-3">
@@ -87,7 +87,7 @@ const ActivityStep = ({
             <button
               type="button"
               onClick={() => setExpanded((value) => !value)}
-              className="flex items-center gap-1 text-xs font-medium text-gray-500 transition hover:text-gray-800"
+              className="flex items-center gap-1 text-xs font-medium text-(--muted) transition hover:text-(--heading)"
             >
               {expanded ? (
                 <ChevronDown size={12} />
@@ -97,19 +97,19 @@ const ActivityStep = ({
               {expanded ? "Hide details" : "Show details"}
             </button>
             {expanded && (
-              <div className="mt-2 space-y-2 rounded-md bg-gray-50 p-3">
+              <div className="mt-2 space-y-2 rounded-xl bg-(--inset) p-3">
                 {step.tool_name && (
-                  <Text size="xs" tone="muted" className="font-mono">
+                  <Text size="xs" tone="muted">
                     {step.tool_name}
                   </Text>
                 )}
                 {step.input != null && (
-                  <pre className="overflow-x-auto text-xs text-gray-600">
+                  <pre className="overflow-x-auto text-xs text-(--body)">
                     {JSON.stringify(step.input, null, 2)}
                   </pre>
                 )}
                 {step.output != null && (
-                  <pre className="overflow-x-auto text-xs text-gray-600">
+                  <pre className="overflow-x-auto text-xs text-(--body)">
                     {JSON.stringify(step.output, null, 2)}
                   </pre>
                 )}

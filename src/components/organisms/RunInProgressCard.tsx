@@ -25,10 +25,10 @@ export const RunInProgressCard = ({
     <>
       <Card as="section" padding="lg">
         <Eyebrow>Emma</Eyebrow>
-        <Heading as="h2" size="md" className="mt-1">
+        <Heading as="h2" size="xl" italic className="mt-1">
           I&apos;m researching leads…
         </Heading>
-        <Text size="sm" tone="muted" className="mt-2">
+        <Text size="sm" tone="subtle" className="mt-2">
           I&apos;m searching for companies that match your profile and drafting
           outreach — this can take a minute.
         </Text>

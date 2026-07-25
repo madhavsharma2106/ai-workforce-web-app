@@ -5,14 +5,14 @@ type Tone = "accent" | "accent-faint" | "muted";
 type Tracking = "wide" | "widest";
 
 const toneClasses: Record<Tone, string> = {
-  accent: "text-(--accent)",
-  "accent-faint": "text-indigo-300",
-  muted: "text-gray-400",
+  accent: "text-(--muted-faint)",
+  "accent-faint": "text-(--muted-faint-2)",
+  muted: "text-(--muted-faint)",
 };
 
 const trackingClasses: Record<Tracking, string> = {
-  wide: "tracking-wide",
-  widest: "tracking-widest",
+  wide: "tracking-[.06em]",
+  widest: "tracking-[.08em]",
 };
 
 type Props = HTMLAttributes<HTMLParagraphElement> & {
@@ -29,7 +29,7 @@ export function Eyebrow({
   return (
     <p
       className={cn(
-        "text-xs font-medium uppercase",
+        "text-[11px] font-normal uppercase",
         trackingClasses[tracking],
         toneClasses[tone],
         className,

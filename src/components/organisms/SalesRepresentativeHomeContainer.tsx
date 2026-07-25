@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getLeadsAwaitingOutreach } from "@/lib/leads";
 import { getMailboxConnection } from "@/lib/mailboxConnections";
+import { getActiveRunSteps, getEmployeeRunHistory } from "@/lib/agentRuns";
 import { SalesRepresentativeHome } from "./SalesRepresentativeHome";
 
 type Props = {
@@ -13,9 +14,11 @@ export async function SalesRepresentativeHomeContainer({
   userId,
 }: Props) {
   const supabase = await createClient();
-  const [leads, mailboxConnection] = await Promise.all([
+  const [leads, mailboxConnection, steps, history] = await Promise.all([
     getLeadsAwaitingOutreach(supabase, { userId }),
     getMailboxConnection(supabase, { userId }),
+    getActiveRunSteps(supabase, { userId, employeeId }),
+    getEmployeeRunHistory(supabase, { userId, employeeId }),
   ]);
 
   return (
@@ -23,6 +26,8 @@ export async function SalesRepresentativeHomeContainer({
       employeeId={employeeId}
       initialLeads={leads}
       mailboxConnected={mailboxConnection !== null}
+      initialSteps={steps}
+      history={history}
     />
   );
 }

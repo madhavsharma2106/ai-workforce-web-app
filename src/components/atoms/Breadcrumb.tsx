@@ -15,22 +15,19 @@ export const Breadcrumb = ({ items, className }: Props) => (
   <nav aria-label="Breadcrumb" className={className}>
     <Text
       as="span"
-      size="sm"
+      size="xs"
       tone="muted"
-      className="flex items-center gap-1.5"
+      className="flex items-center gap-1.5 text-(--muted-faint)"
     >
       {items.map((item, index) => (
         <span key={item.label} className="flex items-center gap-1.5">
-          {index > 0 && <span className="text-gray-300">/</span>}
+          {index > 0 && <span>/</span>}
           {item.href ? (
-            <Link
-              href={item.href}
-              className="hover:text-gray-900 hover:underline"
-            >
+            <Link href={item.href} className="hover:text-(--muted-faint-3)">
               {item.label}
             </Link>
           ) : (
-            <span className="font-medium text-gray-900">{item.label}</span>
+            <span className="text-(--muted-faint-3)">{item.label}</span>
           )}
         </span>
       ))}

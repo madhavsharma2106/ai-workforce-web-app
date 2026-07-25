@@ -11,7 +11,7 @@ export default async function AppLayout({
   const user = await requireUser(supabase);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-background text-(--body-strong)">
       <AppHeader userEmail={user.email ?? null} />
       {children}
     </div>

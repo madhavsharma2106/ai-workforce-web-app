@@ -10,10 +10,10 @@ type Props = {
 export const RunFailedCard = ({ run, onSearchAgain }: Props) => (
   <Card as="section" padding="lg">
     <Eyebrow>Emma</Eyebrow>
-    <Heading as="h2" size="md" className="mt-1">
+    <Heading as="h2" size="xl" italic className="mt-1">
       Something went wrong on this search
     </Heading>
-    <Text size="sm" tone="muted" className="mt-2">
+    <Text size="sm" tone="subtle" className="mt-2">
       I wasn&apos;t able to finish this task. Here&apos;s what happened:
     </Text>
     <Alert variant="error" className="mt-4">

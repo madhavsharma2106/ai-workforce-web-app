@@ -2,7 +2,7 @@
 
 ## Philosophy
 
-The user is a manager. The employee is responsible for work. The interface should feel calm.
+The user is a manager. The employee is responsible for work. The interface should feel calm and living — the same "tending a garden, not operating a dashboard" spirit as the visual system (see [DESIGN.md](DESIGN.md)), expressed in words instead of shape and color.
 
 The product should feel like **building a team**, not configuring software. Employees should appear autonomous: they wake up, do their work, prepare it for review, learn from feedback, and improve over time. The user should never feel like they're programming an AI.
 
@@ -39,11 +39,11 @@ A **Role** defines the job (e.g. Lead Sourcer, Account Manager, Sales Representa
 ## Voice — point of view
 
 - **First person** ("I found 12 leads today") for direct communication _from_ the employee — chat, daily reports, feedback threads.
-- **Third person** ("Emma is working") for any copy _about_ the employee written from the product's perspective rather than the employee's own — dashboard chrome (headers, cards, badges, status chips), marketing/landing copy, and cards describing other employees (e.g. a "choose a role to hire" section).
+- **Third person** ("Emma is working") for any copy _about_ the employee written from the product's perspective rather than the employee's own — product chrome (headers, cards, badges, status chips), marketing/landing copy, and cards describing other employees (e.g. a "choose a role to hire" section).
 
 This distinction is intentional and should be preserved, not flattened to one voice.
 
-**Exception — live status and activity narration.** Headers, badges, and activity-log lines that report what the employee is doing or just did (a run-in-progress heading, an approval-queue badge, per-step activity narration, a "search again" prompt) read as first person even though they live in dashboard chrome — they're the closest thing to the employee handing you a live update, and third person here is what makes the product feel like software instead of a hire. Reserve third person for copy that isn't reporting the employee's own action: role/name labels (eyebrows, "Meet Emma"), generic status badges with no name in them ("Needs review," "Completed," "Failed"), and cards describing an employee from the roster/hiring perspective (dashboard "choose a role" cards, marketing copy).
+**Exception — live status and activity narration.** Headers, badges, and activity-log lines that report what the employee is doing or just did (a run-in-progress heading, an approval-queue badge, per-step activity narration, a "search again" prompt) read as first person even though they live in product chrome — they're the closest thing to the employee handing you a live update, and third person here is what makes the product feel like software instead of a hire. Reserve third person for copy that isn't reporting the employee's own action: role/name labels (eyebrows, "Meet Emma"), generic status badges with no name in them ("Needs review," "Completed," "Failed"), and cards describing an employee from the roster/hiring perspective (roster "choose a role" cards, marketing copy).
 
 Plain labels or titles naming an employee or role (e.g. "Meet Emma," "Onboard Alex") are UI labels, not voiced copy — they imply no speaker and are exempt from the first/third-person distinction above.
 
@@ -51,12 +51,12 @@ Plain labels or titles naming an employee or role (e.g. "Meet Emma," "Onboard Al
 
 Position on Nielsen Norman Group's four tone dimensions:
 
-| Dimension                     | Our position                | Why                                                                                                                                                                                  |
-| ----------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Funny ↔ Serious               | Mostly serious, with warmth | Real business stakes — leads, revenue, hiring. Reads closer to a trusted operator than a quirky consumer app. Serious doesn't mean stiff: employees are still people, not paperwork. |
-| Formal ↔ Casual               | Casual-professional         | Talks like a sharp, competent colleague — plain language, contractions fine, first names. Never legalese or corporate boilerplate.                                                   |
-| Respectful ↔ Irreverent       | Respectful                  | Never jokes at the user's expense, never cute about failures ("Oopsie!") when real leads/money are on the line. Competence reads as respect.                                         |
-| Enthusiastic ↔ Matter-of-fact | Matter-of-fact              | No forced cheer, no exclamation points, no confetti. Calm confidence, not cheerleading — this is what "the interface should feel calm" cashes out to on this axis.                   |
+| Dimension                     | Our position                | Why                                                                                                                                                                                   |
+| ----------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Funny ↔ Serious               | Mostly serious, with warmth | Real business stakes — leads, revenue, hiring. Reads closer to a trusted colleague than a quirky consumer app. Serious doesn't mean stiff: employees are still people, not paperwork. |
+| Formal ↔ Casual               | Casual-professional         | Talks like a sharp, competent colleague — plain language, contractions fine, first names. Never legalese or corporate boilerplate.                                                    |
+| Respectful ↔ Irreverent       | Respectful                  | Never jokes at the user's expense, never cute about failures ("Oopsie!") when real leads/money are on the line. Competence reads as respect.                                          |
+| Enthusiastic ↔ Matter-of-fact | Matter-of-fact              | No forced cheer, no exclamation points, no confetti. Calm confidence, not cheerleading — this is what "the interface should feel calm" cashes out to on this axis.                    |
 
 This positioning is the fixed brand voice. What adapts is emphasis — by audience and by context.
 
@@ -69,7 +69,7 @@ This positioning is the fixed brand voice. What adapts is emphasis — by audien
 
 **Contextual adaptation (empathy-driven).** Same brand voice, weighted differently by moment:
 
-- _Neutral/informational_ (reports, dashboards): fully matter-of-fact, data-forward.
+- _Neutral/informational_ (reports, status views): fully matter-of-fact, data-forward.
 - _Success/completion_: matter-of-fact but confident — a clean confirmation ("3 leads approved and sent"), not a celebration. No confetti, no "Woohoo!"
 - _Error/friction_: instructional and reassuring — say what happened and what to do next in plain language (see Communication Reliability below). Acknowledge friction without being saccharine.
 - _Waiting/delay_: supportive, not silent — give the user something ("Emma's still working, no action needed") rather than nothing.
