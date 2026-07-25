@@ -1,6 +1,7 @@
 import { inngest } from "../client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendReplyViaConnection } from "@/lib/mailboxConnections";
+import { log } from "@/lib/log";
 
 /**
  * Founder-triggered send: approving a reply draft fires this, mirroring
@@ -20,7 +21,13 @@ export const sendReplyOnApproval = inngest.createFunction(
     const { userId, leadId } = event.data as { userId: string; leadId: string };
     const supabase = createAdminClient();
 
-    await step.run("send-reply", async () => {
+    log.info("inngest job started", {
+      job: "send-reply-on-approval",
+      userId,
+      leadId,
+    });
+
+    const outcome = await step.run("send-reply", async () => {
       const { data: lead } = await supabase
         .from("leads")
         .select(
@@ -37,7 +44,7 @@ export const sendReplyOnApproval = inngest.createFunction(
         lead.reply_status !== "approved" ||
         lead.reply_send_status === "sent"
       )
-        return;
+        return "skipped: reply not in approved/unsent state";
 
       await supabase
         .from("leads")
@@ -58,6 +65,7 @@ export const sendReplyOnApproval = inngest.createFunction(
             reply_status: null,
           })
           .eq("id", leadId);
+        return "sent";
       } catch (error) {
         await supabase
           .from("leads")
@@ -69,7 +77,15 @@ export const sendReplyOnApproval = inngest.createFunction(
                 : "Unknown error sending reply.",
           })
           .eq("id", leadId);
+        return "failed";
       }
+    });
+
+    log.info("inngest job finished", {
+      job: "send-reply-on-approval",
+      userId,
+      leadId,
+      outcome,
     });
 
     return { status: "completed" };

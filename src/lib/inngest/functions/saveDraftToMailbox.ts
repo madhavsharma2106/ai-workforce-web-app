@@ -1,6 +1,7 @@
 import { inngest } from "../client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { saveDraftViaConnection } from "@/lib/mailboxConnections";
+import { log } from "@/lib/log";
 
 /**
  * Founder-triggered: clicking "Save to Drafts" pushes the current draft into
@@ -16,7 +17,13 @@ export const saveDraftToMailbox = inngest.createFunction(
     const { userId, leadId } = event.data as { userId: string; leadId: string };
     const supabase = createAdminClient();
 
-    await step.run("save-draft", async () => {
+    log.info("inngest job started", {
+      job: "save-draft-to-mailbox",
+      userId,
+      leadId,
+    });
+
+    const outcome = await step.run("save-draft", async () => {
       const { data: lead } = await supabase
         .from("leads")
         .select("id, email, subject, draft, draft_save_status")
@@ -25,7 +32,8 @@ export const saveDraftToMailbox = inngest.createFunction(
         .maybeSingle();
 
       // Idempotency backstop: don't re-save a lead that already made it in.
-      if (!lead || lead.draft_save_status === "saved") return;
+      if (!lead || lead.draft_save_status === "saved")
+        return "skipped: already saved";
 
       await supabase
         .from("leads")
@@ -46,6 +54,7 @@ export const saveDraftToMailbox = inngest.createFunction(
             draft_save_error: null,
           })
           .eq("id", leadId);
+        return "saved";
       } catch (error) {
         await supabase
           .from("leads")
@@ -57,7 +66,15 @@ export const saveDraftToMailbox = inngest.createFunction(
                 : "Unknown error saving draft.",
           })
           .eq("id", leadId);
+        return "failed";
       }
+    });
+
+    log.info("inngest job finished", {
+      job: "save-draft-to-mailbox",
+      userId,
+      leadId,
+      outcome,
     });
 
     return { status: "completed" };

@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { listEmployees } from "@/lib/employees";
 import { insertDelegation } from "@/lib/agentRuns";
 import { runGraphJob } from "@/lib/agents/runGraphJob";
+import { log } from "@/lib/log";
 
 /**
  * Poll-triggered handoff: `pollForReplies` detects a genuine (non-automated)
@@ -30,7 +31,13 @@ export const draftReplyOnReceipt = inngest.createFunction(
     };
     const supabase = createAdminClient();
 
-    await step.run("delegate-and-draft-reply", async () => {
+    log.info("inngest job started", {
+      job: "draft-reply-on-receipt",
+      userId,
+      leadId,
+    });
+
+    const outcome = await step.run("delegate-and-draft-reply", async () => {
       const { data: lead } = await supabase
         .from("leads")
         .select("id, company, draft_run_id, reply_status")
@@ -46,11 +53,11 @@ export const draftReplyOnReceipt = inngest.createFunction(
         lead.reply_status === "pending" ||
         lead.reply_status === "approved"
       )
-        return;
+        return "skipped: reply already pending/approved or lead has no draft run";
 
       const employees = await listEmployees(supabase, userId);
       const oliver = employees.find((e) => e.role === "sales_representative");
-      if (!oliver) return;
+      if (!oliver) return "skipped: sales_representative not hired";
 
       const delegation = await insertDelegation(supabase, {
         userId,
@@ -75,6 +82,15 @@ export const draftReplyOnReceipt = inngest.createFunction(
         jobKind: "reply",
         pendingDelegationId: delegation.id,
       });
+
+      return "completed";
+    });
+
+    log.info("inngest job finished", {
+      job: "draft-reply-on-receipt",
+      userId,
+      leadId,
+      outcome,
     });
 
     return { status: "completed" };

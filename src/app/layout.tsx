@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lora, Nunito_Sans } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
+import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import "./globals.css";
 
 const nunitoSans = Nunito_Sans({
@@ -33,8 +34,10 @@ export default function RootLayout({
       className={`${nunitoSans.variable} ${lora.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <NextTopLoader color="#5b7a45" showSpinner={false} />
-        {children}
+        <PostHogProvider>
+          <NextTopLoader color="#5b7a45" showSpinner={false} />
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

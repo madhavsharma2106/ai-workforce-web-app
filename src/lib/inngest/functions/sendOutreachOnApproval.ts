@@ -1,6 +1,7 @@
 import { inngest } from "../client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendViaConnection } from "@/lib/mailboxConnections";
+import { log } from "@/lib/log";
 
 /**
  * Founder-triggered send: clicking "Send as you" on an approved draft fires
@@ -17,7 +18,13 @@ export const sendOutreachOnApproval = inngest.createFunction(
     const { userId, leadId } = event.data as { userId: string; leadId: string };
     const supabase = createAdminClient();
 
-    await step.run("send-mail", async () => {
+    log.info("inngest job started", {
+      job: "send-outreach-on-approval",
+      userId,
+      leadId,
+    });
+
+    const outcome = await step.run("send-mail", async () => {
       const { data: lead } = await supabase
         .from("leads")
         .select("id, email, subject, draft, draft_status, send_status")
@@ -31,7 +38,7 @@ export const sendOutreachOnApproval = inngest.createFunction(
         lead.draft_status !== "approved" ||
         lead.send_status === "sent"
       )
-        return;
+        return "skipped: lead not in approved/unsent state";
 
       await supabase
         .from("leads")
@@ -53,6 +60,7 @@ export const sendOutreachOnApproval = inngest.createFunction(
             conversation_id: conversationId ?? null,
           })
           .eq("id", leadId);
+        return "sent";
       } catch (error) {
         await supabase
           .from("leads")
@@ -64,7 +72,15 @@ export const sendOutreachOnApproval = inngest.createFunction(
                 : "Unknown error sending email.",
           })
           .eq("id", leadId);
+        return "failed";
       }
+    });
+
+    log.info("inngest job finished", {
+      job: "send-outreach-on-approval",
+      userId,
+      leadId,
+      outcome,
     });
 
     return { status: "completed" };

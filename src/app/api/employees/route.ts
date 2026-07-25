@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUserForApi } from "@/lib/supabase/auth";
 import { createEmployee, type EmployeeRole } from "@/lib/employees";
 import { apiErrorResponse } from "@/lib/api/errors";
+import { captureServerEvent } from "@/lib/analytics";
 
 const HIREABLE_ROLES: EmployeeRole[] = ["lead_sourcer", "sales_representative"];
 
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
 
   try {
     const employee = await createEmployee(supabase, user.id, role);
+    await captureServerEvent(user.id, "employee_hired", { role });
     return NextResponse.json({ id: employee.id });
   } catch (error) {
     return apiErrorResponse(error);

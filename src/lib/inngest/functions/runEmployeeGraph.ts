@@ -3,6 +3,7 @@ import { inngest } from "../client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { EmployeeRole } from "@/lib/employees";
 import { runGraphJob } from "@/lib/agents/runGraphJob";
+import { log } from "@/lib/log";
 
 /**
  * One Inngest job = one LangGraph delegation graph run, which may traverse
@@ -22,6 +23,12 @@ export const runEmployeeGraph = inngest.createFunction(
       { role: "user", content: message },
     ];
 
+    log.info("inngest job started", {
+      job: "run-employee-graph",
+      userId,
+      initiatingRole,
+    });
+
     await step.run("run-graph", async () => {
       await runGraphJob(supabase, {
         userId,
@@ -29,6 +36,8 @@ export const runEmployeeGraph = inngest.createFunction(
         messages: initialMessages,
       });
     });
+
+    log.info("inngest job finished", { job: "run-employee-graph", userId });
 
     return { status: "completed" };
   },

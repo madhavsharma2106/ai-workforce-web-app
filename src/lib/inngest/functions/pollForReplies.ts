@@ -3,6 +3,7 @@ import { inngest } from "../client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { listInboxRepliesViaConnection } from "@/lib/mailboxConnections";
 import type { InboundMessage } from "@/lib/integrations/email/types";
+import { log } from "@/lib/log";
 
 const POLL_LOOKBACK_HOURS = 6; // poll cadence (5h) + buffer; overlap is harmless, dedupe is per-lead via last_reply_message_id
 
@@ -26,6 +27,9 @@ export const pollForReplies = inngest.createFunction(
       .from("mailbox_connections")
       .select("user_id");
 
+    const mailboxCount = connections?.length ?? 0;
+    log.info("inngest job started", { job: "poll-for-replies", mailboxCount });
+
     for (const connection of (connections as { user_id: string }[] | null) ??
       []) {
       const userId = connection.user_id;
@@ -34,10 +38,16 @@ export const pollForReplies = inngest.createFunction(
         try {
           await pollOneMailbox(supabase, userId);
         } catch (error) {
-          console.error(`pollForReplies: failed for user ${userId}`, error);
+          log.error("poll-for-replies: failed for user", {
+            userId,
+            message: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          });
         }
       });
     }
+
+    log.info("inngest job finished", { job: "poll-for-replies", mailboxCount });
 
     return { status: "completed" };
   },

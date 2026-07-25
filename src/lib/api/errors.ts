@@ -3,6 +3,7 @@ import {
   ApolloConfigError,
   ApolloRequestError,
 } from "@/lib/integrations/apollo";
+import { log } from "@/lib/log";
 
 export function apiErrorResponse(error: unknown): NextResponse {
   if (error instanceof ApolloConfigError) {
@@ -11,7 +12,10 @@ export function apiErrorResponse(error: unknown): NextResponse {
   if (error instanceof ApolloRequestError) {
     return NextResponse.json({ error: error.message }, { status: 502 });
   }
-  console.error("Unhandled API route error", error);
+  log.error("Unhandled API route error", {
+    message: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+  });
   return NextResponse.json(
     { error: "Something went wrong — try again." },
     { status: 500 },

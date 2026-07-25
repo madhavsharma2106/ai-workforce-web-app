@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { listEmployees, ROLE_LABELS } from "@/lib/employees";
 import { insertDelegation } from "@/lib/agentRuns";
 import { runGraphJob } from "@/lib/agents/runGraphJob";
+import { log } from "@/lib/log";
 
 /**
  * Founder-triggered handoff: approving a lead on Emma's page starts a real
@@ -18,7 +19,13 @@ export const draftOutreachOnApproval = inngest.createFunction(
     const { userId, leadId } = event.data as { userId: string; leadId: string };
     const supabase = createAdminClient();
 
-    await step.run("delegate-and-draft", async () => {
+    log.info("inngest job started", {
+      job: "draft-outreach-on-approval",
+      userId,
+      leadId,
+    });
+
+    const outcome = await step.run("delegate-and-draft", async () => {
       const { data: lead } = await supabase
         .from("leads")
         .select(
@@ -30,13 +37,14 @@ export const draftOutreachOnApproval = inngest.createFunction(
 
       // Idempotency backstop: only proceed for a still-approved, not-yet-
       // drafted lead. Guards against a duplicate/retried event.
-      if (!lead || lead.status !== "approved" || lead.draft !== "") return;
+      if (!lead || lead.status !== "approved" || lead.draft !== "")
+        return "skipped: lead not in approved/undrafted state";
 
       const employees = await listEmployees(supabase, userId);
       const oliver = employees.find((e) => e.role === "sales_representative");
       // Backstop only — the PATCH route already blocks approval when Oliver
       // isn't hired, so this should be unreachable in practice.
-      if (!oliver) return;
+      if (!oliver) return "skipped: sales_representative not hired";
 
       const delegation = await insertDelegation(supabase, {
         userId,
@@ -60,6 +68,15 @@ export const draftOutreachOnApproval = inngest.createFunction(
         leadId: lead.id,
         pendingDelegationId: delegation.id,
       });
+
+      return "completed";
+    });
+
+    log.info("inngest job finished", {
+      job: "draft-outreach-on-approval",
+      userId,
+      leadId,
+      outcome,
     });
 
     return { status: "completed" };
