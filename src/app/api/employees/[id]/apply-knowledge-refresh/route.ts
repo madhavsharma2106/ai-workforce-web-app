@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOwnedEmployeeForApi } from "@/lib/employees";
 import { mergeBusinessProfile } from "@/lib/businessProfile";
 import { mergeEmployeeInstructions } from "@/lib/employeeInstructions";
-import type { ChatMessage } from "@/lib/knowledgeChat";
+import { getChatMessages } from "@/lib/knowledgeChat";
 import type { IdRouteParams } from "@/lib/types";
 import { apiErrorResponse } from "@/lib/api/errors";
 
@@ -20,8 +20,7 @@ export async function POST(request: Request, { params }: IdRouteParams) {
   const { user, employee } = result;
 
   try {
-    const body = await request.json();
-    const messages: ChatMessage[] = body.messages ?? [];
+    const messages = await getChatMessages(supabase, id);
     const hasUserMessage = messages.some((message) => message.role === "user");
 
     if (employee.role === "account_manager") {

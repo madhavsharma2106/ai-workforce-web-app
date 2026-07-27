@@ -1,30 +1,54 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button, Card, Textarea } from "@/components/atoms";
+import { Send } from "lucide-react";
+import { Card, EmployeeAvatar, Textarea } from "@/components/atoms";
 import type { ChatMessage } from "@/lib/knowledgeChat";
 
 type Props = {
+  employeeId: string;
   agentName: string;
   opener: string;
-  sendMessage: (messages: ChatMessage[]) => Promise<{ reply: string }>;
-  onSave: (messages: ChatMessage[]) => void | Promise<void>;
+  initialMessages: ChatMessage[];
+  sendMessage: (message: string) => Promise<{ reply: string }>;
+  onSave: () => void | Promise<void>;
 };
 
-type UiMessage = { id: string; role: "assistant" | "user"; content: string };
+type UiMessage = {
+  id: string;
+  role: "assistant" | "user";
+  content: string;
+  createdAt: string;
+};
 
-const toChatMessages = (messages: UiMessage[]): ChatMessage[] =>
-  messages.map(({ role, content }) => ({ role, content }));
+const formatTime = (iso: string) =>
+  new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
 export const KnowledgeChatForm = ({
+  employeeId,
   agentName,
   opener,
+  initialMessages,
   sendMessage,
   onSave,
 }: Props) => {
-  const [messages, setMessages] = useState<UiMessage[]>([
-    { id: "opener", role: "assistant", content: opener },
-  ]);
+  const [messages, setMessages] = useState<UiMessage[]>(() =>
+    initialMessages.length
+      ? initialMessages.map((message, index) => ({
+          id: `h${index}`,
+          role: message.role,
+          content: message.content,
+          createdAt: message.createdAt ?? new Date().toISOString(),
+        }))
+      : [
+          {
+            id: "opener",
+            role: "assistant",
+            content: opener,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+  );
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(false);
@@ -41,23 +65,19 @@ export const KnowledgeChatForm = ({
     if (!isSending) inputRef.current?.focus();
   }, [isSending]);
 
-  const send = async (value: string, history: UiMessage[]) => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-
-    const withUser: UiMessage[] = [
-      ...history,
-      { id: `u${idRef.current++}`, role: "user", content: trimmed },
-    ];
-    setMessages(withUser);
-    setInputValue("");
+  const deliver = async (content: string) => {
     setError(false);
     setIsSending(true);
     try {
-      const { reply } = await sendMessage(toChatMessages(withUser));
+      const { reply } = await sendMessage(content);
       setMessages((current) => [
         ...current,
-        { id: `a${idRef.current++}`, role: "assistant", content: reply },
+        {
+          id: `a${idRef.current++}`,
+          role: "assistant",
+          content: reply,
+          createdAt: new Date().toISOString(),
+        },
       ]);
     } catch {
       setError(true);
@@ -66,10 +86,26 @@ export const KnowledgeChatForm = ({
     }
   };
 
+  const send = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    setMessages((current) => [
+      ...current,
+      {
+        id: `u${idRef.current++}`,
+        role: "user",
+        content: trimmed,
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+    setInputValue("");
+    void deliver(trimmed);
+  };
+
   const retry = () => {
     const last = messages[messages.length - 1];
     if (last?.role !== "user") return;
-    void send(last.content, messages.slice(0, -1));
+    void deliver(last.content);
   };
 
   const hasUserMessage = messages.some((message) => message.role === "user");
@@ -77,46 +113,69 @@ export const KnowledgeChatForm = ({
   const save = async () => {
     setSaving(true);
     try {
-      await onSave(toChatMessages(messages));
+      await onSave();
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Card padding="none" className="flex h-full flex-col bg-white">
+    <Card padding="none" className="flex h-full flex-col bg-(--surface)">
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 space-y-3 overflow-y-auto p-5"
+        className="min-h-0 flex-1 space-y-1 overflow-y-auto p-5"
       >
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm leading-6 ${
-                message.role === "user"
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {message.role === "assistant" && (
-                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-indigo-500">
-                  {agentName}
+        {messages.map((message, index) => {
+          const prev = messages[index - 1];
+          const next = messages[index + 1];
+          const startsGroup = !prev || prev.role !== message.role;
+          const endsGroup = !next || next.role !== message.role;
+          const isAssistant = message.role === "assistant";
+
+          return (
+            <div key={message.id}>
+              <div
+                className={`flex items-end gap-2 ${isAssistant ? "justify-start" : "justify-end"} ${startsGroup ? "mt-3" : "mt-0.5"}`}
+              >
+                {isAssistant && (
+                  <div className="w-7 shrink-0">
+                    {startsGroup && (
+                      <EmployeeAvatar seed={employeeId} size="sm" />
+                    )}
+                  </div>
+                )}
+                <div
+                  className={`max-w-[80%] px-3.5 py-2 text-sm leading-6 ${
+                    isAssistant
+                      ? "rounded-2xl bg-(--secondary-bg) text-(--body-strong)"
+                      : "rounded-2xl bg-(--accent) text-white"
+                  }`}
+                >
+                  {message.content}
+                </div>
+              </div>
+              {endsGroup && (
+                <p
+                  className={`mt-1 text-[11px] text-(--muted-faint) ${
+                    isAssistant ? "ml-9 text-left" : "text-right"
+                  }`}
+                >
+                  {formatTime(message.createdAt)}
                 </p>
               )}
-              {message.content}
             </div>
-          </div>
-        ))}
+          );
+        })}
         {isSending && (
-          <div className="flex justify-start">
-            <div className="flex items-center gap-1 rounded-lg bg-gray-100 px-3.5 py-3">
+          <div className="mt-3 flex items-end gap-2">
+            <div className="w-7 shrink-0">
+              <EmployeeAvatar seed={employeeId} size="sm" />
+            </div>
+            <div className="flex items-center gap-1 rounded-2xl bg-(--secondary-bg) px-3.5 py-3">
               {[0, 1, 2].map((dot) => (
                 <span
                   key={dot}
-                  className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400"
+                  className="h-1.5 w-1.5 animate-bounce rounded-full bg-(--muted-faint)"
                   style={{ animationDelay: `${dot * 120}ms` }}
                 />
               ))}
@@ -125,23 +184,27 @@ export const KnowledgeChatForm = ({
         )}
       </div>
 
-      <div className="space-y-2.5 border-t border-gray-200 p-4">
+      <div className="space-y-2 border-t border-(--border) p-4">
         {error && (
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-red-600">
               Something went wrong on our end.
             </p>
-            <Button variant="secondary" onClick={retry}>
+            <button
+              type="button"
+              onClick={retry}
+              className="text-xs font-medium text-(--accent) hover:underline"
+            >
               Retry
-            </Button>
+            </button>
           </div>
         )}
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            void send(inputValue, messages);
+            send(inputValue);
           }}
-          className="space-y-2.5"
+          className="flex items-end gap-2"
         >
           <Textarea
             ref={inputRef}
@@ -150,28 +213,33 @@ export const KnowledgeChatForm = ({
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
-                void send(inputValue, messages);
+                send(inputValue);
               }
             }}
             placeholder={`Message ${agentName}...`}
-            rows={2}
-            className="resize-none"
+            rows={1}
+            className="max-h-32 flex-1 resize-none"
             disabled={isSending}
           />
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={save}
-              disabled={!hasUserMessage || saving || isSending}
-            >
-              {saving ? "Saving…" : "Save updates"}
-            </Button>
-            <Button type="submit" disabled={isSending || !inputValue.trim()}>
-              Send
-            </Button>
-          </div>
+          <button
+            type="submit"
+            aria-label="Send"
+            disabled={isSending || !inputValue.trim()}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-(--accent) text-white transition hover:bg-(--accent-hover) disabled:bg-(--disabled-bg) disabled:text-(--disabled-text)"
+          >
+            <Send size={16} />
+          </button>
         </form>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={save}
+            disabled={!hasUserMessage || saving || isSending}
+            className="text-xs font-medium text-(--muted-faint-3) hover:text-(--accent) hover:underline disabled:pointer-events-none disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save updates to What I Know"}
+          </button>
+        </div>
       </div>
     </Card>
   );

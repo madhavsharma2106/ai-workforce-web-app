@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnedEmployee } from "@/lib/employees";
+import { getChatMessages } from "@/lib/knowledgeChat";
 import { EmployeeChatSidebar } from "@/components/organisms";
 
 type Params = { params: Promise<{ id: string }> };
@@ -18,10 +19,16 @@ export default async function EmployeeLayout({
     return <>{children}</>;
   }
 
+  const initialMessages = await getChatMessages(supabase, employee.id);
+
   return (
-    <div className="flex items-start">
-      <div className="min-w-0 flex-1">{children}</div>
-      <EmployeeChatSidebar employeeId={employee.id} role={employee.role} />
-    </div>
+    <>
+      {children}
+      <EmployeeChatSidebar
+        employeeId={employee.id}
+        role={employee.role}
+        initialMessages={initialMessages}
+      />
+    </>
   );
 }

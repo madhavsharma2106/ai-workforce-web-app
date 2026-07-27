@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireOwnedEmployeeForApi } from "@/lib/employees";
-import { generateChatReply, type ChatMessage } from "@/lib/knowledgeChat";
+import {
+  generateChatReply,
+  getChatMessages,
+  saveChatMessage,
+} from "@/lib/knowledgeChat";
 import type { IdRouteParams } from "@/lib/types";
 import { apiErrorResponse } from "@/lib/api/errors";
 
@@ -14,7 +18,10 @@ export async function POST(request: Request, { params }: IdRouteParams) {
 
   try {
     const body = await request.json();
-    const messages: ChatMessage[] = body.messages ?? [];
+    const message: string = body.message ?? "";
+
+    await saveChatMessage(supabase, id, { role: "user", content: message });
+    const messages = await getChatMessages(supabase, id);
 
     const { data: businessProfile } = await supabase
       .from("business_profiles")
@@ -35,6 +42,11 @@ export async function POST(request: Request, { params }: IdRouteParams) {
           ? null
           : businessProfile?.profile_md || null,
       messages,
+    });
+
+    await saveChatMessage(supabase, id, {
+      role: "assistant",
+      content: next.reply,
     });
 
     return NextResponse.json(next);

@@ -1,4 +1,3 @@
-import type { ChatMessage } from "@/lib/knowledgeChat";
 import type {
   AgentRun,
   AgentRunStep,
@@ -57,12 +56,12 @@ export async function updateInstructions(
 
 export async function sendKnowledgeChatMessage(
   employeeId: string,
-  messages: ChatMessage[],
+  message: string,
 ): Promise<{ reply: string }> {
   const response = await fetch(`/api/employees/${employeeId}/knowledge-chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ message }),
   });
   if (!response.ok) throw new Error("Failed to continue the conversation.");
   return response.json();
@@ -81,15 +80,10 @@ export type KnowledgeRefreshResult =
 
 export async function applyKnowledgeRefresh(
   employeeId: string,
-  messages: ChatMessage[],
 ): Promise<KnowledgeRefreshResult | null> {
   const response = await fetch(
     `/api/employees/${employeeId}/apply-knowledge-refresh`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
-    },
+    { method: "POST" },
   );
   const data = await response.json();
   return response.ok ? (data as KnowledgeRefreshResult) : null;

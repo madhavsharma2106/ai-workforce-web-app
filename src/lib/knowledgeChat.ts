@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { getModel } from "@/lib/agents/model";
 import { generateObject } from "@/lib/agents/tracing";
@@ -5,7 +6,44 @@ import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
 import { loadRoleMarkdown } from "@/lib/roles";
 import { buildReferencedPageContext } from "@/lib/urlContext";
 
-export type ChatMessage = { role: "assistant" | "user"; content: string };
+export type ChatMessage = {
+  role: "assistant" | "user";
+  content: string;
+  createdAt?: string;
+};
+
+export async function getChatMessages(
+  supabase: SupabaseClient,
+  employeeId: string,
+): Promise<ChatMessage[]> {
+  const { data } = await supabase
+    .from("employee_chat_messages")
+    .select("role, content, created_at")
+    .eq("employee_id", employeeId)
+    .order("created_at", { ascending: true });
+
+  return (
+    (data as
+      | { role: "assistant" | "user"; content: string; created_at: string }[]
+      | null) ?? []
+  ).map(({ role, content, created_at }) => ({
+    role,
+    content,
+    createdAt: created_at,
+  }));
+}
+
+export async function saveChatMessage(
+  supabase: SupabaseClient,
+  employeeId: string,
+  message: ChatMessage,
+): Promise<void> {
+  await supabase.from("employee_chat_messages").insert({
+    employee_id: employeeId,
+    role: message.role,
+    content: message.content,
+  });
+}
 
 const replySchema = z.object({ reply: z.string() });
 

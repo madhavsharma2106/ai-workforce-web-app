@@ -30,7 +30,7 @@ export default async function InstructionsPage({ params }: Params) {
             label: ROLE_LABELS[employee.role],
             href: `/employee/${employee.id}`,
           },
-          { label: "Instructions" },
+          { label: "What I Know" },
         ]}
       />
       <InstructionsPanel

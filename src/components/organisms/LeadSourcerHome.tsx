@@ -229,7 +229,7 @@ export const LeadSourcerHome = ({
           href={`/employee/${employeeId}/instructions`}
           className="rounded-full bg-(--secondary-bg) px-4 py-1.5 text-[13px] font-bold text-(--muted-faint-3) transition hover:bg-(--secondary-hover)"
         >
-          Instructions
+          What I Know
         </Link>
       </div>
       <LearningsSummaryPanel learnings={learnings} />

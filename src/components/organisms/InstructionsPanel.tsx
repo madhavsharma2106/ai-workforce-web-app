@@ -76,13 +76,13 @@ export const InstructionsPanel = ({
         <div>
           <Eyebrow>What I&apos;m working off of</Eyebrow>
           <Heading as="h3" size="md" className="mt-1">
-            Instructions
+            What I Know
           </Heading>
         </div>
         {mode === "view" && (
           <div className="flex gap-2">
             <Button variant="secondary" onClick={startEdit}>
-              Update instructions
+              Update
             </Button>
           </div>
         )}

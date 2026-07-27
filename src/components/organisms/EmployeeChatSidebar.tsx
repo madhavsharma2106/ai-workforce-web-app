@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MessageCircle, X } from "lucide-react";
-import { EmployeeAvatar, Text } from "@/components/atoms";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { EmployeeAvatar, Heading, Text } from "@/components/atoms";
 import { KnowledgeChatForm } from "./KnowledgeChatForm";
 import {
   applyKnowledgeRefresh,
@@ -15,6 +15,7 @@ import type { ChatMessage } from "@/lib/knowledgeChat";
 type Props = {
   employeeId: string;
   role: EmployeeRole;
+  initialMessages: ChatMessage[];
 };
 
 const CHAT_OPENERS: Record<EmployeeRole, string> = {
@@ -25,17 +26,21 @@ const CHAT_OPENERS: Record<EmployeeRole, string> = {
     "Hey! Anything new I should know, or a question for me?",
 };
 
-export const EmployeeChatSidebar = ({ employeeId, role }: Props) => {
+export const EmployeeChatSidebar = ({
+  employeeId,
+  role,
+  initialMessages,
+}: Props) => {
   const router = useRouter();
   const agentName = ROLE_LABELS[role];
   const [open, setOpen] = useState(true);
   const [justSaved, setJustSaved] = useState(false);
 
-  const sendMessage = (messages: ChatMessage[]) =>
-    sendKnowledgeChatMessage(employeeId, messages);
+  const sendMessage = (message: string) =>
+    sendKnowledgeChatMessage(employeeId, message);
 
-  const handleSave = async (messages: ChatMessage[]) => {
-    const result = await applyKnowledgeRefresh(employeeId, messages);
+  const handleSave = async () => {
+    const result = await applyKnowledgeRefresh(employeeId);
     if (result) {
       router.refresh();
       setJustSaved(true);
@@ -45,53 +50,46 @@ export const EmployeeChatSidebar = ({ employeeId, role }: Props) => {
 
   return (
     <div
-      className={`sticky top-(--header-height) z-30 flex h-[calc(100vh-var(--header-height))] shrink-0 flex-col overflow-hidden bg-(--surface) shadow-lg transition-[width] duration-300 ease-in-out ${
-        open ? "w-96" : "w-14"
+      className={`fixed right-6 bottom-0 z-30 flex w-96 shrink-0 flex-col overflow-hidden rounded-t-xl border border-b-0 border-(--border) bg-(--surface) shadow-2xl transition-[height] duration-200 ease-in-out ${
+        open ? "h-[min(38rem,calc(100vh-5rem))]" : "h-17.25"
       }`}
     >
-      {open ? (
-        <>
-          <div className="flex items-center justify-between gap-3 border-b border-(--secondary-bg) p-4">
-            <div className="flex items-center gap-2.5">
-              <EmployeeAvatar seed={employeeId} size="sm" />
-              <div>
-                <Text size="sm" weight="medium">
-                  {agentName}
-                </Text>
-                {justSaved && (
-                  <Text size="xs" tone="muted">
-                    Saved
-                  </Text>
-                )}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Collapse chat"
-              className="rounded-full p-1.5 text-(--muted-faint) transition hover:bg-(--secondary-bg)"
-            >
-              <X size={18} />
-            </button>
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        aria-label={open ? "Collapse chat" : `Talk to ${agentName}`}
+        className="flex shrink-0 items-center justify-between gap-3 border-b border-(--border) p-4 text-left transition hover:bg-(--secondary-bg)"
+      >
+        <div className="flex items-center gap-3">
+          <div className="relative shrink-0">
+            <EmployeeAvatar seed={employeeId} size="sm" />
+            <span className="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-(--surface) bg-(--accent)" />
           </div>
-          <div className="min-h-0 flex-1">
-            <KnowledgeChatForm
-              agentName={agentName}
-              opener={CHAT_OPENERS[role]}
-              sendMessage={sendMessage}
-              onSave={handleSave}
-            />
+          <div>
+            <Heading as="h3" size="sm">
+              {agentName}
+            </Heading>
+            <Text size="xs" tone="muted">
+              {justSaved ? "Saved" : "Active now"}
+            </Text>
           </div>
-        </>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label={`Talk to ${agentName}`}
-          className="flex h-full w-14 flex-col items-center gap-2 pt-5 text-(--muted-faint) transition hover:bg-(--secondary-bg)"
-        >
-          <MessageCircle size={20} />
-        </button>
+        </div>
+        <span className="rounded-full p-1.5 text-(--muted-faint)">
+          {open ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+        </span>
+      </button>
+      {open && (
+        <div className="min-h-0 flex-1">
+          <KnowledgeChatForm
+            employeeId={employeeId}
+            agentName={agentName}
+            opener={CHAT_OPENERS[role]}
+            initialMessages={initialMessages}
+            sendMessage={sendMessage}
+            onSave={handleSave}
+          />
+        </div>
       )}
     </div>
   );
