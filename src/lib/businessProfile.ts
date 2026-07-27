@@ -5,6 +5,7 @@ import {
   buildTranscriptContext,
   type OnboardingTranscriptEntry,
 } from "@/lib/onboardingQuestions";
+import { buildChatContext, type ChatMessage } from "@/lib/knowledgeChat";
 
 const profileSchema = z.object({
   businessName: z.string(),
@@ -43,10 +44,10 @@ Write:
 }
 
 /**
- * Folds a follow-up conversation into the existing Business Profile —
- * keeps still-valid content, updates or replaces anything the new answers
- * supersede, adds anything new. Used by Alex's "Talk to Alex" action, as
- * distinct from fresh-onboarding synthesis above.
+ * Folds a free-form "Talk to Alex" chat into the existing Business Profile —
+ * keeps still-valid content, updates or replaces anything the chat
+ * supersedes, adds anything new. As distinct from fresh-onboarding
+ * synthesis above, which works off a strict Q/A transcript.
  */
 export async function mergeBusinessProfile(input: {
   existingProfile: {
@@ -54,10 +55,10 @@ export async function mergeBusinessProfile(input: {
     contactName: string;
     profileMd: string;
   };
-  transcript: OnboardingTranscriptEntry[];
+  messages: ChatMessage[];
 }): Promise<{ businessName: string; contactName: string; profileMd: string }> {
-  const { existingProfile, transcript } = input;
-  const transcriptContext = await buildTranscriptContext(transcript);
+  const { existingProfile, messages } = input;
+  const conversation = await buildChatContext(messages);
 
   const prompt = `You are Alex, the founder's Account Manager. Here's the current Business Profile other AI employees read as context:
 
@@ -66,12 +67,12 @@ export async function mergeBusinessProfile(input: {
 - Description:
 ${existingProfile.profileMd || "(nothing on file yet)"}
 
-The founder just answered a few follow-up questions closing gaps in that profile:
-${transcriptContext}
+You just had this chat with the founder:
+${conversation}
 
 Write the full, updated profile:
 - "businessName" / "contactName": updated only if the conversation gave new or corrected values, otherwise keep the existing ones as-is.
-- "profileMd": fold the new answers into the existing document — keep sections that are still valid, update or replace any the new answers supersede, add new "## Heading" sections for anything not covered before. Keep it precise and concrete, not a rewrite from scratch.`;
+- "profileMd": fold anything new from the chat into the existing document — keep sections that are still valid, update or replace any the chat supersedes, add new "## Heading" sections for anything not covered before. Keep it precise and concrete, not a rewrite from scratch.`;
 
   const { object } = await generateObject({
     model: getModel(),

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireOwnedEmployeeForApi } from "@/lib/employees";
 import { mergeBusinessProfile } from "@/lib/businessProfile";
 import { mergeEmployeeInstructions } from "@/lib/employeeInstructions";
-import type { OnboardingTranscriptEntry } from "@/lib/onboardingQuestions";
+import type { ChatMessage } from "@/lib/knowledgeChat";
 import type { IdRouteParams } from "@/lib/types";
 import { apiErrorResponse } from "@/lib/api/errors";
 
@@ -21,7 +21,8 @@ export async function POST(request: Request, { params }: IdRouteParams) {
 
   try {
     const body = await request.json();
-    const transcript: OnboardingTranscriptEntry[] = body.transcript ?? [];
+    const messages: ChatMessage[] = body.messages ?? [];
+    const hasUserMessage = messages.some((message) => message.role === "user");
 
     if (employee.role === "account_manager") {
       const { data: existing } = await supabase
@@ -36,13 +37,13 @@ export async function POST(request: Request, { params }: IdRouteParams) {
         profileMd: existing?.profile_md ?? "",
       };
 
-      if (transcript.length === 0) {
+      if (!hasUserMessage) {
         return NextResponse.json({ businessProfile: existingProfile });
       }
 
       let merged;
       try {
-        merged = await mergeBusinessProfile({ existingProfile, transcript });
+        merged = await mergeBusinessProfile({ existingProfile, messages });
       } catch {
         return NextResponse.json(
           { error: "Couldn't update your Business Profile — try again." },
@@ -78,7 +79,7 @@ export async function POST(request: Request, { params }: IdRouteParams) {
 
     const existingInstructionsMd = employee.instructions_md || "";
 
-    if (transcript.length === 0) {
+    if (!hasUserMessage) {
       return NextResponse.json({ instructionsMd: existingInstructionsMd });
     }
 
@@ -87,7 +88,7 @@ export async function POST(request: Request, { params }: IdRouteParams) {
       merged = await mergeEmployeeInstructions({
         role: employee.role,
         existingInstructionsMd,
-        transcript,
+        messages,
       });
     } catch {
       return NextResponse.json(

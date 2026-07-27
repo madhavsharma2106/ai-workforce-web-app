@@ -6,6 +6,7 @@ import {
   buildTranscriptContext,
   type OnboardingTranscriptEntry,
 } from "@/lib/onboardingQuestions";
+import { buildChatContext, type ChatMessage } from "@/lib/knowledgeChat";
 
 const instructionsSchema = z.object({
   instructionsMd: z.string(),
@@ -46,28 +47,28 @@ Write "instructionsMd": a short, concrete markdown note (a few bullet points, "#
 }
 
 /**
- * Folds a follow-up conversation into the founder's existing Instructions
- * note for one employee — keeps still-valid points, updates ones the new
- * answers supersede, adds anything new. Used by the Instructions tab's
- * "Talk to {agent}" action, as distinct from fresh-onboarding synthesis above.
+ * Folds a free-form "Talk to {agent}" chat into the founder's existing
+ * Instructions note for one employee — keeps still-valid points, updates
+ * ones the chat supersedes, adds anything new. As distinct from
+ * fresh-onboarding synthesis above, which works off a strict Q/A transcript.
  */
 export async function mergeEmployeeInstructions(input: {
   role: EmployeeRole;
   existingInstructionsMd: string;
-  transcript: OnboardingTranscriptEntry[];
+  messages: ChatMessage[];
 }): Promise<{ instructionsMd: string }> {
-  const { role, existingInstructionsMd, transcript } = input;
+  const { role, existingInstructionsMd, messages } = input;
 
   const agentName = ROLE_LABELS[role];
-  const transcriptContext = await buildTranscriptContext(transcript);
+  const conversation = await buildChatContext(messages);
   const prompt = `You are ${agentName}. Here's your current Instructions note — the founder's own preferences for how you specifically should work, as distinct from the shared Business Profile:
 
 ${existingInstructionsMd || "(nothing on file yet)"}
 
-The founder just answered a few follow-up questions closing gaps in that note:
-${transcriptContext}
+You just had this chat with the founder:
+${conversation}
 
-Write the full, updated "instructionsMd": fold the new answers in — keep bullets that are still valid, update or replace any the new answers supersede, add new ones for anything not covered before. Keep it a short, concrete markdown note (a few bullet points, "## Heading"s only if genuinely needed), not a rewrite from scratch.`;
+Write the full, updated "instructionsMd": fold anything new from the chat in — keep bullets that are still valid, update or replace any the chat supersedes, add new ones for anything not covered before. Keep it a short, concrete markdown note (a few bullet points, "## Heading"s only if genuinely needed), not a rewrite from scratch.`;
 
   const { object } = await generateObject({
     model: getModel(),

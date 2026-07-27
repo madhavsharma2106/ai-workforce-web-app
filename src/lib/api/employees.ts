@@ -1,7 +1,4 @@
-import type {
-  NextQuestionResult,
-  OnboardingTranscriptEntry,
-} from "@/lib/onboardingQuestions";
+import type { ChatMessage } from "@/lib/knowledgeChat";
 import type {
   AgentRun,
   AgentRunStep,
@@ -58,14 +55,14 @@ export async function updateInstructions(
   return data;
 }
 
-export async function fetchKnowledgeGapQuestion(
+export async function sendKnowledgeChatMessage(
   employeeId: string,
-  transcript: OnboardingTranscriptEntry[],
-): Promise<NextQuestionResult> {
-  const response = await fetch(`/api/employees/${employeeId}/knowledge-gaps`, {
+  messages: ChatMessage[],
+): Promise<{ reply: string }> {
+  const response = await fetch(`/api/employees/${employeeId}/knowledge-chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ transcript }),
+    body: JSON.stringify({ messages }),
   });
   if (!response.ok) throw new Error("Failed to continue the conversation.");
   return response.json();
@@ -84,14 +81,14 @@ export type KnowledgeRefreshResult =
 
 export async function applyKnowledgeRefresh(
   employeeId: string,
-  transcript: OnboardingTranscriptEntry[],
+  messages: ChatMessage[],
 ): Promise<KnowledgeRefreshResult | null> {
   const response = await fetch(
     `/api/employees/${employeeId}/apply-knowledge-refresh`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transcript }),
+      body: JSON.stringify({ messages }),
     },
   );
   const data = await response.json();

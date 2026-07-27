@@ -1,17 +1,14 @@
 "use client";
 
 import { Heading, Modal, Text } from "@/components/atoms";
-import {
-  ConversationalForm,
-  type NextQuestionResult,
-  type TranscriptEntry,
-} from "./ConversationalForm";
+import { KnowledgeChatForm } from "./KnowledgeChatForm";
 import {
   applyKnowledgeRefresh,
-  fetchKnowledgeGapQuestion,
+  sendKnowledgeChatMessage,
   type KnowledgeRefreshResult,
 } from "@/lib/api/employees";
 import type { EmployeeRole } from "@/lib/employees";
+import type { ChatMessage } from "@/lib/knowledgeChat";
 
 export type { KnowledgeRefreshResult };
 
@@ -24,20 +21,27 @@ type Props = {
   onApplied: (result: KnowledgeRefreshResult) => void;
 };
 
+const CHAT_OPENERS: Record<EmployeeRole, string> = {
+  account_manager:
+    "Hey, good to see you — anything new about the business, or something on your mind?",
+  lead_sourcer: "Hey! Anything new I should know, or a question for me?",
+  sales_representative:
+    "Hey! Anything new I should know, or a question for me?",
+};
+
 export const KnowledgeRefreshModal = ({
   open,
   onClose,
   employeeId,
+  role,
   agentName,
   onApplied,
 }: Props) => {
-  const fetchNextQuestion = async (
-    transcript: TranscriptEntry[],
-  ): Promise<NextQuestionResult> =>
-    fetchKnowledgeGapQuestion(employeeId, transcript);
+  const sendMessage = (messages: ChatMessage[]) =>
+    sendKnowledgeChatMessage(employeeId, messages);
 
-  const handleComplete = async (transcript: TranscriptEntry[]) => {
-    const result = await applyKnowledgeRefresh(employeeId, transcript);
+  const handleSave = async (messages: ChatMessage[]) => {
+    const result = await applyKnowledgeRefresh(employeeId, messages);
     if (result) onApplied(result);
     onClose();
   };
@@ -52,15 +56,15 @@ export const KnowledgeRefreshModal = ({
             Catching up with {agentName}
           </Heading>
           <Text size="sm" tone="muted" className="mt-1">
-            Picking up where we left off — I&apos;ll ask about anything that
-            would help me get to know your business better.
+            Chat about anything new — I&apos;ll fold it into what I know when
+            you save.
           </Text>
         </div>
-        <ConversationalForm
+        <KnowledgeChatForm
           agentName={agentName}
-          confirmLabel="Save updates"
-          fetchNextQuestion={fetchNextQuestion}
-          onComplete={handleComplete}
+          opener={CHAT_OPENERS[role]}
+          sendMessage={sendMessage}
+          onSave={handleSave}
         />
       </div>
     </Modal>
