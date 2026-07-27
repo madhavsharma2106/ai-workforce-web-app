@@ -12,8 +12,7 @@ import {
   Textarea,
 } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import { KnowledgeRefreshModal } from "./KnowledgeRefreshModal";
-import { ROLE_LABELS, ROLE_TITLES } from "@/lib/employees";
+import { ROLE_TITLES } from "@/lib/employees";
 
 type Profile = {
   businessName: string;
@@ -46,7 +45,27 @@ export const AccountManagerHome = ({
   const [draft, setDraft] = useState(profile);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [gapCheckOpen, setGapCheckOpen] = useState(false);
+  const [prevProps, setPrevProps] = useState({
+    businessName,
+    contactName,
+    profileMd,
+    updatedAt,
+  });
+
+  if (
+    businessName !== prevProps.businessName ||
+    contactName !== prevProps.contactName ||
+    profileMd !== prevProps.profileMd ||
+    updatedAt !== prevProps.updatedAt
+  ) {
+    setPrevProps({ businessName, contactName, profileMd, updatedAt });
+    setProfile({
+      businessName: businessName ?? "",
+      contactName: contactName ?? "",
+      profileMd,
+    });
+    setSavedAt(updatedAt);
+  }
 
   const startEdit = () => {
     setDraft(profile);
@@ -129,9 +148,6 @@ export const AccountManagerHome = ({
           </div>
           {mode === "view" && (
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => setGapCheckOpen(true)}>
-                Talk to Alex
-              </Button>
               <Button variant="secondary" onClick={startEdit}>
                 Update profile
               </Button>
@@ -245,26 +261,6 @@ export const AccountManagerHome = ({
           </div>
         )}
       </Card>
-
-      <KnowledgeRefreshModal
-        open={gapCheckOpen}
-        onClose={() => setGapCheckOpen(false)}
-        employeeId={employeeId}
-        role="account_manager"
-        agentName={ROLE_LABELS.account_manager}
-        onApplied={(result) => {
-          if ("businessProfile" in result) {
-            setProfile({
-              businessName: result.businessProfile.businessName,
-              contactName: result.businessProfile.contactName,
-              profileMd: result.businessProfile.profileMd,
-            });
-            if (result.businessProfile.updatedAt) {
-              setSavedAt(result.businessProfile.updatedAt);
-            }
-          }
-        }}
-      />
     </main>
   );
 };

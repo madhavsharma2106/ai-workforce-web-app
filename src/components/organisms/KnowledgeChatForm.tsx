@@ -87,8 +87,7 @@ export const KnowledgeChatForm = ({
     <Card padding="none" className="flex h-full flex-col bg-white">
       <div
         ref={scrollRef}
-        className="flex-1 space-y-3 overflow-y-auto p-5"
-        style={{ maxHeight: "26rem" }}
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto p-5"
       >
         {messages.map((message) => (
           <div

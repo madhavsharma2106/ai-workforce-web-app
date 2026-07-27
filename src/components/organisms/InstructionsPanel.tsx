@@ -11,9 +11,8 @@ import {
   Textarea,
 } from "@/components/atoms";
 import { Markdown } from "@/components/molecules";
-import { KnowledgeRefreshModal } from "./KnowledgeRefreshModal";
 import { updateInstructions } from "@/lib/api/employees";
-import { ROLE_LABELS, type EmployeeRole } from "@/lib/employees";
+import { type EmployeeRole } from "@/lib/employees";
 
 const MISSION_LINE: Partial<Record<EmployeeRole, string>> = {
   lead_sourcer:
@@ -38,11 +37,18 @@ export const InstructionsPanel = ({
   const [instructionsMd, setInstructionsMd] = useState(
     initialInstructionsMd ?? "",
   );
+  const [prevInitialInstructionsMd, setPrevInitialInstructionsMd] = useState(
+    initialInstructionsMd,
+  );
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [draft, setDraft] = useState(instructionsMd);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [gapCheckOpen, setGapCheckOpen] = useState(false);
+
+  if (initialInstructionsMd !== prevInitialInstructionsMd) {
+    setPrevInitialInstructionsMd(initialInstructionsMd);
+    setInstructionsMd(initialInstructionsMd ?? "");
+  }
 
   const startEdit = () => {
     setDraft(instructionsMd);
@@ -75,9 +81,6 @@ export const InstructionsPanel = ({
         </div>
         {mode === "view" && (
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => setGapCheckOpen(true)}>
-              Talk to {ROLE_LABELS[role]}
-            </Button>
             <Button variant="secondary" onClick={startEdit}>
               Update instructions
             </Button>
@@ -144,19 +147,6 @@ export const InstructionsPanel = ({
           </div>
         </div>
       )}
-
-      <KnowledgeRefreshModal
-        open={gapCheckOpen}
-        onClose={() => setGapCheckOpen(false)}
-        employeeId={employeeId}
-        role={role}
-        agentName={ROLE_LABELS[role]}
-        onApplied={(result) => {
-          if ("instructionsMd" in result) {
-            setInstructionsMd(result.instructionsMd ?? "");
-          }
-        }}
-      />
     </Card>
   );
 };

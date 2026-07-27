@@ -10,10 +10,10 @@ export type {
   TranscriptEntry,
   NextQuestionResult,
 } from "./ConversationalForm";
+export { EmployeeChatSidebar } from "./EmployeeChatSidebar";
 export { EmployeeOnboarding } from "./EmployeeOnboarding";
 export { HireRoleButton } from "./HireRoleButton";
 export { InstructionsPanel } from "./InstructionsPanel";
-export { KnowledgeRefreshModal } from "./KnowledgeRefreshModal";
 export { LeadCard } from "./LeadCard";
 export { LeadSourcerHome } from "./LeadSourcerHome";
 export { LeadSourcerHomeContainer } from "./LeadSourcerHomeContainer";
