@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PiMicrosoftOutlookLogo } from "react-icons/pi";
+import { SiGmail } from "react-icons/si";
 import {
   Badge,
   Button,
@@ -68,7 +70,14 @@ export const SettingsHome = ({ connection }: Props) => {
 
         {connection ? (
           <div className="flex items-center justify-between rounded-md border border-(--border) px-4 py-3">
-            <Text size="sm">Connected as {connection.email}</Text>
+            <div className="flex items-center gap-2">
+              {connection.provider === "google" ? (
+                <SiGmail className="size-4 shrink-0" />
+              ) : (
+                <PiMicrosoftOutlookLogo className="size-4 shrink-0" />
+              )}
+              <Text size="sm">Connected as {connection.email}</Text>
+            </div>
             <Button
               variant="secondary"
               size="sm"
@@ -79,9 +88,23 @@ export const SettingsHome = ({ connection }: Props) => {
             </Button>
           </div>
         ) : (
-          <a href="/api/integrations/outlook/connect">
-            <Button>Connect your mailbox</Button>
-          </a>
+          <div className="flex flex-wrap gap-3">
+            <a href="/api/integrations/outlook/connect">
+              <Button className="inline-flex items-center gap-2">
+                <PiMicrosoftOutlookLogo className="size-4 shrink-0" />
+                Connect Outlook
+              </Button>
+            </a>
+            <a href="/api/integrations/google/connect">
+              <Button
+                variant="secondary"
+                className="inline-flex items-center gap-2"
+              >
+                <SiGmail className="size-4 shrink-0" />
+                Connect Gmail
+              </Button>
+            </a>
+          </div>
         )}
       </Card>
     </main>

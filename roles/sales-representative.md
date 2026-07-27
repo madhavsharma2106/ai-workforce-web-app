@@ -23,13 +23,13 @@ Drafts approved by the founder (leading indicator, live today); replies received
 
 - Drafted outreach emails, pending founder approval
 - Emails sent from the founder's own mailbox (only after approval — "Send as you")
-- Drafts pushed into the founder's own mailbox Drafts folder ("Save to Drafts"), for them to review/edit/send manually from their own Outlook/webmail — an alternative to sending through the app, available any time before or after approval
+- Drafts pushed into the founder's own mailbox Drafts folder ("Save to Drafts"), for them to review/edit/send manually from their own Outlook/Gmail/webmail — an alternative to sending through the app, available any time before or after approval
 - Drafted responses to prospect replies, pending founder approval
 - Replies sent from the founder's own mailbox (only after approval), threaded on the original conversation
 
 ## Integrations
 
-- Microsoft Graph (Outlook/Microsoft 365) — sending from the founder's own mailbox, polling the inbox for replies, and sending threaded replies, via a one-time OAuth connection made from `/settings`. See [docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md).
+- Microsoft Graph (Outlook/Microsoft 365) or the Gmail API — sending from the founder's own mailbox, polling the inbox for replies, and sending threaded replies, via a one-time OAuth connection made from `/settings` (one provider connected at a time). See [docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md).
 
 ## Tools
 

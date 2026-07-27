@@ -12,7 +12,7 @@ Validate that founders will trust an AI employee to generate outbound pipeline e
 - Daily execution of some employees
 - Lead research
 - Email drafting
-- Sending approved emails from the founder's Outlook account
+- Sending approved emails from the founder's Outlook or Gmail account
 - Reply monitoring
 - Approval queue
 - Feedback learning

@@ -50,4 +50,4 @@ flowchart TD
 
 **Note:** Emma's hire flow no longer asks for ideal client / good-fit criteria — that's now covered once by Alex's Business Profile, which her first search reads directly. Her onboarding today is a single placeholder question; her real question set (lead-type preferences, etc.) is designed later.
 
-**Planned, not yet built:** step K's "draft still sent manually" is the target for Oliver, the Sales Representative (see [roles/sales-representative.md](../roles/sales-representative.md)). Once built, approving a draft hands it to Oliver, who sends it from the founder's own Outlook account after a final approval step, then monitors replies — rather than the founder copying the draft out by hand.
+**Planned, not yet built:** step K's "draft still sent manually" is the target for Oliver, the Sales Representative (see [roles/sales-representative.md](../roles/sales-representative.md)). Once built, approving a draft hands it to Oliver, who sends it from the founder's own Outlook or Gmail account after a final approval step, then monitors replies — rather than the founder copying the draft out by hand.
