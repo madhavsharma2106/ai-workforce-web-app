@@ -33,7 +33,7 @@ export const EmployeeChatSidebar = ({
 }: Props) => {
   const router = useRouter();
   const agentName = ROLE_LABELS[role];
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
 
   const sendMessage = (message: string) =>
