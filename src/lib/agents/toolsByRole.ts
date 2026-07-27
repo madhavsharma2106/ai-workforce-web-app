@@ -46,6 +46,7 @@ const roleTools: Record<EmployeeRole, (ctx: RoleCtx) => ToolSet> = {
       accountManagerEmployeeId: ctx.accountManagerEmployeeId,
       leadId: ctx.leadId,
     }),
+    web_search: getWebSearchTool(),
   }),
   sales_representative: (ctx): ToolSet => {
     if (!ctx.leadId) return {};

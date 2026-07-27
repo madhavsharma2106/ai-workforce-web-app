@@ -35,8 +35,8 @@ export const AppHeader = ({ userEmail }: Props) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-(--background)/80 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-10 py-5">
+    <header className="sticky top-0 z-50 h-(--header-height) bg-(--background)/80 backdrop-blur-sm">
+      <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-10">
         <Link href="/dashboard" className="flex items-center gap-2.5">
           <Text as="span" className="font-serif text-lg text-(--heading)">
             Workforce

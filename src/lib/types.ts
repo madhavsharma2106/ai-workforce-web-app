@@ -42,6 +42,8 @@ export type Lead = {
   contactLinkedinUrl?: string;
   seniority?: string;
   departments?: string[];
+  segment?: string;
+  whyNow?: string;
 };
 
 export type AgentRunTrigger = "manual" | "delegation";

@@ -45,6 +45,8 @@ type LeadRow = {
   contact_linkedin_url: string | null;
   contact_seniority: string | null;
   contact_departments: string[] | null;
+  segment: string | null;
+  why_now: string | null;
 };
 
 function toLead(row: LeadRow): Lead {
@@ -84,6 +86,8 @@ function toLead(row: LeadRow): Lead {
     contactLinkedinUrl: row.contact_linkedin_url ?? undefined,
     seniority: row.contact_seniority ?? undefined,
     departments: row.contact_departments ?? undefined,
+    segment: row.segment ?? undefined,
+    whyNow: row.why_now ?? undefined,
   };
 }
 
@@ -108,6 +112,8 @@ export async function insertLead(
     contactLinkedinUrl?: string;
     seniority?: string;
     departments?: string[];
+    segment?: string;
+    whyNow?: string;
   },
 ): Promise<Lead> {
   const { data, error } = await supabase
@@ -131,6 +137,8 @@ export async function insertLead(
       contact_linkedin_url: input.contactLinkedinUrl ?? null,
       contact_seniority: input.seniority ?? null,
       contact_departments: input.departments ?? null,
+      segment: input.segment ?? null,
+      why_now: input.whyNow ?? null,
     })
     .select("*")
     .single();
@@ -301,6 +309,32 @@ export async function getRunHistory(
   });
 }
 
+export type SegmentStats = {
+  segment: string;
+  approved: number;
+  rejected: number;
+  pending: number;
+};
+
+/** Approval/rejection counts per named ICP segment, so Emma can see which segments are actually converting. Leads saved without a segment are excluded — there's nothing to break down. */
+function computeSegmentStats(
+  rows: { segment: string | null; status: ApprovalStatus }[],
+): SegmentStats[] {
+  const bySegment = new Map<string, SegmentStats>();
+  for (const row of rows) {
+    if (!row.segment) continue;
+    const stats = bySegment.get(row.segment) ?? {
+      segment: row.segment,
+      approved: 0,
+      rejected: 0,
+      pending: 0,
+    };
+    stats[row.status] += 1;
+    bySegment.set(row.segment, stats);
+  }
+  return Array.from(bySegment.values());
+}
+
 export async function getFeedbackContext(
   supabase: SupabaseClient,
   input: { userId: string; employeeId: string },
@@ -308,10 +342,11 @@ export async function getFeedbackContext(
   approvedCompanies: string[];
   rejected: { company: string; reason: string | null }[];
   seenDomains: string[];
+  segmentStats: SegmentStats[];
 }> {
   const { data } = await supabase
     .from("leads")
-    .select("company, website, status, feedback_reason")
+    .select("company, website, status, feedback_reason, segment")
     .eq("user_id", input.userId)
     .eq("employee_id", input.employeeId)
     .order("created_at", { ascending: false })
@@ -324,6 +359,7 @@ export async function getFeedbackContext(
           website: string;
           status: ApprovalStatus;
           feedback_reason: string | null;
+          segment: string | null;
         }[]
       | null) ?? [];
 
@@ -343,6 +379,38 @@ export async function getFeedbackContext(
             .split("/")[0],
       )
       .filter(Boolean),
+    segmentStats: computeSegmentStats(rows),
+  };
+}
+
+export type LearningsSummary = {
+  approvedCount: number;
+  rejectedCount: number;
+  topRejectionReasons: { reason: string; count: number }[];
+  segmentStats: SegmentStats[];
+};
+
+/** A founder-facing view of what Emma has learned so far, built from the same feedback data she uses to qualify leads — a plain aggregation, not a new synthesis step. */
+export async function getLearningsSummary(
+  supabase: SupabaseClient,
+  input: { userId: string; employeeId: string },
+): Promise<LearningsSummary> {
+  const feedback = await getFeedbackContext(supabase, input);
+
+  const reasonCounts = new Map<string, number>();
+  for (const { reason } of feedback.rejected) {
+    if (!reason) continue;
+    reasonCounts.set(reason, (reasonCounts.get(reason) ?? 0) + 1);
+  }
+
+  return {
+    approvedCount: feedback.approvedCompanies.length,
+    rejectedCount: feedback.rejected.length,
+    topRejectionReasons: Array.from(reasonCounts.entries())
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3),
+    segmentStats: feedback.segmentStats,
   };
 }
 

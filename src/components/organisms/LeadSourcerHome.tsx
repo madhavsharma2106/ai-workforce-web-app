@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { LearningsSummaryPanel } from "./LearningsSummaryPanel";
 import { RunFailedCard } from "./RunFailedCard";
 import { RunInProgressCard } from "./RunInProgressCard";
 import { RunNotStartedCard } from "./RunNotStartedCard";
@@ -18,6 +19,7 @@ import type {
   PassedCandidate,
   TaskHistoryItem,
 } from "@/lib/types";
+import type { LearningsSummary } from "@/lib/leads";
 import { Tabs } from "@/components/atoms";
 
 const SEARCH_AGAIN_MESSAGE = "Run a new lead search.";
@@ -30,6 +32,7 @@ type Props = {
   initialSteps: AgentRunStep[];
   initialHistory: TaskHistoryItem[];
   initialPassedCandidates: PassedCandidate[];
+  learnings: LearningsSummary;
   oliverHired: boolean;
 };
 
@@ -41,6 +44,7 @@ export const LeadSourcerHome = ({
   initialSteps,
   initialHistory,
   initialPassedCandidates,
+  learnings,
   oliverHired,
 }: Props) => {
   const {
@@ -228,6 +232,7 @@ export const LeadSourcerHome = ({
           Instructions
         </Link>
       </div>
+      <LearningsSummaryPanel learnings={learnings} />
       {activeTab === "current" && renderCurrentTask()}
       {activeTab === "previous" && (
         <TaskHistory

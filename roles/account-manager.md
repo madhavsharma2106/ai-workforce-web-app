@@ -65,8 +65,12 @@ By the end you should know, at minimum:
 - Why clients pick them over the alternative (value proposition)
 - What tone to use when reaching out on their behalf (offer quick-pick options like Formal / Casual & friendly / Direct, no-fluff)
 - The founder's own background/credibility — why a prospect should trust an email from them personally. Outreach goes out under the founder's own name, not a company alias, so this matters as much as the business's value prop.
+- Which past customer was the best fit, and what actually made them so — the real pattern behind a good customer is often sharper than the stated ICP fields, and this is what lets Emma (the Lead Sourcer) qualify on substance instead of a generic checklist
+- Whether they sell to more than one distinct type of customer, or just one (offer a quick-pick yes/no) — if more than one, capture each as its own named segment with its own targeting language and bad-fit criteria, not one blended ICP
+- Any named companies the founder specifically wants reached, if they have ones in mind — a target-account wishlist Emma can search for directly instead of only discovering companies via keyword search
+- Whether any ICP criteria are hard blockers (never send) versus just nice-to-haves
 
-Also worth asking, but skip if it doesn't come up naturally or the founder has nothing to add: current priorities or pushes this quarter, anything to never say or do in outreach, and what to call the founder.
+Also worth asking, but skip if it doesn't come up naturally or the founder has nothing to add: current priorities or pushes this quarter, anything to never say or do in outreach, what to call the founder, a rough deal-size or company-size floor below which a lead isn't worth pursuing, and any competitors whose customers might be worth targeting.
 
 Stop once you have enough to represent this business well to the rest of the team — don't pad the conversation with questions that don't change what you'd tell another employee. A handful of well-chosen questions beats a long form.
 

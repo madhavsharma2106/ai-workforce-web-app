@@ -17,6 +17,7 @@ export { InstructionsPanel } from "./InstructionsPanel";
 export { LeadCard } from "./LeadCard";
 export { LeadSourcerHome } from "./LeadSourcerHome";
 export { LeadSourcerHomeContainer } from "./LeadSourcerHomeContainer";
+export { LearningsSummaryPanel } from "./LearningsSummaryPanel";
 export { PassedCandidatesList } from "./PassedCandidatesList";
 export { RunFailedCard } from "./RunFailedCard";
 export { RunInProgressCard } from "./RunInProgressCard";

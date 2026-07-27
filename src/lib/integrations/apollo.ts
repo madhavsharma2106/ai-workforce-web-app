@@ -64,19 +64,13 @@ export type ApolloPerson = {
 };
 
 export type ApolloSearchCriteria = {
-  icp: string;
+  icp?: string;
+  /** Target-account mode: search for the right contact at these specific companies instead of discovering by keyword. */
+  organizationDomains?: string[];
   excludeCriteria?: string;
   page?: number;
   perPage?: number;
 };
-
-function keywordsFromCriteria({ icp, excludeCriteria }: ApolloSearchCriteria) {
-  // Simple heuristic: Apollo's search API takes structured filters, not
-  // free-text ICP descriptions. We just forward the raw ICP text as a
-  // keyword search for now — good enough to return relevant results
-  // without needing an LLM to parse it into structured filters.
-  return { icp, excludeCriteria };
-}
 
 function locationFromOrg(org: Record<string, unknown>): string | null {
   const parts = [org.city, org.state, org.country].filter(
@@ -126,10 +120,17 @@ function parseApolloPerson(
 export async function searchPeople(
   criteria: ApolloSearchCriteria,
 ): Promise<ApolloPerson[]> {
-  const { icp } = keywordsFromCriteria(criteria);
-
+  // Simple heuristic: Apollo's search API takes structured filters, not
+  // free-text ICP descriptions. We just forward the raw ICP text as a
+  // keyword search for now — good enough to return relevant results
+  // without needing an LLM to parse it into structured filters.
+  // `organizationDomains` is the one real structured filter used today, for
+  // target-account mode (searching by named company instead of discovery).
   const data = await apolloFetch("/mixed_people/api_search", {
-    q_keywords: icp,
+    ...(criteria.icp ? { q_keywords: criteria.icp } : {}),
+    ...(criteria.organizationDomains?.length
+      ? { q_organization_domains_list: criteria.organizationDomains }
+      : {}),
     page: criteria.page ?? 1,
     per_page: criteria.perPage ?? 10,
   });

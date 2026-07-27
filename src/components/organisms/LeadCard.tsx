@@ -164,14 +164,30 @@ export const LeadCard: FC<Props> = ({
           )}
         </div>
 
-        <Badge tone={statusMeta.tone} size="sm">
-          {statusMeta.label}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {lead.segment && (
+            <Badge tone="neutral" size="sm">
+              {lead.segment}
+            </Badge>
+          )}
+          <Badge tone={statusMeta.tone} size="sm">
+            {statusMeta.label}
+          </Badge>
+        </div>
       </div>
 
       <Text size="sm" tone="subtle" className="mt-3.5">
         {lead.fit}
       </Text>
+
+      {lead.whyNow && (
+        <div className="mt-2 rounded-2xl bg-(--accent-soft) px-4 py-3">
+          <Eyebrow>Why now</Eyebrow>
+          <Text size="sm" className="mt-1 text-(--accent-soft-text)">
+            {lead.whyNow}
+          </Text>
+        </div>
+      )}
 
       <div className="mt-4">
         <Eyebrow>Decision maker</Eyebrow>

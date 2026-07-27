@@ -91,6 +91,18 @@ export function createSaveLeadTool(
         .describe(
           "Copied exactly from the candidate's data. Leave unset if not provided.",
         ),
+      segment: z
+        .string()
+        .optional()
+        .describe(
+          "The named ICP segment this candidate matches, if the Business Profile defines more than one. Leave unset if the founder only has a single ICP.",
+        ),
+      whyNow: z
+        .string()
+        .optional()
+        .describe(
+          "A recent, concrete trigger event (funding, a leadership change, a launch, a relevant job posting) that makes this a good time to reach out — grounded in an actual web_search result, not inferred. Distinct from fit: fit is why they're a good match, this is why now. Leave unset if you didn't find a real trigger event.",
+        ),
     }),
     execute: async (input) => {
       await insertLead(supabase, {
@@ -112,6 +124,8 @@ export function createSaveLeadTool(
         contactLinkedinUrl: input.contactLinkedinUrl,
         seniority: input.seniority,
         departments: input.departments,
+        segment: input.segment,
+        whyNow: input.whyNow,
       });
       return { saved: true };
     },

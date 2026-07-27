@@ -45,7 +45,7 @@ export const EmployeeChatSidebar = ({ employeeId, role }: Props) => {
 
   return (
     <div
-      className={`sticky top-0 z-30 flex h-screen shrink-0 flex-col overflow-hidden bg-(--surface) shadow-lg transition-[width] duration-300 ease-in-out ${
+      className={`sticky top-(--header-height) z-30 flex h-[calc(100vh-var(--header-height))] shrink-0 flex-col overflow-hidden bg-(--surface) shadow-lg transition-[width] duration-300 ease-in-out ${
         open ? "w-96" : "w-14"
       }`}
     >

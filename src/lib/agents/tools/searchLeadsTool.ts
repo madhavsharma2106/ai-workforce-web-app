@@ -7,7 +7,7 @@ import {
   type ApolloPerson,
 } from "@/lib/integrations/apollo";
 import { fetchCompanyText } from "@/lib/integrations/companyWebsite";
-import { getFeedbackContext } from "@/lib/leads";
+import { getFeedbackContext, type SegmentStats } from "@/lib/leads";
 
 const CANDIDATE_CONCURRENCY = 4;
 
@@ -58,6 +58,7 @@ export type SearchLeadsResult = {
   experience: {
     approvedCompanies: string[];
     rejected: { company: string; reason: string | null }[];
+    segmentStats: SegmentStats[];
   };
 };
 
@@ -80,25 +81,44 @@ export function createSearchLeadsTool(
       "(3-8 words, no punctuation) using terms that would literally appear in a matching " +
       "company's own description or job postings: industry/sector, company type, and any " +
       'explicit target-client language (e.g. "NGO", "nonprofit", "fast-moving startup"). ' +
+      "Alternatively, if the founder named specific companies to reach (a target-account " +
+      "wishlist), pass their domains via companyDomains instead of icp, to find the right " +
+      "contact at each by name rather than by discovery — pass exactly one of icp or " +
+      "companyDomains, never both. " +
       "Returns each new candidate with whatever research on their site could be found, plus " +
       "firmographic and contact facts from Apollo (industry, headcount, location, founded year, " +
       "LinkedIn URLs, seniority, departments — any of these may be null if Apollo didn't have it). " +
       "When you save_lead, copy these fields through exactly as given, never infer or guess a value " +
       "that wasn't provided. Only qualify and save_lead companies present in this result, never invent one.",
-    inputSchema: z.object({
-      icp: z
-        .string()
-        .describe(
-          "Short keyword phrase describing the target company profile.",
-        ),
-    }),
+    inputSchema: z
+      .object({
+        icp: z
+          .string()
+          .optional()
+          .describe(
+            "Short keyword phrase describing the target company profile. Omit if searching by companyDomains instead.",
+          ),
+        companyDomains: z
+          .array(z.string())
+          .optional()
+          .describe(
+            "Domains of specific companies to search for a contact at, from the founder's target-account wishlist. Omit if searching by icp instead.",
+          ),
+      })
+      .refine(
+        (input) => Boolean(input.icp) !== Boolean(input.companyDomains?.length),
+        { message: "Pass exactly one of icp or companyDomains." },
+      ),
     execute: async (input): Promise<SearchLeadsResult> => {
       const feedback = await getFeedbackContext(supabase, {
         userId: ctx.userId,
         employeeId: ctx.employeeId,
       });
 
-      const previews = await searchPeople({ icp: input.icp });
+      const previews = await searchPeople({
+        icp: input.icp,
+        organizationDomains: input.companyDomains,
+      });
 
       // Search results are masked previews with no usable organization
       // name/domain — each candidate must be enriched via /people/match
@@ -137,7 +157,8 @@ export function createSearchLeadsTool(
       );
 
       return {
-        searched: input.icp,
+        searched:
+          input.icp ?? `Companies: ${(input.companyDomains ?? []).join(", ")}`,
         totalFound: previews.length,
         candidates: researched.map(({ person, website, page }) => ({
           company: person.organization!.name,
@@ -159,6 +180,7 @@ export function createSearchLeadsTool(
         experience: {
           approvedCompanies: feedback.approvedCompanies,
           rejected: feedback.rejected,
+          segmentStats: feedback.segmentStats,
         },
       };
     },
