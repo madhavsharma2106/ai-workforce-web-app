@@ -2,6 +2,7 @@ import { serve } from "inngest/next";
 import { inngest } from "@/lib/inngest/client";
 import { runEmployeeGraph } from "@/lib/inngest/functions/runEmployeeGraph";
 import { draftOutreachOnApproval } from "@/lib/inngest/functions/draftOutreachOnApproval";
+import { redraftOutreach } from "@/lib/inngest/functions/redraftOutreach";
 import { sendOutreachOnApproval } from "@/lib/inngest/functions/sendOutreachOnApproval";
 import { saveDraftToMailbox } from "@/lib/inngest/functions/saveDraftToMailbox";
 import { pollForReplies } from "@/lib/inngest/functions/pollForReplies";
@@ -13,6 +14,7 @@ export const { GET, POST, PUT } = serve({
   functions: [
     runEmployeeGraph,
     draftOutreachOnApproval,
+    redraftOutreach,
     sendOutreachOnApproval,
     saveDraftToMailbox,
     pollForReplies,

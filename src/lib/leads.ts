@@ -4,6 +4,7 @@ import type {
   ApprovalStatus,
   DraftSaveStatus,
   Lead,
+  RedraftStatus,
   SendStatus,
   TaskHistoryItem,
 } from "@/lib/types";
@@ -28,6 +29,8 @@ type LeadRow = {
   draft_save_status: DraftSaveStatus;
   draft_save_error: string | null;
   draft_saved_at: string | null;
+  redraft_status: RedraftStatus | null;
+  redraft_error: string | null;
   conversation_id: string | null;
   last_reply_snippet: string | null;
   reply_draft: string;
@@ -70,6 +73,8 @@ function toLead(row: LeadRow): Lead {
     draftSaveStatus: row.draft_save_status,
     draftSaveError: row.draft_save_error ?? undefined,
     draftSavedAt: row.draft_saved_at ?? undefined,
+    redraftStatus: row.redraft_status ?? undefined,
+    redraftError: row.redraft_error ?? undefined,
     lastReplySnippet: row.last_reply_snippet ?? undefined,
     replyDraft: row.reply_draft,
     replyStatus: row.reply_status ?? undefined,
@@ -615,6 +620,27 @@ export async function updateLeadFeedback(
     .from("leads")
     .update({
       feedback_reason: input.feedbackReason,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.id)
+    .eq("user_id", input.userId);
+  if (error) throw error;
+}
+
+export async function updateLeadRedraftStatus(
+  supabase: SupabaseClient,
+  input: {
+    id: string;
+    userId: string;
+    status: RedraftStatus | null;
+    error?: string | null;
+  },
+): Promise<void> {
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      redraft_status: input.status,
+      redraft_error: input.error ?? null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", input.id)

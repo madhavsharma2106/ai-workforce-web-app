@@ -14,7 +14,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "reset-user": "node --env-file=.env.local --experimental-strip-types scripts/reset-user.mts"
+    "reset-user": "node --env-file=.env.local --experimental-strip-types scripts/reset-user.mts",
+    "db:push": "supabase db push",
+    "db:lint": "supabase db lint --linked"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.95",

@@ -7,6 +7,7 @@ import { ActivityCard } from "./ActivityCard";
 import { TaskHistory } from "./TaskHistory";
 import {
   patchLead,
+  redraftLead,
   retryDraft,
   retrySend,
   revealLeadEmail,
@@ -74,9 +75,20 @@ export const SalesRepresentativeHome = ({
     () => leads.some((lead) => lead.replySendStatus === "sending"),
     [leads],
   );
+  const isRedrafting = useMemo(
+    () => leads.some((lead) => lead.redraftStatus === "redrafting"),
+    [leads],
+  );
 
   useEffect(() => {
-    if (!isDrafting && !isSending && !isSavingDraft && !isSendingReply) return;
+    if (
+      !isDrafting &&
+      !isSending &&
+      !isSavingDraft &&
+      !isSendingReply &&
+      !isRedrafting
+    )
+      return;
 
     const interval = setInterval(async () => {
       try {
@@ -90,7 +102,14 @@ export const SalesRepresentativeHome = ({
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [employeeId, isDrafting, isSending, isSavingDraft, isSendingReply]);
+  }, [
+    employeeId,
+    isDrafting,
+    isSending,
+    isSavingDraft,
+    isSendingReply,
+    isRedrafting,
+  ]);
 
   const updateLead = (id: string, updater: (lead: Lead) => Lead) => {
     setLeads((current) =>
@@ -200,6 +219,17 @@ export const SalesRepresentativeHome = ({
     }));
     void saveDraftToMailbox(id).catch((error) =>
       console.error("Failed to save draft to mailbox", error),
+    );
+  };
+
+  const handleRedraft = (id: string, message?: string) => {
+    updateLead(id, (current) => ({
+      ...current,
+      redraftStatus: "redrafting",
+      redraftError: undefined,
+    }));
+    void redraftLead(id, message).catch((error) =>
+      console.error("Failed to redraft email", error),
     );
   };
 
@@ -489,6 +519,9 @@ export const SalesRepresentativeHome = ({
                     saveDraftDisabled={!mailboxConnected}
                     draftSaveStatus={lead.draftSaveStatus}
                     draftSaveError={lead.draftSaveError}
+                    onRedraft={(message) => handleRedraft(lead.id, message)}
+                    redraftStatus={lead.redraftStatus}
+                    redraftError={lead.redraftError}
                   />
                 ))}
               </div>

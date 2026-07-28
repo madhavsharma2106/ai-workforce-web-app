@@ -27,6 +27,14 @@ export async function retryDraft(id: string): Promise<void> {
   await fetch(`/api/leads/${id}/retry-draft`, { method: "POST" });
 }
 
+export async function redraftLead(id: string, message?: string): Promise<void> {
+  await fetch(`/api/leads/${id}/redraft`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
+}
+
 export async function retrySend(id: string): Promise<void> {
   await fetch(`/api/leads/${id}/retry-send`, { method: "POST" });
 }

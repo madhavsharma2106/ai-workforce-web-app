@@ -1,4 +1,6 @@
-import type { FC } from "react";
+"use client";
+
+import { useState, type FC } from "react";
 import type { DraftSaveStatus, Lead } from "@/lib/types";
 import {
   Badge,
@@ -50,6 +52,10 @@ type Props = {
   onApproveReply?: () => void;
   onRejectReply?: () => void;
   approveReplyDisabled?: boolean;
+  /** Only passed by Oliver's flow — regenerates this one draft, optionally with a free-text amendment. */
+  onRedraft?: (message?: string) => void;
+  redraftStatus?: "redrafting" | "failed";
+  redraftError?: string;
 };
 
 const statusLabel: Record<
@@ -120,10 +126,22 @@ export const LeadCard: FC<Props> = ({
   onApproveReply,
   onRejectReply,
   approveReplyDisabled = false,
+  onRedraft,
+  redraftStatus,
+  redraftError,
 }) => {
   const statusMeta = statusLabel[status];
   const emailLocked = Boolean(lead.personId) && !lead.emailRevealed;
   const snapshot = companySnapshot(lead);
+  const [showRedraftForm, setShowRedraftForm] = useState(false);
+  const [redraftNote, setRedraftNote] = useState("");
+  const isRedrafting = redraftStatus === "redrafting";
+
+  const submitRedraft = () => {
+    onRedraft?.(redraftNote.trim() || undefined);
+    setShowRedraftForm(false);
+    setRedraftNote("");
+  };
 
   return (
     <Card as="article" padding="md">
@@ -235,7 +253,19 @@ export const LeadCard: FC<Props> = ({
       <div className="mt-4 space-y-3">
         {showDraft && (
           <div className="space-y-2 rounded-2xl bg-(--inset) p-3.5">
-            <Eyebrow>Draft email</Eyebrow>
+            <div className="flex items-center justify-between gap-2">
+              <Eyebrow>Draft email</Eyebrow>
+              {isRedrafting && (
+                <Badge tone="accent" size="sm">
+                  Redrafting…
+                </Badge>
+              )}
+            </div>
+            {redraftStatus === "failed" && (
+              <Text size="xs" className="text-red-600">
+                {redraftError ?? "Couldn't redraft this email."}
+              </Text>
+            )}
             {isEditing ? (
               <Input
                 value={subjectText}
@@ -283,7 +313,10 @@ export const LeadCard: FC<Props> = ({
                   {draftSaveStatus === "saving" ? "Saving…" : "Save to Drafts"}
                 </Button>
               )}
-              <Button onClick={onApprove} disabled={approveDisabled}>
+              <Button
+                onClick={onApprove}
+                disabled={approveDisabled || isRedrafting}
+              >
                 {approveLabel}
               </Button>
               {showDraft && (
@@ -291,9 +324,41 @@ export const LeadCard: FC<Props> = ({
                   {isEditing ? "Done" : "Edit"}
                 </Button>
               )}
+              {onRedraft && status === "pending" && (
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowRedraftForm((current) => !current)}
+                  disabled={isRedrafting}
+                >
+                  {showRedraftForm ? "Cancel redraft" : "Redraft"}
+                </Button>
+              )}
             </div>
           )}
         </div>
+
+        {showRedraftForm && (
+          <div className="space-y-2 rounded-2xl bg-(--inset) p-3.5">
+            <Text size="sm" weight="medium">
+              Redraft this email
+            </Text>
+            <Textarea
+              rows={3}
+              value={redraftNote}
+              onChange={(event) => setRedraftNote(event.target.value)}
+              placeholder="Anything specific to change? (optional)"
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setShowRedraftForm(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={submitRedraft}>Redraft</Button>
+            </div>
+          </div>
+        )}
 
         {onSaveDraft && draftSaveStatus === "saved" && (
           <Text size="xs" className="text-(--accent-hover)">
